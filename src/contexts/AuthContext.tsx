@@ -35,15 +35,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Keycloak OAuth2 configuration
-  const KEYCLOAK_URL = 'https://your-keycloak-server.com'; // Replace with your Keycloak server
-  const REALM = 'your-realm'; // Replace with your realm
-  const CLIENT_ID = 'dashboard-client'; // Replace with your client ID
+  const KEYCLOAK_URL = process.env.VITE_KEYCLOAK_URL || 'https://your-keycloak-server.com';
+  const REALM = process.env.VITE_KEYCLOAK_REALM || 'your-realm';
+  const CLIENT_ID = process.env.VITE_KEYCLOAK_CLIENT_ID || 'dashboard-client';
+  
+  // Development mode - set to true to skip real Keycloak authentication
+  const DEV_MODE = !KEYCLOAK_URL.includes('your-keycloak-server.com');
 
   useEffect(() => {
+    // In development mode, auto-login with mock user
+    if (DEV_MODE) {
+      setTimeout(() => {
+        setUser({
+          id: 'dev-user',
+          username: 'Разработчик',
+          email: 'dev@company.com',
+          avatar: '',
+          roles: ['admin']
+        });
+        setIsLoading(false);
+      }, 1000);
+      return;
+    }
+
     // Check if user is already authenticated
     const token = localStorage.getItem('access_token');
     if (token) {
-      // Validate token and get user info
       validateToken(token);
     } else {
       setIsLoading(false);
@@ -81,6 +98,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const login = () => {
+    if (DEV_MODE) {
+      // Mock login for development
+      setIsLoading(true);
+      setTimeout(() => {
+        setUser({
+          id: 'dev-user',
+          username: 'Разработчик',
+          email: 'dev@company.com',
+          avatar: '',
+          roles: ['admin']
+        });
+        setIsLoading(false);
+      }, 1000);
+      return;
+    }
+
     const authUrl = `${KEYCLOAK_URL}/realms/${REALM}/protocol/openid-connect/auth?` +
       `client_id=${CLIENT_ID}&` +
       `redirect_uri=${encodeURIComponent(window.location.origin)}&` +
@@ -94,6 +127,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     setUser(null);
+    
+    if (DEV_MODE) {
+      // Simple logout for development
+      window.location.reload();
+      return;
+    }
     
     const logoutUrl = `${KEYCLOAK_URL}/realms/${REALM}/protocol/openid-connect/logout?` +
       `redirect_uri=${encodeURIComponent(window.location.origin)}`;

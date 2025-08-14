@@ -21,9 +21,9 @@ const LoginPage: React.FC = () => {
               <Server className="h-8 w-8 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-2xl">Infrastructure Dashboard</CardTitle>
+          <CardTitle className="text-2xl">Портал Сервисов</CardTitle>
           <CardDescription>
-            Авторизуйтесь для доступа к сервисам инфраструктуры
+            Единый вход для доступа ко всем внутренним сервисам компании
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -37,7 +37,7 @@ const LoginPage: React.FC = () => {
             {isLoading ? 'Подключение...' : 'Войти через Keycloak'}
           </Button>
           <p className="text-sm text-muted-foreground text-center">
-            Используется единая система входа (SSO) для безопасного доступа ко всем сервисам
+            Безопасная авторизация через корпоративную систему единого входа
           </p>
         </CardContent>
       </Card>
