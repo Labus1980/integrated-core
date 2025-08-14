@@ -21,7 +21,7 @@ const LoginPage: React.FC = () => {
             <img 
               src={oktaLogo} 
               alt="OKTA Solutions" 
-              className="h-20 w-20 rounded-full shadow-xl"
+              className="h-24 w-24 rounded-full shadow-xl"
             />
           </div>
           <CardTitle className="text-2xl">Портал Сервисов</CardTitle>

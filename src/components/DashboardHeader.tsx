@@ -29,7 +29,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
             <img 
               src={oktaLogo} 
               alt="OKTA Solutions" 
-              className="h-10 w-10 rounded-full shadow-lg"
+              className="h-14 w-14 rounded-full shadow-lg"
             />
             <h1 className="text-xl font-semibold text-white">Портал Сервисов</h1>
           </div>
