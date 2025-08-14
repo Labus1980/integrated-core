@@ -14,7 +14,7 @@ interface DashboardHeaderProps {
 }
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearchChange }) => {
-  const { user, logout } = useAuth();
+  const { user, logout, devMode, toggleDevMode } = useAuth();
   const { theme, setTheme } = useTheme();
 
   const getUserInitials = (username: string) => {
@@ -69,21 +69,28 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
                   </div>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem>
-                  <User className="mr-2 h-4 w-4" />
-                  Профиль
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Настройки
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Выйти
-                </DropdownMenuItem>
-              </DropdownMenuContent>
+               <DropdownMenuContent align="end" className="w-56">
+                 <DropdownMenuItem>
+                   <User className="mr-2 h-4 w-4" />
+                   Профиль
+                 </DropdownMenuItem>
+                 <DropdownMenuItem>
+                   <Settings className="mr-2 h-4 w-4" />
+                   Настройки
+                 </DropdownMenuItem>
+                 <DropdownMenuSeparator />
+                 <DropdownMenuItem onClick={toggleDevMode}>
+                   <span className="mr-2 h-4 w-4 text-center text-xs font-bold">
+                     {devMode ? 'DEV' : 'PRD'}
+                   </span>
+                   {devMode ? 'Переключить на Prod' : 'Переключить на Dev'}
+                 </DropdownMenuItem>
+                 <DropdownMenuSeparator />
+                 <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive">
+                   <LogOut className="mr-2 h-4 w-4" />
+                   Выйти
+                 </DropdownMenuItem>
+               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>

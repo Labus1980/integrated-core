@@ -14,6 +14,8 @@ interface AuthContextType {
   login: () => void;
   logout: () => void;
   isLoading: boolean;
+  devMode: boolean;
+  toggleDevMode: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,6 +35,10 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [devMode, setDevMode] = useState(() => {
+    const saved = localStorage.getItem('devMode');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
 
   // Keycloak OAuth2 configuration
   const KEYCLOAK_URL = 'https://keycloak.okta-solutions.com';
@@ -40,7 +46,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const CLIENT_ID = 'okta-entrypoint';
   
   // Development mode - using mock authentication
-  const DEV_MODE = true;
+  const DEV_MODE = devMode;
 
   useEffect(() => {
     // In development mode, auto-login with mock user
@@ -147,6 +153,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     window.location.href = logoutUrl;
   };
 
+  const toggleDevMode = () => {
+    const newDevMode = !devMode;
+    setDevMode(newDevMode);
+    localStorage.setItem('devMode', JSON.stringify(newDevMode));
+    
+    // Logout current user when switching modes
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    setUser(null);
+    
+    // Reload page to restart auth flow
+    window.location.reload();
+  };
+
   const isAuthenticated = !!user;
 
   return (
@@ -155,7 +175,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       isAuthenticated,
       login,
       logout,
-      isLoading
+      isLoading,
+      devMode,
+      toggleDevMode
     }}>
       {children}
     </AuthContext.Provider>
