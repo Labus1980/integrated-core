@@ -6,7 +6,7 @@ import { Shield } from 'lucide-react';
 import oktaLogo from '@/assets/okta-logo-soft.png';
 
 const LoginPage: React.FC = () => {
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, devMode, toggleDevMode } = useAuth();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-hero relative overflow-hidden">
@@ -42,6 +42,22 @@ const LoginPage: React.FC = () => {
           <p className="text-sm text-muted-foreground text-center">
             Безопасная авторизация через корпоративную систему единого входа
           </p>
+          
+          <div className="pt-4 border-t">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Режим:</span>
+              <button
+                onClick={toggleDevMode}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                  devMode 
+                    ? 'bg-orange-100 text-orange-800 hover:bg-orange-200' 
+                    : 'bg-green-100 text-green-800 hover:bg-green-200'
+                }`}
+              >
+                {devMode ? 'Разработка' : 'Продакшн'}
+              </button>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

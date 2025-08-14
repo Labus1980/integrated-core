@@ -14,7 +14,7 @@ interface DashboardHeaderProps {
 }
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearchChange }) => {
-  const { user, logout, devMode, toggleDevMode } = useAuth();
+  const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
 
   const getUserInitials = (username: string) => {
@@ -77,13 +77,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
                  <DropdownMenuItem>
                    <Settings className="mr-2 h-4 w-4" />
                    Настройки
-                 </DropdownMenuItem>
-                 <DropdownMenuSeparator />
-                 <DropdownMenuItem onClick={toggleDevMode}>
-                   <span className="mr-2 h-4 w-4 text-center text-xs font-bold">
-                     {devMode ? 'DEV' : 'PRD'}
-                   </span>
-                   {devMode ? 'Переключить на Prod' : 'Переключить на Dev'}
                  </DropdownMenuItem>
                  <DropdownMenuSeparator />
                  <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive">
