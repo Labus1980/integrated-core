@@ -58,16 +58,16 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-2 hover:bg-white/20 text-white">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.avatar} alt={user?.username} />
-                    <AvatarFallback>{getUserInitials(user?.username || '')}</AvatarFallback>
-                  </Avatar>
-                   <div className="text-left">
-                     <p className="text-sm font-medium text-white drop-shadow-sm">{user?.username}</p>
-                     <p className="text-xs text-white/90 drop-shadow-sm">{user?.email}</p>
-                   </div>
-                </Button>
+                 <Button variant="ghost" className="flex items-center space-x-2 hover:bg-white/20 text-white">
+                   <Avatar className="h-8 w-8">
+                     <AvatarImage src={user?.avatar} alt={user?.username} />
+                     <AvatarFallback>{getUserInitials(user?.username || '')}</AvatarFallback>
+                   </Avatar>
+                    <div className="text-left">
+                      <p className="text-sm font-medium text-white dark:text-white light:text-foreground drop-shadow-sm">{user?.username}</p>
+                      <p className="text-xs text-white/90 dark:text-white/90 light:text-muted-foreground drop-shadow-sm">{user?.email}</p>
+                    </div>
+                 </Button>
               </DropdownMenuTrigger>
                <DropdownMenuContent align="end" className="w-56">
                  <DropdownMenuItem>
