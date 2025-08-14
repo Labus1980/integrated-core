@@ -39,8 +39,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const REALM = 'okta';
   const CLIENT_ID = 'okta-entrypoint';
   
-  // Production mode - using real Keycloak
-  const DEV_MODE = false;
+  // Development mode - using mock authentication
+  const DEV_MODE = true;
 
   useEffect(() => {
     // In development mode, auto-login with mock user
