@@ -11,7 +11,6 @@ const SERVICES: Service[] = [
     description: 'Автоматизация рабочих процессов и интеграция между сервисами',
     url: 'https://n8n.your-domain.com',
     icon: <Zap className="h-5 w-5" />,
-    logo: 'https://docs.n8n.io/favicon.ico',
     category: 'Автоматизация',
     status: 'online',
     version: '1.0.5'
@@ -22,7 +21,6 @@ const SERVICES: Service[] = [
     description: 'Визуализация метрик и создание дашбордов для мониторинга',
     url: 'https://grafana.your-domain.com',
     icon: <BarChart3 className="h-5 w-5" />,
-    logo: 'https://grafana.com/static/img/menu/grafana2.svg',
     category: 'Мониторинг',
     status: 'online',
     version: '10.2.0'
@@ -33,7 +31,6 @@ const SERVICES: Service[] = [
     description: 'Управление базами данных, аутентификация и API',
     url: 'https://supabase.your-domain.com',
     icon: <Database className="h-5 w-5" />,
-    logo: 'https://supabase.com/favicon.ico',
     category: 'Данные',
     status: 'online',
     version: '2.39.0'
@@ -44,7 +41,6 @@ const SERVICES: Service[] = [
     description: 'Сбор и хранение метрик системы мониторинга',
     url: 'https://prometheus.your-domain.com',
     icon: <Activity className="h-5 w-5" />,
-    logo: 'https://prometheus.io/assets/favicons/favicon.ico',
     category: 'Мониторинг',
     status: 'warning',
     version: '2.47.0'
@@ -55,7 +51,6 @@ const SERVICES: Service[] = [
     description: 'Конструктор AI-ботов с низким кодом',
     url: 'https://flowise.your-domain.com',
     icon: <Bot className="h-5 w-5" />,
-    logo: 'https://docs.flowiseai.com/img/favicon.ico',
     category: 'AI',
     status: 'online',
     version: '1.4.3'
@@ -66,7 +61,6 @@ const SERVICES: Service[] = [
     description: 'Веб-интерфейс для работы с языковыми моделями ИИ',
     url: 'https://webui.your-domain.com',
     icon: <Globe className="h-5 w-5" />,
-    logo: 'https://raw.githubusercontent.com/oobabooga/text-generation-webui/main/docs/logo.png',
     category: 'AI',
     status: 'offline'
   }
