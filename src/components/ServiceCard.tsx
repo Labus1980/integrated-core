@@ -60,7 +60,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
       whileHover={{ y: -5 }}
       className="group"
     >
-      <Card className="h-full hover:shadow-xl transition-all duration-300 border-0 bg-gradient-secondary hover:bg-white dark:hover:bg-card relative overflow-hidden">
+      <Card className="h-full hover:shadow-xl transition-all duration-300 border border-border/50 bg-card hover:bg-card/90 relative overflow-hidden">
         <CardHeader className="pb-3">
           {/* Status indicator */}
           <div className="absolute top-4 right-4">
@@ -80,7 +80,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
                   className="w-12 h-12 object-contain rounded-lg bg-white p-2 shadow-md"
                 />
               ) : (
-                <div className="p-3 bg-gradient-primary rounded-lg text-white shadow-lg">
+                <div className="p-3 bg-primary rounded-lg text-white shadow-lg">
                   {service.icon}
                 </div>
               )}
@@ -109,29 +109,29 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
           <CardDescription className="mb-6 min-h-[2.5rem] text-sm">
             {service.description}
           </CardDescription>
-          <div className="flex items-center justify-between">
-            <Badge variant="outline" className="text-xs font-medium">
-              {service.category}
-            </Badge>
-            <div className="flex space-x-2">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-xs hover:bg-primary/10"
-              >
-                <Activity className="mr-1 h-3 w-3" />
-                Статус
-              </Button>
-              <Button 
-                onClick={handleOpenService}
-                size="sm"
-                className="bg-gradient-primary hover:opacity-90 border-0 shadow-md text-white"
-              >
-                <ExternalLink className="mr-1 h-3 w-3" />
-                Открыть
-              </Button>
+            <div className="flex items-center justify-between">
+              <Badge variant="outline" className="text-xs font-medium">
+                {service.category}
+              </Badge>
+              <div className="flex space-x-2">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-xs hover:bg-muted"
+                >
+                  <Activity className="mr-1 h-3 w-3" />
+                  Статус
+                </Button>
+                <Button 
+                  onClick={handleOpenService}
+                  size="sm"
+                  className="bg-primary hover:bg-primary/90 border-0 shadow-md text-primary-foreground"
+                >
+                  <ExternalLink className="mr-1 h-3 w-3" />
+                  Открыть
+                </Button>
+              </div>
             </div>
-          </div>
         </CardContent>
       </Card>
     </motion.div>

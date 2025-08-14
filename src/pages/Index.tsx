@@ -38,7 +38,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-secondary">
       <DashboardHeader 
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}

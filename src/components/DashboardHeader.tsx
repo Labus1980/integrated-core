@@ -21,25 +21,25 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
   };
 
   return (
-    <header className="border-b bg-card/95 backdrop-blur-sm sticky top-0 z-50">
+    <header className="bg-gradient-secondary shadow-lg">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className="p-2 bg-gradient-primary rounded-lg">
+            <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
               <Server className="h-6 w-6 text-white" />
             </div>
-            <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">Infrastructure Portal</h1>
+            <h1 className="text-2xl font-bold text-white">Портал Сервисов</h1>
           </div>
           
           <div className="flex-1 max-w-md mx-8">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Поиск сервисов..."
-                value={searchQuery}
-                onChange={(e) => onSearchChange(e.target.value)}
-                className="pl-10"
-              />
+               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+               <Input
+                 placeholder="Поиск сервисов..."
+                 value={searchQuery}
+                 onChange={(e) => onSearchChange(e.target.value)}
+                 className="pl-10 bg-white/90 backdrop-blur-sm border-white/30"
+               />
             </div>
           </div>
 
@@ -48,20 +48,21 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
               variant="ghost"
               size="icon"
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="text-white hover:bg-white/20"
             >
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-2 hover:bg-accent">
+                <Button variant="ghost" className="flex items-center space-x-2 hover:bg-white/20 text-white">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user?.avatar} alt={user?.username} />
                     <AvatarFallback>{getUserInitials(user?.username || '')}</AvatarFallback>
                   </Avatar>
                   <div className="text-left">
-                    <p className="text-sm font-medium">{user?.username}</p>
-                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                    <p className="text-sm font-medium text-white">{user?.username}</p>
+                    <p className="text-xs text-white/80">{user?.email}</p>
                   </div>
                 </Button>
               </DropdownMenuTrigger>
