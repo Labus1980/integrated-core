@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { Server, Users, Activity, Shield } from 'lucide-react';
@@ -34,36 +35,69 @@ const WelcomeSection: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <motion.div 
+      className="space-y-6"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
       <div className="text-center space-y-2">
-        <h2 className="text-3xl font-bold">
+        <motion.h2 
+          className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
           Добро пожаловать, {user?.username}!
-        </h2>
-        <p className="text-muted-foreground">
+        </motion.h2>
+        <motion.p 
+          className="text-muted-foreground"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
           Управляйте вашей инфраструктурой из единого центра
-        </p>
+        </motion.p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <motion.div 
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.4, staggerChildren: 0.1 }}
+      >
         {stats.map((stat, index) => (
-          <Card key={index} className="border-l-4 border-l-primary">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    {stat.label}
-                  </p>
-                  <p className="text-2xl font-bold">{stat.value}</p>
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, delay: 0.5 + index * 0.1 }}
+          >
+            <Card className="border-0 bg-gradient-secondary hover:shadow-lg transition-all duration-300 group">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">
+                      {stat.label}
+                    </p>
+                    <p className="text-2xl font-bold">{stat.value}</p>
+                  </div>
+                  <motion.div 
+                    className={`p-3 rounded-full bg-gradient-primary ${stat.color}`}
+                    whileHover={{ scale: 1.1 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <div className="text-white">
+                      {stat.icon}
+                    </div>
+                  </motion.div>
                 </div>
-                <div className={`p-2 rounded-full bg-primary/10 ${stat.color}`}>
-                  {stat.icon}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </motion.div>
         ))}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

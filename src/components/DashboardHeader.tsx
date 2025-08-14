@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Search, Settings, LogOut, User, Moon, Sun } from 'lucide-react';
+import { Search, Settings, LogOut, User, Moon, Sun, Server } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from 'next-themes';
 
@@ -21,11 +21,14 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
   };
 
   return (
-    <header className="border-b bg-card">
+    <header className="border-b bg-card/95 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <h1 className="text-2xl font-bold text-primary">Infrastructure Dashboard</h1>
+            <div className="p-2 bg-gradient-primary rounded-lg">
+              <Server className="h-6 w-6 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">Infrastructure Portal</h1>
           </div>
           
           <div className="flex-1 max-w-md mx-8">
