@@ -40,7 +40,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const CLIENT_ID = import.meta.env.VITE_KEYCLOAK_CLIENT_ID || 'dashboard-client';
   
   // Development mode - set to true to skip real Keycloak authentication
-  const DEV_MODE = !KEYCLOAK_URL.includes('your-keycloak-server.com');
+  const DEV_MODE = KEYCLOAK_URL.includes('your-keycloak-server.com');
 
   useEffect(() => {
     // In development mode, auto-login with mock user
