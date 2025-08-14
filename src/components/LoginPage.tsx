@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { Shield } from 'lucide-react';
-import oktaLogo from '@/assets/okta-logo-soft.png';
+import oktaLogo from '@/assets/okta-logo-modern.png';
 
 const LoginPage: React.FC = () => {
   const { login, isLoading, devMode, toggleDevMode } = useAuth();
