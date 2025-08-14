@@ -136,12 +136,19 @@ const ServicesGrid: React.FC<ServicesGridProps> = ({ searchQuery }) => {
 
   return (
     <div className="space-y-8">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-          {env.app.title}
-        </h1>
-        <p className="text-muted-foreground text-lg">
-          Доступ к инфраструктурным сервисам и инструментам
+      <div className="text-center space-y-4">
+        <div className="flex items-center justify-center gap-4">
+          <img 
+            src="/lovable-uploads/cabbd9de-e4a5-4ac4-bf04-5378c56ae58e.png" 
+            alt="OKTA Solutions Logo" 
+            className="h-12 w-auto"
+          />
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+            OKTA Solutions Platform
+          </h1>
+        </div>
+        <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          Интеллектуальная платформа автоматизации бизнес-процессов и управления корпоративной инфраструктурой
         </p>
       </div>
 

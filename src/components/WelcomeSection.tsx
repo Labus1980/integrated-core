@@ -56,7 +56,7 @@ const WelcomeSection: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          Управляйте вашей инфраструктурой из единого центра
+          Управляйте корпоративной инфраструктурой через интеллектуальную платформу автоматизации OKTA Solutions
         </motion.p>
       </div>
 
