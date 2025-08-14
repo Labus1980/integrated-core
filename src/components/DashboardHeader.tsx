@@ -64,8 +64,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
                      <AvatarFallback>{getUserInitials(user?.username || '')}</AvatarFallback>
                    </Avatar>
                     <div className="text-left">
-                      <p className="text-sm font-medium text-white dark:text-white light:text-foreground drop-shadow-sm">{user?.username}</p>
-                      <p className="text-xs text-white/90 dark:text-white/90 light:text-muted-foreground drop-shadow-sm">{user?.email}</p>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{user?.username}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email}</p>
                     </div>
                  </Button>
               </DropdownMenuTrigger>
