@@ -13,14 +13,14 @@ const SSO_CONFIGS: Record<string, SSOConfig> = {
   'n8n': {
     id: 'n8n',
     method: 'oauth2',
-    requiresProxy: true,
-    authEndpoint: '/oauth/callback'
+    requiresProxy: false, // Direct OAuth2 with Keycloak
+    authEndpoint: '/oauth/login/keycloak'
   },
   'grafana': {
     id: 'grafana',
     method: 'oauth2',
-    requiresProxy: true,
-    authEndpoint: '/login/oauth/keycloak'
+    requiresProxy: false, // Direct OAuth2 with Keycloak
+    authEndpoint: '/login/generic_oauth'
   },
   'supabase': {
     id: 'supabase',
@@ -30,14 +30,15 @@ const SSO_CONFIGS: Record<string, SSOConfig> = {
   },
   'prometheus': {
     id: 'prometheus',
-    method: 'header',
-    requiresProxy: true
+    method: 'token_url',
+    tokenParam: 'access_token', // Try token in URL first
+    requiresProxy: false
   },
   'flowise': {
     id: 'flowise',
     method: 'oauth2',
-    requiresProxy: true,
-    authEndpoint: '/api/v1/oauth/callback'
+    requiresProxy: false, // Direct OAuth2 with Keycloak
+    authEndpoint: '/api/v1/oauth/keycloak'
   },
   'webui': {
     id: 'webui',
@@ -48,12 +49,13 @@ const SSO_CONFIGS: Record<string, SSOConfig> = {
   'keycloak-admin': {
     id: 'keycloak-admin',
     method: 'oauth2',
-    requiresProxy: false
+    requiresProxy: false // Same Keycloak instance - shared session
   },
   'qdrant': {
     id: 'qdrant',
-    method: 'header',
-    requiresProxy: true
+    method: 'token_url',
+    tokenParam: 'api-key', // Try API key approach
+    requiresProxy: false
   }
 };
 
@@ -78,11 +80,40 @@ export const useSSO = () => {
     }
 
     try {
-      // Implement token refresh logic here
-      // This would typically call Keycloak's token endpoint
-      return refreshTokenValue;
+      const keycloakUrl = import.meta.env.VITE_KEYCLOAK_URL;
+      const realm = import.meta.env.VITE_KEYCLOAK_REALM;
+      const clientId = import.meta.env.VITE_KEYCLOAK_CLIENT_ID;
+
+      const response = await fetch(`${keycloakUrl}/realms/${realm}/protocol/openid-connect/token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          grant_type: 'refresh_token',
+          client_id: clientId,
+          refresh_token: refreshTokenValue,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Token refresh failed');
+      }
+
+      const tokenData = await response.json();
+      
+      // Update stored tokens
+      localStorage.setItem('access_token', tokenData.access_token);
+      if (tokenData.refresh_token) {
+        localStorage.setItem('refresh_token', tokenData.refresh_token);
+      }
+
+      return tokenData.access_token;
     } catch (error) {
       console.error('Token refresh failed:', error);
+      // Clear invalid tokens
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
       return null;
     }
   };
@@ -127,23 +158,17 @@ export const useSSO = () => {
           break;
 
         case 'oauth2':
-          if (ssoConfig.requiresProxy) {
-            // Use our proxy service to handle OAuth2 flow
-            finalUrl = `/api/sso-proxy/${serviceId}?token=${token}&redirect=${encodeURIComponent(serviceUrl)}`;
+          if (serviceId === 'keycloak-admin') {
+            // Same Keycloak instance - shared session should work
+            finalUrl = serviceUrl;
+          } else if (ssoConfig.authEndpoint) {
+            // Redirect to service's OAuth endpoint configured for Keycloak
+            const separator = serviceUrl.includes('?') ? '&' : '?';
+            finalUrl = `${serviceUrl}${ssoConfig.authEndpoint}${separator}token=${token}`;
           } else {
-            // Direct OAuth2 - let service handle the flow
+            // Direct service access
             finalUrl = serviceUrl;
           }
-          break;
-
-        case 'post':
-          // For POST method, we'll need to use a form or proxy
-          finalUrl = `/api/sso-proxy/${serviceId}?method=post&token=${token}&redirect=${encodeURIComponent(serviceUrl)}`;
-          break;
-
-        case 'header':
-          // For header method, we'll use proxy to inject auth header
-          finalUrl = `/api/sso-proxy/${serviceId}?method=header&token=${token}&redirect=${encodeURIComponent(serviceUrl)}`;
           break;
 
         default:
