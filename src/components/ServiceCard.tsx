@@ -10,7 +10,7 @@ export interface Service {
   name: string;
   description: string;
   url: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   logo?: string;
   category: string;
   status: 'online' | 'offline' | 'warning';
@@ -42,9 +42,15 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
               whileHover={{ scale: 1.1 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
-              <div className="p-3 bg-primary rounded-lg text-white shadow-lg">
-                {service.icon}
-              </div>
+              {service.logo ? (
+                <div className="p-2 bg-white rounded-lg shadow-lg">
+                  <img src={service.logo} alt={`${service.name} logo`} className="h-8 w-8 object-contain" />
+                </div>
+              ) : (
+                <div className="p-3 bg-primary rounded-lg text-white shadow-lg">
+                  {service.icon}
+                </div>
+              )}
             </motion.div>
             <div className="flex-1">
               <CardTitle className="text-lg mb-2">{service.name}</CardTitle>

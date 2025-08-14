@@ -3,6 +3,12 @@ import { motion } from 'framer-motion';
 import ServiceCard, { Service } from './ServiceCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Bot, Database, Activity, Zap, BarChart3, Globe } from 'lucide-react';
+import n8nLogo from '@/assets/service-icons/n8n.png';
+import grafanaLogo from '@/assets/service-icons/grafana.png';
+import supabaseLogo from '@/assets/service-icons/supabase.png';
+import prometheusLogo from '@/assets/service-icons/prometheus.png';
+import flowiseLogo from '@/assets/service-icons/flowise.png';
+import webuiLogo from '@/assets/service-icons/webui.png';
 
 const SERVICES: Service[] = [
   {
@@ -10,6 +16,7 @@ const SERVICES: Service[] = [
     name: 'n8n',
     description: 'Автоматизация рабочих процессов и интеграция между сервисами',
     url: 'https://n8n.your-domain.com',
+    logo: n8nLogo,
     icon: <Zap className="h-5 w-5" />,
     category: 'Автоматизация',
     status: 'online',
@@ -20,6 +27,7 @@ const SERVICES: Service[] = [
     name: 'Grafana',
     description: 'Визуализация метрик и создание дашбордов для мониторинга',
     url: 'https://grafana.your-domain.com',
+    logo: grafanaLogo,
     icon: <BarChart3 className="h-5 w-5" />,
     category: 'Мониторинг',
     status: 'online',
@@ -30,6 +38,7 @@ const SERVICES: Service[] = [
     name: 'Supabase Studio',
     description: 'Управление базами данных, аутентификация и API',
     url: 'https://supabase.your-domain.com',
+    logo: supabaseLogo,
     icon: <Database className="h-5 w-5" />,
     category: 'Данные',
     status: 'online',
@@ -40,6 +49,7 @@ const SERVICES: Service[] = [
     name: 'Prometheus',
     description: 'Сбор и хранение метрик системы мониторинга',
     url: 'https://prometheus.your-domain.com',
+    logo: prometheusLogo,
     icon: <Activity className="h-5 w-5" />,
     category: 'Мониторинг',
     status: 'warning',
@@ -50,6 +60,7 @@ const SERVICES: Service[] = [
     name: 'Flowise',
     description: 'Конструктор AI-ботов с низким кодом',
     url: 'https://flowise.your-domain.com',
+    logo: flowiseLogo,
     icon: <Bot className="h-5 w-5" />,
     category: 'AI',
     status: 'online',
@@ -60,6 +71,7 @@ const SERVICES: Service[] = [
     name: 'WebUI',
     description: 'Веб-интерфейс для работы с языковыми моделями ИИ',
     url: 'https://webui.your-domain.com',
+    logo: webuiLogo,
     icon: <Globe className="h-5 w-5" />,
     category: 'AI',
     status: 'offline'
