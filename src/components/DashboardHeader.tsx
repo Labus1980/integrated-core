@@ -6,7 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Search, Settings, LogOut, User, Moon, Sun } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from 'next-themes';
-import oktaLogo from '@/assets/okta-logo-robot.png';
+import oktaLogo from '@/assets/okta-logo-blue.png';
 
 interface DashboardHeaderProps {
   searchQuery: string;
