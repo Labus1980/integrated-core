@@ -10,6 +10,7 @@ import supabaseLogo from '@/assets/service-icons/supabase-original.png';
 import prometheusLogo from '@/assets/service-icons/prometheus-original.png';
 import flowiseLogo from '/lovable-uploads/8a2a2a28-f334-48ae-b15e-9846838ddbf7.png';
 import webuiLogo from '/lovable-uploads/d199923e-e237-479e-9fcd-1237f683b7af.png';
+import qdrantLogo from '/lovable-uploads/1caac955-7ab4-4956-83cf-3154d1ec3101.png';
 
 const SERVICES: Service[] = [
   {
@@ -92,6 +93,7 @@ const SERVICES: Service[] = [
     name: 'Qdrant',
     description: 'Векторная база данных для поиска по сходству и AI приложений',
     url: env.services.qdrant,
+    logo: qdrantLogo,
     icon: <Cpu className="h-5 w-5" />,
     category: 'Данные',
     status: 'online',
