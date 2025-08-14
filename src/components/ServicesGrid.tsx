@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import ServiceCard, { Service } from './ServiceCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Bot, Database, Activity, Zap, BarChart3, Globe } from 'lucide-react';
-import n8nLogo from '@/assets/service-icons/n8n-original.png';
+import n8nLogo from '/lovable-uploads/764d21da-4ba9-4a54-b3ee-f6879fcc4869.png';
 import grafanaLogo from '@/assets/service-icons/grafana-original.svg';
 import supabaseLogo from '@/assets/service-icons/supabase-original.png';
 import prometheusLogo from '@/assets/service-icons/prometheus-original.png';
