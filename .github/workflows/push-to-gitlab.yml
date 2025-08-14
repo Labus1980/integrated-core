@@ -1,0 +1,42 @@
+name: Push to Okta GitLab via SSH
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH keys
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.OKTA_GITLAB_SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          # Если используется known_hosts через секрет:
+          # echo "${{ secrets.OKTA_GITLAB_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+          # Или через ssh-keyscan:
+          ssh-keyscan gitlab.okta-solutions.com >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Configure Git for SSH
+        run: |
+          git config --global user.email "action@gitlab.okta-solutions.com"
+          git config --global user.name "GitHub Action"
+
+      - name: Add GitLab remote and push
+        run: |
+          eval $(ssh-agent -s)
+          ssh-add ~/.ssh/id_rsa
+
+          git fetch --unshallow
+          git remote add gitlab git@gitlab.okta-solutions.com:okta/tools/integrated-core.git || true
+          GIT_TRACE=1 git push gitlab --force --all
+          git push gitlab --tags
