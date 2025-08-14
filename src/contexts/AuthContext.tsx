@@ -35,12 +35,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Keycloak OAuth2 configuration
-  const KEYCLOAK_URL = import.meta.env.VITE_KEYCLOAK_URL || 'https://your-keycloak-server.com';
-  const REALM = import.meta.env.VITE_KEYCLOAK_REALM || 'your-realm';
-  const CLIENT_ID = import.meta.env.VITE_KEYCLOAK_CLIENT_ID || 'dashboard-client';
+  const KEYCLOAK_URL = 'https://keycloak.okta-solutions.com';
+  const REALM = 'okta';
+  const CLIENT_ID = 'okta-entrypoint';
   
-  // Development mode - set to true to skip real Keycloak authentication
-  const DEV_MODE = KEYCLOAK_URL.includes('your-keycloak-server.com');
+  // Production mode - using real Keycloak
+  const DEV_MODE = false;
 
   useEffect(() => {
     // In development mode, auto-login with mock user

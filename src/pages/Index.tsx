@@ -14,13 +14,39 @@ const Index = () => {
     const code = urlParams.get('code');
     
     if (code) {
-      // Handle OAuth callback - exchange code for token
-      // This would typically be done in the AuthContext
-      console.log('OAuth code received:', code);
+      // Exchange authorization code for access token
+      exchangeCodeForToken(code);
       // Clean URL
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
+
+  const exchangeCodeForToken = async (code: string) => {
+    try {
+      const tokenResponse = await fetch('https://keycloak.okta-solutions.com/realms/okta/protocol/openid-connect/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          grant_type: 'authorization_code',
+          client_id: 'okta-entrypoint',
+          client_secret: 'ONNndDTi8fFsltBy8ILElFSr6axaxW9N',
+          code: code,
+          redirect_uri: window.location.origin,
+        }),
+      });
+
+      if (tokenResponse.ok) {
+        const tokens = await tokenResponse.json();
+        localStorage.setItem('access_token', tokens.access_token);
+        localStorage.setItem('refresh_token', tokens.refresh_token);
+        window.location.reload(); // Reload to trigger auth check
+      }
+    } catch (error) {
+      console.error('Token exchange failed:', error);
+    }
+  };
 
   if (isLoading) {
     return (
