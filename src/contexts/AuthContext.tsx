@@ -98,6 +98,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const login = () => {
+    console.log('Login function called, DEV_MODE:', DEV_MODE);
+    
     if (DEV_MODE) {
       // Mock login for development
       setIsLoading(true);
@@ -119,6 +121,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       `redirect_uri=${encodeURIComponent(window.location.origin)}&` +
       `response_type=code&` +
       `scope=openid email profile`;
+    
+    console.log('Redirecting to Keycloak URL:', authUrl);
+    console.log('KEYCLOAK_URL:', KEYCLOAK_URL);
+    console.log('REALM:', REALM);
+    console.log('CLIENT_ID:', CLIENT_ID);
     
     window.location.href = authUrl;
   };

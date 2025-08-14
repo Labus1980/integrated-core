@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { Shield, Server } from 'lucide-react';
+import { Shield } from 'lucide-react';
 
 const LoginPage: React.FC = () => {
   const { login, isLoading } = useAuth();
@@ -17,11 +17,9 @@ const LoginPage: React.FC = () => {
       <Card className="w-full max-w-md backdrop-blur-sm bg-white/95 dark:bg-card/95 shadow-2xl border-0">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <img 
-              src="/lovable-uploads/cabbd9de-e4a5-4ac4-bf04-5378c56ae58e.png" 
-              alt="OKTA Solutions" 
-              className="h-16 w-16"
-            />
+            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
+              <span className="text-white font-bold text-lg">OKTA</span>
+            </div>
           </div>
           <CardTitle className="text-2xl">Портал Сервисов</CardTitle>
           <CardDescription>
