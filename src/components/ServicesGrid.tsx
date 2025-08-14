@@ -3,12 +3,12 @@ import { motion } from 'framer-motion';
 import ServiceCard, { Service } from './ServiceCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Bot, Database, Activity, Zap, BarChart3, Globe } from 'lucide-react';
-import n8nLogo from '@/assets/service-icons/n8n.png';
-import grafanaLogo from '@/assets/service-icons/grafana.png';
-import supabaseLogo from '@/assets/service-icons/supabase.png';
-import prometheusLogo from '@/assets/service-icons/prometheus.png';
-import flowiseLogo from '@/assets/service-icons/flowise.png';
-import webuiLogo from '@/assets/service-icons/webui.png';
+import n8nLogo from '@/assets/service-icons/n8n-original.png';
+import grafanaLogo from '@/assets/service-icons/grafana-original.svg';
+import supabaseLogo from '@/assets/service-icons/supabase-original.png';
+import prometheusLogo from '@/assets/service-icons/prometheus-original.png';
+import flowiseLogo from '@/assets/service-icons/flowise-original.png';
+import webuiLogo from '@/assets/service-icons/webui-original.png';
 
 const SERVICES: Service[] = [
   {
