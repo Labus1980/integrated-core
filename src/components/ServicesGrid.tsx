@@ -8,7 +8,7 @@ import grafanaLogo from '@/assets/service-icons/grafana-original.svg';
 import supabaseLogo from '@/assets/service-icons/supabase-original.png';
 import prometheusLogo from '@/assets/service-icons/prometheus-original.png';
 import flowiseLogo from '@/assets/service-icons/flowise-original.png';
-import webuiLogo from '@/assets/service-icons/webui-original.png';
+import webuiLogo from '@/assets/service-icons/webui-better.png';
 
 const SERVICES: Service[] = [
   {
