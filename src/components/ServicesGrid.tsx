@@ -143,7 +143,7 @@ const ServicesGrid: React.FC<ServicesGridProps> = ({ searchQuery }) => {
             OKTA Solutions Platform
           </h1>
         </div>
-        <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+        <p className="text-gray-600 dark:text-gray-400 text-lg max-w-2xl mx-auto">
           Интеллектуальная платформа автоматизации бизнес-процессов и управления корпоративной инфраструктурой
         </p>
       </div>
