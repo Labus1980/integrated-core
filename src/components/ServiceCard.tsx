@@ -67,7 +67,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
             <div className="flex-1">
               <CardTitle className="text-lg mb-2">{service.name}</CardTitle>
               {service.version && (
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="secondary" className="text-xs font-medium">
                   v{service.version}
                 </Badge>
               )}
