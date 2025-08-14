@@ -138,11 +138,7 @@ const ServicesGrid: React.FC<ServicesGridProps> = ({ searchQuery }) => {
     <div className="space-y-8">
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-4">
-          <img 
-            src="/src/assets/okta-logo-3d.png" 
-            alt="OKTA Solutions Logo" 
-            className="h-12 w-auto object-contain"
-          />
+          <Bot className="h-12 w-12 text-primary" />
           <h1 className="text-3xl font-semibold tracking-tight text-foreground">
             OKTA Solutions Platform
           </h1>
