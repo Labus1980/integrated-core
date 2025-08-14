@@ -35,9 +35,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Keycloak OAuth2 configuration
-  const KEYCLOAK_URL = process.env.VITE_KEYCLOAK_URL || 'https://your-keycloak-server.com';
-  const REALM = process.env.VITE_KEYCLOAK_REALM || 'your-realm';
-  const CLIENT_ID = process.env.VITE_KEYCLOAK_CLIENT_ID || 'dashboard-client';
+  const KEYCLOAK_URL = import.meta.env.VITE_KEYCLOAK_URL || 'https://your-keycloak-server.com';
+  const REALM = import.meta.env.VITE_KEYCLOAK_REALM || 'your-realm';
+  const CLIENT_ID = import.meta.env.VITE_KEYCLOAK_CLIENT_ID || 'dashboard-client';
   
   // Development mode - set to true to skip real Keycloak authentication
   const DEV_MODE = !KEYCLOAK_URL.includes('your-keycloak-server.com');
