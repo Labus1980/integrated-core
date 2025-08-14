@@ -17,9 +17,11 @@ const LoginPage: React.FC = () => {
       <Card className="w-full max-w-md backdrop-blur-sm bg-white/95 dark:bg-card/95 shadow-2xl border-0">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="p-3 bg-primary rounded-full">
-              <Server className="h-8 w-8 text-primary-foreground" />
-            </div>
+            <img 
+              src="/lovable-uploads/cabbd9de-e4a5-4ac4-bf04-5378c56ae58e.png" 
+              alt="OKTA Solutions" 
+              className="h-16 w-16"
+            />
           </div>
           <CardTitle className="text-2xl">Портал Сервисов</CardTitle>
           <CardDescription>
@@ -34,7 +36,7 @@ const LoginPage: React.FC = () => {
             size="lg"
           >
             <Shield className="mr-2 h-5 w-5" />
-            {isLoading ? 'Подключение...' : 'Войти через Keycloak'}
+            {isLoading ? 'Подключение...' : 'Войти через Центр Авторизации'}
           </Button>
           <p className="text-sm text-muted-foreground text-center">
             Безопасная авторизация через корпоративную систему единого входа
