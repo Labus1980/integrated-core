@@ -41,7 +41,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
                  placeholder="Поиск сервисов..."
                  value={searchQuery}
                  onChange={(e) => onSearchChange(e.target.value)}
-                 className="pl-10 bg-white/90 backdrop-blur-sm border-white/30 text-foreground placeholder:text-muted-foreground"
+                 className="pl-10 bg-card text-card-foreground placeholder:text-muted-foreground border-white/30 focus:bg-card"
                />
             </div>
           </div>
