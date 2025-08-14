@@ -142,8 +142,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null);
     
     if (DEV_MODE) {
-      // Simple logout for development
-      window.location.reload();
+      // Simple logout for development - just clear state, no redirect
       return;
     }
     
