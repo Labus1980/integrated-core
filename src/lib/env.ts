@@ -36,6 +36,8 @@ export const serviceUrls = {
   prometheus: getEnvVar('VITE_PROMETHEUS_URL'),
   flowise: getEnvVar('VITE_FLOWISE_URL'),
   webui: getEnvVar('VITE_WEBUI_URL'),
+  keycloakAdmin: getEnvVar('VITE_KEYCLOAK_ADMIN_URL'),
+  qdrant: getEnvVar('VITE_QDRANT_URL'),
 } as const;
 
 // General Settings

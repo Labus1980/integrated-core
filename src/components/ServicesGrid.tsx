@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import ServiceCard, { Service } from './ServiceCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bot, Database, Activity, Zap, BarChart3, Globe } from 'lucide-react';
+import { Bot, Database, Activity, Zap, BarChart3, Globe, Shield, Cpu } from 'lucide-react';
 import { env } from '@/lib/env';
 import n8nLogo from '/lovable-uploads/764d21da-4ba9-4a54-b3ee-f6879fcc4869.png';
 import grafanaLogo from '@/assets/service-icons/grafana-original.svg';
@@ -76,6 +76,26 @@ const SERVICES: Service[] = [
     icon: <Globe className="h-5 w-5" />,
     category: 'AI',
     status: 'offline'
+  },
+  {
+    id: 'keycloak-admin',
+    name: 'Keycloak Admin',
+    description: 'Панель администрирования для управления пользователями и ролями',
+    url: env.services.keycloakAdmin,
+    icon: <Shield className="h-5 w-5" />,
+    category: 'Безопасность',
+    status: 'online',
+    version: '23.0.0'
+  },
+  {
+    id: 'qdrant',
+    name: 'Qdrant',
+    description: 'Векторная база данных для поиска по сходству и AI приложений',
+    url: env.services.qdrant,
+    icon: <Cpu className="h-5 w-5" />,
+    category: 'Данные',
+    status: 'online',
+    version: '1.7.0'
   }
 ];
 
