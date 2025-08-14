@@ -11,6 +11,7 @@ import prometheusLogo from '@/assets/service-icons/prometheus-original.png';
 import flowiseLogo from '/lovable-uploads/8a2a2a28-f334-48ae-b15e-9846838ddbf7.png';
 import webuiLogo from '/lovable-uploads/d199923e-e237-479e-9fcd-1237f683b7af.png';
 import qdrantLogo from '/lovable-uploads/1caac955-7ab4-4956-83cf-3154d1ec3101.png';
+import keycloakLogo from '/lovable-uploads/fc46b386-43ad-46c7-b69d-0cd039c81f1c.png';
 
 const SERVICES: Service[] = [
   {
@@ -83,6 +84,7 @@ const SERVICES: Service[] = [
     name: 'Keycloak Admin',
     description: 'Панель администрирования для управления пользователями и ролями',
     url: env.services.keycloakAdmin,
+    logo: keycloakLogo,
     icon: <Shield className="h-5 w-5" />,
     category: 'Безопасность',
     status: 'online',
