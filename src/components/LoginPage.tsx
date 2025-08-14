@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { Shield } from 'lucide-react';
-import oktaLogo from '@/assets/okta-solutions-logo.png';
+import oktaLogo from '@/assets/okta-logo-circle.png';
 
 const LoginPage: React.FC = () => {
   const { login, isLoading } = useAuth();
@@ -21,7 +21,7 @@ const LoginPage: React.FC = () => {
             <img 
               src={oktaLogo} 
               alt="OKTA Solutions" 
-              className="h-16 w-16"
+              className="h-20 w-20 rounded-full shadow-xl"
             />
           </div>
           <CardTitle className="text-2xl">Портал Сервисов</CardTitle>
