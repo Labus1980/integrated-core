@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import ServiceCard, { Service } from './ServiceCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Bot, Database, Activity, Zap, BarChart3, Globe } from 'lucide-react';
+import { env } from '@/lib/env';
 import n8nLogo from '/lovable-uploads/764d21da-4ba9-4a54-b3ee-f6879fcc4869.png';
 import grafanaLogo from '@/assets/service-icons/grafana-original.svg';
 import supabaseLogo from '@/assets/service-icons/supabase-original.png';
@@ -15,7 +16,7 @@ const SERVICES: Service[] = [
     id: 'n8n',
     name: 'n8n',
     description: 'Автоматизация рабочих процессов и интеграция между сервисами',
-    url: 'https://n8n.your-domain.com',
+    url: env.services.n8n,
     logo: n8nLogo,
     icon: <Zap className="h-5 w-5" />,
     category: 'Автоматизация',
@@ -26,7 +27,7 @@ const SERVICES: Service[] = [
     id: 'grafana',
     name: 'Grafana',
     description: 'Визуализация метрик и создание дашбордов для мониторинга',
-    url: 'https://grafana.your-domain.com',
+    url: env.services.grafana,
     logo: grafanaLogo,
     icon: <BarChart3 className="h-5 w-5" />,
     category: 'Мониторинг',
@@ -37,7 +38,7 @@ const SERVICES: Service[] = [
     id: 'supabase',
     name: 'Supabase Studio',
     description: 'Управление базами данных, аутентификация и API',
-    url: 'https://supabase.your-domain.com',
+    url: env.services.supabase,
     logo: supabaseLogo,
     icon: <Database className="h-5 w-5" />,
     category: 'Данные',
@@ -48,7 +49,7 @@ const SERVICES: Service[] = [
     id: 'prometheus',
     name: 'Prometheus',
     description: 'Сбор и хранение метрик системы мониторинга',
-    url: 'https://prometheus.your-domain.com',
+    url: env.services.prometheus,
     logo: prometheusLogo,
     icon: <Activity className="h-5 w-5" />,
     category: 'Мониторинг',
@@ -59,7 +60,7 @@ const SERVICES: Service[] = [
     id: 'flowise',
     name: 'Flowise',
     description: 'Конструктор AI-ботов с низким кодом',
-    url: 'https://flowise.your-domain.com',
+    url: env.services.flowise,
     logo: flowiseLogo,
     icon: <Bot className="h-5 w-5" />,
     category: 'AI',
@@ -70,7 +71,7 @@ const SERVICES: Service[] = [
     id: 'webui',
     name: 'WebUI',
     description: 'Веб-интерфейс для работы с языковыми моделями ИИ',
-    url: 'https://webui.your-domain.com',
+    url: env.services.webui,
     logo: webuiLogo,
     icon: <Globe className="h-5 w-5" />,
     category: 'AI',
@@ -105,7 +106,7 @@ const ServicesGrid: React.FC<ServicesGridProps> = ({ searchQuery }) => {
     <div className="space-y-8">
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-          Корпоративные Сервисы
+          {env.app.title}
         </h1>
         <p className="text-muted-foreground text-lg">
           Доступ к инфраструктурным сервисам и инструментам

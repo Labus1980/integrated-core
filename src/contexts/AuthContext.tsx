@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { env } from '@/lib/env';
 
 interface User {
   id: string;
@@ -37,13 +38,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [devMode, setDevMode] = useState(() => {
     const saved = localStorage.getItem('devMode');
-    return saved !== null ? JSON.parse(saved) : true;
+    return saved !== null ? JSON.parse(saved) : env.app.defaultDevMode;
   });
 
-  // Keycloak OAuth2 configuration
-  const KEYCLOAK_URL = 'https://keycloak.okta-solutions.com';
-  const REALM = 'okta';
-  const CLIENT_ID = 'okta-entrypoint';
+  // Keycloak OAuth2 configuration from environment variables
+  const KEYCLOAK_URL = env.keycloak.url;
+  const REALM = env.keycloak.realm;
+  const CLIENT_ID = env.keycloak.clientId;
   
   // Development mode - using mock authentication
   const DEV_MODE = devMode;
