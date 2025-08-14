@@ -6,7 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Search, Settings, LogOut, User, Moon, Sun } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from 'next-themes';
-import oktaLogo from '@/assets/okta-logo-final.png';
+import oktaLogo from '@/assets/okta-logo-big.png';
 
 interface DashboardHeaderProps {
   searchQuery: string;
@@ -29,7 +29,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
             <img 
               src={oktaLogo} 
               alt="OKTA Solutions" 
-              className="h-14 w-14 rounded-full shadow-lg"
+              className="h-16 w-16 rounded-full shadow-lg"
             />
             <h1 className="text-xl font-semibold text-white">Портал Сервисов</h1>
           </div>
