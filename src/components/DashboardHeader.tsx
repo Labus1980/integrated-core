@@ -3,9 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Search, Settings, LogOut, User, Moon, Sun, Server } from 'lucide-react';
+import { Search, Settings, LogOut, User, Moon, Sun } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from 'next-themes';
+import oktaLogo from '@/assets/okta-solutions-logo.png';
 
 interface DashboardHeaderProps {
   searchQuery: string;
@@ -25,9 +26,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-              <Server className="h-6 w-6 text-white" />
-            </div>
+            <img 
+              src={oktaLogo} 
+              alt="OKTA Solutions" 
+              className="h-12 w-12"
+            />
             <h1 className="text-2xl font-bold text-white">Портал Сервисов</h1>
           </div>
           
