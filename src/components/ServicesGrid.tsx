@@ -96,14 +96,23 @@ const ServicesGrid: React.FC<ServicesGridProps> = ({ searchQuery }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      <div className="text-center space-y-2">
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+          Корпоративные Сервисы
+        </h1>
+        <p className="text-muted-foreground text-lg">
+          Доступ к инфраструктурным сервисам и инструментам
+        </p>
+      </div>
+
       <Tabs defaultValue="Все" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 bg-gradient-secondary">
+        <TabsList className="grid w-full grid-cols-5 bg-muted">
           {categories.map(category => (
-            <TabsTrigger key={category} value={category} className="flex-1">
+            <TabsTrigger key={category} value={category} className="flex-1 font-medium">
               {category}
               {category !== 'Все' && (
-                <span className="ml-2 text-xs bg-primary/20 px-1.5 py-0.5 rounded-full">
+                <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
                   {getServicesByCategory(category).length}
                 </span>
               )}
@@ -112,27 +121,27 @@ const ServicesGrid: React.FC<ServicesGridProps> = ({ searchQuery }) => {
         </TabsList>
 
         {categories.map(category => (
-          <TabsContent key={category} value={category} className="mt-6">
+          <TabsContent key={category} value={category} className="mt-8">
             <motion.div 
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.3, staggerChildren: 0.1 }}
+              transition={{ duration: 0.3, staggerChildren: 0.05 }}
             >
               {getServicesByCategory(category).map((service, index) => (
                 <motion.div
                   key={service.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
                 >
                   <ServiceCard service={service} />
                 </motion.div>
               ))}
             </motion.div>
             {getServicesByCategory(category).length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">
+              <div className="text-center py-16">
+                <p className="text-muted-foreground text-lg">
                   {searchQuery ? 'Сервисы не найдены' : 'Нет доступных сервисов в этой категории'}
                 </p>
               </div>
