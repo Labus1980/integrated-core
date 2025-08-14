@@ -146,7 +146,7 @@ const ServicesGrid: React.FC<ServicesGridProps> = ({ searchQuery }) => {
       </div>
 
       <Tabs defaultValue="Все" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 bg-muted">
+        <TabsList className="grid w-full bg-muted" style={{ gridTemplateColumns: `repeat(${categories.length}, minmax(0, 1fr))` }}>
           {categories.map(category => (
             <TabsTrigger key={category} value={category} className="flex-1 font-medium">
               {category}
