@@ -24,6 +24,8 @@ const Index = () => {
 
   const exchangeCodeForToken = async (code: string) => {
     try {
+      console.log('Exchanging code for token...', { code: code.substring(0, 10) + '...' });
+      
       const tokenResponse = await fetch(`${env.keycloak.url}/realms/${env.keycloak.realm}/protocol/openid-connect/token`, {
         method: 'POST',
         headers: {
@@ -38,11 +40,17 @@ const Index = () => {
         }),
       });
 
+      console.log('Token response status:', tokenResponse.status);
+
       if (tokenResponse.ok) {
         const tokens = await tokenResponse.json();
+        console.log('Tokens received, setting in localStorage');
         localStorage.setItem('access_token', tokens.access_token);
         localStorage.setItem('refresh_token', tokens.refresh_token);
         window.location.reload(); // Reload to trigger auth check
+      } else {
+        const errorText = await tokenResponse.text();
+        console.error('Token exchange failed:', tokenResponse.status, errorText);
       }
     } catch (error) {
       console.error('Token exchange failed:', error);
