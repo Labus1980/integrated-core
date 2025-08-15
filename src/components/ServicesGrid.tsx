@@ -24,7 +24,7 @@ const SERVICES: Service[] = [
     category: 'Автоматизация',
     status: 'online',
     version: '1.0.5',
-    ssoEnabled: true
+    ssoEnabled: false
   },
   {
     id: 'grafana',
