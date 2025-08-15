@@ -26,6 +26,7 @@ export const keycloakConfig = {
   url: getEnvVar('VITE_KEYCLOAK_URL'),
   realm: getEnvVar('VITE_KEYCLOAK_REALM'),
   clientId: getEnvVar('VITE_KEYCLOAK_CLIENT_ID'),
+  clientSecret: getEnvVar('VITE_KEYCLOAK_CLIENT_SECRET'),
 } as const;
 
 // Service URLs

@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import LoginPage from '@/components/LoginPage';
 import DashboardHeader from '@/components/DashboardHeader';
 import ServicesGrid from '@/components/ServicesGrid';
+import { env } from '@/lib/env';
 
 const Index = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -23,15 +24,15 @@ const Index = () => {
 
   const exchangeCodeForToken = async (code: string) => {
     try {
-      const tokenResponse = await fetch('https://keycloak.okta-solutions.com/realms/okta/protocol/openid-connect/token', {
+      const tokenResponse = await fetch(`${env.keycloak.url}/realms/${env.keycloak.realm}/protocol/openid-connect/token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
           grant_type: 'authorization_code',
-          client_id: 'okta-entrypoint',
-          client_secret: 'ONNndDTi8fFsltBy8ILElFSr6axaxW9N',
+          client_id: env.keycloak.clientId,
+          client_secret: env.keycloak.clientSecret,
           code: code,
           redirect_uri: window.location.origin,
         }),

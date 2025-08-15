@@ -1,5 +1,6 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { env } from '@/lib/env';
 
 export interface SSOConfig {
   id: string;
@@ -80,18 +81,14 @@ export const useSSO = () => {
     }
 
     try {
-      const keycloakUrl = import.meta.env.VITE_KEYCLOAK_URL;
-      const realm = import.meta.env.VITE_KEYCLOAK_REALM;
-      const clientId = import.meta.env.VITE_KEYCLOAK_CLIENT_ID;
-
-      const response = await fetch(`${keycloakUrl}/realms/${realm}/protocol/openid-connect/token`, {
+      const response = await fetch(`${env.keycloak.url}/realms/${env.keycloak.realm}/protocol/openid-connect/token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
           grant_type: 'refresh_token',
-          client_id: clientId,
+          client_id: env.keycloak.clientId,
           refresh_token: refreshTokenValue,
         }),
       });
