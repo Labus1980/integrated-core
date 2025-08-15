@@ -41,6 +41,18 @@ export const serviceUrls = {
   qdrant: getEnvVar('VITE_QDRANT_URL'),
 } as const;
 
+// Service Versions
+export const serviceVersions = {
+  n8n: getEnvVar('VITE_N8N_VERSION', '1.0.5'),
+  grafana: getEnvVar('VITE_GRAFANA_VERSION', '10.2.0'),
+  supabase: getEnvVar('VITE_SUPABASE_VERSION', '2.39.0'),
+  prometheus: getEnvVar('VITE_PROMETHEUS_VERSION', '2.47.0'),
+  flowise: getEnvVar('VITE_FLOWISE_VERSION', '1.4.3'),
+  webui: getEnvVar('VITE_WEBUI_VERSION', ''),
+  keycloakAdmin: getEnvVar('VITE_KEYCLOAK_VERSION', '23.0.0'),
+  qdrant: getEnvVar('VITE_QDRANT_VERSION', '1.7.0'),
+} as const;
+
 // General Settings
 export const appConfig = {
   title: getEnvVar('VITE_APP_TITLE', 'Корпоративные Сервисы'),
@@ -51,5 +63,6 @@ export const appConfig = {
 export const env = {
   keycloak: keycloakConfig,
   services: serviceUrls,
+  versions: serviceVersions,
   app: appConfig,
 } as const;
