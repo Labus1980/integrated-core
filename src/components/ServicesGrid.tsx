@@ -65,7 +65,7 @@ const SERVICES: Service[] = [
   {
     id: 'flowise',
     name: 'Flowise',
-    description: 'Конструктор AI-ботов с низким кодом',
+    description: 'Конструктор для визуальной сборки чат-ботов и AI-агентов, позволяющий: создавать чат-ботов для сайтов; разрабатывать внутренних ассистентов для компании.',
     url: env.services.flowise,
     logo: flowiseLogo,
     icon: <Bot className="h-5 w-5" />,
