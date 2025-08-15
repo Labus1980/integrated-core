@@ -1,0 +1,85 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  DOCKER_DRIVER: overlay2
+  NODE_ENV: production
+
+cache:
+  key:
+    files:
+      - package-lock.json
+  paths:
+    - node_modules/
+
+build:
+  stage: build
+  image: docker:latest
+
+  services:
+    - name: docker:dind
+      alias: docker-service
+
+  variables:
+    # Стандартные переменные для docker-in-docker
+    DOCKER_HOST: tcp://docker-service:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+
+  before_script: |
+    echo "Prepare to build..."
+    cat <<EOF > build_app.sh
+      npm ci
+      npm run build
+    EOF
+    chmod +x build_app.sh
+
+  script:
+    - docker run -i --rm -v $(pwd):/app -w /app node:20-alpine /app/build_app.sh
+    - ls -lthr
+
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 week  # время жизни артефакта
+
+deploy_application:
+  stage: deploy
+  image: kroniak/ssh-client
+  variables:
+    ENVIRONMENT: prod
+    DEPLOYMENT_DIR: /opt/app-addons/studio
+    NGINX_DIR: studio
+  before_script:
+    - echo "Init ssh"
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo "${DEPLOYMENT_HOST} deployment.server" >> /etc/hosts
+    - ssh-keyscan deployment.server > ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+
+  script: |
+    echo "Starting deploy ..."
+
+    cat <<EOF > cicd.sh
+      #!/bin/bash
+      [ ! -f front-pack.tgz ] && { echo "*** Error: Wrong CICD process, front-pack.tgz is absent!"; exit 1; }
+      [ -d $DEPLOYMENT_DIR/vol/html/$NGINX_DIR ] && { sudo rm -fr $DEPLOYMENT_DIR/vol/html/$NGINX_DIR.old; sudo mv $DEPLOYMENT_DIR/vol/html/$NGINX_DIR $DEPLOYMENT_DIR/vol/html/$NGINX_DIR.old; }
+      sudo tar -zxf front-pack.tgz -C $DEPLOYMENT_DIR/vol/html
+      rm -f front-pack.tgz
+      sudo mv $DEPLOYMENT_DIR/vol/html/{dist,$NGINX_DIR}
+    EOF
+
+    tar -zcf front-pack.tgz dist
+
+    killall ssh-agent 2>/dev/null || true
+    eval $(ssh-agent -s)
+    echo "$DEPLOYMENT_KEY" | tr -d '\r' | ssh-add - > /dev/null
+    scp cicd.sh front-pack.tgz $DEPLOYMENT_USER@deployment.server:./
+    echo "Finishing deploy ..."
+    ssh $DEPLOYMENT_USER@deployment.server "chmod +x ./cicd.sh; ./cicd.sh; rm -f cicd.sh"
+    echo "Done"
+
+  dependencies:
+    - build
