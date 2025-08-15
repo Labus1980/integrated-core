@@ -23,7 +23,7 @@ const SERVICES: Service[] = [
     icon: <Zap className="h-5 w-5" />,
     category: 'Автоматизация',
     status: 'online',
-    version: env.versions.n8n,
+    version: '1.0.5',
     ssoEnabled: false
   },
   {
@@ -35,7 +35,7 @@ const SERVICES: Service[] = [
     icon: <BarChart3 className="h-5 w-5" />,
     category: 'Мониторинг',
     status: 'online',
-    version: env.versions.grafana,
+    version: '10.2.0',
     ssoEnabled: true
   },
   {
@@ -47,7 +47,7 @@ const SERVICES: Service[] = [
     icon: <Database className="h-5 w-5" />,
     category: 'Данные',
     status: 'online',
-    version: env.versions.supabase,
+    version: '2.39.0',
     ssoEnabled: true
   },
   {
@@ -59,7 +59,7 @@ const SERVICES: Service[] = [
     icon: <Activity className="h-5 w-5" />,
     category: 'Мониторинг',
     status: 'warning',
-    version: env.versions.prometheus,
+    version: '2.47.0',
     ssoEnabled: true
   },
   {
@@ -71,7 +71,7 @@ const SERVICES: Service[] = [
     icon: <Bot className="h-5 w-5" />,
     category: 'AI',
     status: 'online',
-    version: env.versions.flowise,
+    version: '1.4.3',
     ssoEnabled: true
   },
   {
@@ -83,7 +83,6 @@ const SERVICES: Service[] = [
     icon: <Globe className="h-5 w-5" />,
     category: 'AI',
     status: 'offline',
-    version: env.versions.webui,
     ssoEnabled: true
   },
   {
@@ -95,7 +94,7 @@ const SERVICES: Service[] = [
     icon: <Shield className="h-5 w-5" />,
     category: 'Безопасность',
     status: 'online',
-    version: env.versions.keycloakAdmin,
+    version: '23.0.0',
     ssoEnabled: false
   },
   {
@@ -107,7 +106,7 @@ const SERVICES: Service[] = [
     icon: <Cpu className="h-5 w-5" />,
     category: 'Данные',
     status: 'online',
-    version: env.versions.qdrant,
+    version: '1.7.0',
     ssoEnabled: true
   }
 ];
