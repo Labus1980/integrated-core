@@ -4,15 +4,9 @@ import ServiceCard, { Service } from './ServiceCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Bot, Database, Activity, Zap, BarChart3, Globe, Shield, Cpu, Code } from 'lucide-react';
 import { env } from '@/lib/env';
-import n8nLogo from '/lovable-uploads/764d21da-4ba9-4a54-b3ee-f6879fcc4869.png';
 import grafanaLogo from '@/assets/service-icons/grafana-original.svg';
 import supabaseLogo from '@/assets/service-icons/supabase-original.png';
 import prometheusLogo from '@/assets/service-icons/prometheus-original.png';
-import flowiseLogo from '/lovable-uploads/8a2a2a28-f334-48ae-b15e-9846838ddbf7.png';
-import webuiLogo from '/lovable-uploads/d199923e-e237-479e-9fcd-1237f683b7af.png';
-import qdrantLogo from '/lovable-uploads/1caac955-7ab4-4956-83cf-3154d1ec3101.png';
-import keycloakLogo from '/lovable-uploads/fc46b386-43ad-46c7-b69d-0cd039c81f1c.png';
-import boltLogo from '/lovable-uploads/0f0fc83b-a79d-4469-aa4b-9518267709a8.png';
 
 const SERVICES: Service[] = [
   {
@@ -20,7 +14,7 @@ const SERVICES: Service[] = [
     name: 'n8n',
     description: 'Автоматизация рабочих процессов и интеграция между сервисами',
     url: env.services.n8n,
-    logo: n8nLogo,
+    logo: '/lovable-uploads/764d21da-4ba9-4a54-b3ee-f6879fcc4869.png',
     icon: <Zap className="h-5 w-5" />,
     category: 'Автоматизация',
     status: 'online',
@@ -68,7 +62,7 @@ const SERVICES: Service[] = [
     name: 'Flowise',
     description: 'Конструктор для визуальной сборки чат-ботов и AI-агентов • Создание чат-ботов для сайтов • Разработка внутренних ассистентов для компании',
     url: env.services.flowise,
-    logo: flowiseLogo,
+    logo: '/lovable-uploads/8a2a2a28-f334-48ae-b15e-9846838ddbf7.png',
     icon: <Bot className="h-5 w-5" />,
     category: 'AI',
     status: 'online',
@@ -80,7 +74,7 @@ const SERVICES: Service[] = [
     name: 'WebUI',
     description: 'Веб-интерфейс для работы с языковыми моделями ИИ',
     url: env.services.webui,
-    logo: webuiLogo,
+    logo: '/lovable-uploads/d199923e-e237-479e-9fcd-1237f683b7af.png',
     icon: <Globe className="h-5 w-5" />,
     category: 'AI',
     status: 'offline',
@@ -92,7 +86,7 @@ const SERVICES: Service[] = [
     name: 'Keycloak Admin',
     description: 'Панель администрирования для управления пользователями и ролями',
     url: env.services.keycloakAdmin,
-    logo: keycloakLogo,
+    logo: '/lovable-uploads/fc46b386-43ad-46c7-b69d-0cd039c81f1c.png',
     icon: <Shield className="h-5 w-5" />,
     category: 'Безопасность',
     status: 'online',
@@ -104,7 +98,7 @@ const SERVICES: Service[] = [
     name: 'Qdrant',
     description: 'Векторная база данных для поиска по сходству и AI приложений',
     url: env.services.qdrant,
-    logo: qdrantLogo,
+    logo: '/lovable-uploads/1caac955-7ab4-4956-83cf-3154d1ec3101.png',
     icon: <Cpu className="h-5 w-5" />,
     category: 'Данные',
     status: 'online',
@@ -116,7 +110,7 @@ const SERVICES: Service[] = [
     name: 'Bolt',
     description: 'AI-платформа для быстрой разработки веб-приложений с помощью искусственного интеллекта',
     url: env.services.bolt,
-    logo: boltLogo,
+    logo: '/lovable-uploads/0f0fc83b-a79d-4469-aa4b-9518267709a8.png',
     icon: <Code className="h-5 w-5" />,
     category: 'Разработка',
     status: 'online',
