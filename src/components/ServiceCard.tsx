@@ -55,7 +55,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
               transition={{ type: "spring", stiffness: 300 }}
             >
               {service.logo ? (
-                <div className={`p-2 rounded-lg shadow-lg ${service.id === 'bolt' ? 'bg-purple-600' : 'bg-white'}`}>
+                <div className={`p-2 rounded-lg shadow-lg ${service.id === 'bolt' ? 'bg-gray-800' : 'bg-white'}`}>
                   <img src={service.logo} alt={`${service.name} logo`} className="h-8 w-8 object-contain" />
                 </div>
               ) : (
