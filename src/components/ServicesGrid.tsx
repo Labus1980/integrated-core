@@ -110,12 +110,12 @@ const SERVICES: Service[] = [
     name: 'Bolt',
     description: 'AI-платформа для быстрой разработки веб-приложений с помощью искусственного интеллекта',
     url: env.services.bolt,
-    logo: '/lovable-uploads/0f0fc83b-a79d-4469-aa4b-9518267709a8.png',
+    logo: '/lovable-uploads/66569f4a-a0e3-4070-b316-56b43a0bb186.png',
     icon: <Code className="h-5 w-5" />,
     category: 'Разработка',
     status: 'online',
     version: env.versions.bolt,
-    ssoEnabled: true
+    ssoEnabled: false
   }
 ];
 
