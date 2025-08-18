@@ -39,6 +39,7 @@ export const serviceUrls = {
   webui: getEnvVar('VITE_WEBUI_URL'),
   keycloakAdmin: getEnvVar('VITE_KEYCLOAK_ADMIN_URL'),
   qdrant: getEnvVar('VITE_QDRANT_URL'),
+  bolt: getEnvVar('VITE_BOLT_URL'),
 } as const;
 
 // Service Versions
@@ -51,6 +52,7 @@ export const serviceVersions = {
   webui: getEnvVar('VITE_WEBUI_VERSION', ''),
   keycloakAdmin: getEnvVar('VITE_KEYCLOAK_VERSION', '23.0.0'),
   qdrant: getEnvVar('VITE_QDRANT_VERSION', '1.7.0'),
+  bolt: getEnvVar('VITE_BOLT_VERSION', '1.0.0'),
 } as const;
 
 // General Settings
