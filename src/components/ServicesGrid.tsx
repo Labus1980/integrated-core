@@ -112,7 +112,7 @@ const SERVICES: Service[] = [
     url: env.services.bolt,
     logo: '/lovable-uploads/66569f4a-a0e3-4070-b316-56b43a0bb186.png',
     icon: <Code className="h-5 w-5" />,
-    category: 'Разработка',
+    category: 'AI',
     status: 'online',
     version: env.versions.bolt,
     ssoEnabled: false
