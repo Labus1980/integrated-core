@@ -104,18 +104,6 @@ const SERVICES: Service[] = [
     status: 'online',
     version: env.versions.qdrant,
     ssoEnabled: true
-  },
-  {
-    id: 'bolt',
-    name: 'Bolt',
-    description: 'AI-платформа для быстрой разработки веб-приложений с помощью искусственного интеллекта',
-    url: env.services.bolt,
-    logo: '/lovable-uploads/66569f4a-a0e3-4070-b316-56b43a0bb186.png',
-    icon: <Code className="h-5 w-5" />,
-    category: 'AI',
-    status: 'online',
-    version: env.versions.bolt,
-    ssoEnabled: false
   }
 ];
 
