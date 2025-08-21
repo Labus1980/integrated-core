@@ -104,6 +104,17 @@ const SERVICES: Service[] = [
     status: 'online',
     version: env.versions.qdrant,
     ssoEnabled: true
+  },
+  {
+    id: 'waha',
+    name: 'WAHA',
+    description: 'Интеграция с WhatsApp через WAHA',
+    url: env.services.waha,
+    icon: <Code className="h-5 w-5" />,
+    category: 'Коммуникации',
+    status: 'online',
+    version: env.versions.waha,
+    ssoEnabled: false
   }
 ];
 
