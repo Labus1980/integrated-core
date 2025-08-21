@@ -14,6 +14,7 @@ interface ImportMetaEnv {
   readonly VITE_PROMETHEUS_URL: string;
   readonly VITE_FLOWISE_URL: string;
   readonly VITE_WEBUI_URL: string;
+  readonly VITE_WAHA_URL: string;
   
   // General Settings
   readonly VITE_APP_TITLE: string;
