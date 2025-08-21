@@ -149,12 +149,13 @@ export const useSSO = () => {
       let finalUrl = serviceUrl;
 
       switch (ssoConfig.method) {
-        case 'token_url':
+        case 'token_url': {
           const separator = serviceUrl.includes('?') ? '&' : '?';
           finalUrl = `${serviceUrl}${separator}${ssoConfig.tokenParam}=${token}`;
           break;
+        }
 
-        case 'oauth2':
+        case 'oauth2': {
           if (serviceId === 'keycloak-admin') {
             // Same Keycloak instance - shared session should work
             finalUrl = serviceUrl;
@@ -167,9 +168,11 @@ export const useSSO = () => {
             finalUrl = serviceUrl;
           }
           break;
+        }
 
         default:
           finalUrl = serviceUrl;
+          break;
       }
 
       window.open(finalUrl, '_blank', 'noopener,noreferrer');
