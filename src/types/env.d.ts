@@ -14,10 +14,14 @@ interface ImportMetaEnv {
   readonly VITE_PROMETHEUS_URL: string;
   readonly VITE_FLOWISE_URL: string;
   readonly VITE_WEBUI_URL: string;
-  
+  readonly VITE_WAHA_URL: string;
+
   // General Settings
   readonly VITE_APP_TITLE: string;
   readonly VITE_DEFAULT_DEV_MODE: string;
+
+  // Service Versions
+  readonly VITE_WAHA_VERSION: string;
 }
 
 interface ImportMeta {
