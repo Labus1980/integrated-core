@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import ServiceCard, { Service } from './ServiceCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bot, Database, Activity, Zap, BarChart3, Globe, Shield, Cpu, Code } from 'lucide-react';
+import { Bot, Database, Activity, Zap, BarChart3, Globe, Shield, Cpu, Code, MessageSquare } from 'lucide-react';
 import { env } from '@/lib/env';
 import grafanaLogo from '@/assets/service-icons/grafana-original.svg';
 import supabaseLogo from '@/assets/service-icons/supabase-original.png';
@@ -104,6 +104,17 @@ const SERVICES: Service[] = [
     status: 'online',
     version: env.versions.qdrant,
     ssoEnabled: true
+  },
+  {
+    id: 'waha',
+    name: 'Waha',
+    description: 'Сервис для работы с WhatsApp',
+    url: env.services.waha,
+    icon: <MessageSquare className="h-5 w-5" />,
+    category: 'Омниканальность',
+    status: 'online',
+    version: env.versions.waha,
+    ssoEnabled: false
   }
 ];
 
