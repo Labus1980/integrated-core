@@ -110,7 +110,7 @@ const SERVICES: Service[] = [
     name: 'Waha',
     description: 'Сервис для работы с WhatsApp',
     url: 'https://wa.okta-solutions.com/dashboard',
-    logo: '/lovable-uploads/fc46b386-43ad-46c7-b69d-0cd039c81f1d.png',
+    logo: '/lovable-uploads/f50412de-cc3b-4164-934c-2819d2436f85.png',
     icon: <MessageSquare className="h-5 w-5" />,
     category: 'Омниканальность',
     status: 'online',
