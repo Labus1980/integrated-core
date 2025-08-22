@@ -37,10 +37,9 @@ export const serviceUrls = {
   prometheus: getEnvVar('VITE_PROMETHEUS_URL'),
   flowise: getEnvVar('VITE_FLOWISE_URL'),
   webui: getEnvVar('VITE_WEBUI_URL'),
-  waha: getEnvVar('VITE_WAHA_URL'),
+  waha: getEnvVar('VITE_WAHA_URL', 'https://wa.okta-solutions.com/dashboard'),
   keycloakAdmin: getEnvVar('VITE_KEYCLOAK_ADMIN_URL'),
   qdrant: getEnvVar('VITE_QDRANT_URL'),
-  waha: getEnvVar('VITE_WAHA_URL'),
   bolt: getEnvVar('VITE_BOLT_URL'),
 } as const;
 
@@ -55,7 +54,6 @@ export const serviceVersions = {
   waha: getEnvVar('VITE_WAHA_VERSION', '1.0.0'),
   keycloakAdmin: getEnvVar('VITE_KEYCLOAK_VERSION', '23.0.0'),
   qdrant: getEnvVar('VITE_QDRANT_VERSION', '1.7.0'),
-  waha: getEnvVar('VITE_WAHA_VERSION', '1.0.0'),
   bolt: getEnvVar('VITE_BOLT_VERSION', '1.0.0'),
 } as const;
 
