@@ -128,6 +128,18 @@ const SERVICES: Service[] = [
     status: 'online',
     version: env.versions.waha,
     ssoEnabled: false
+  },
+  {
+    id: 'matrix',
+    name: 'Matrix',
+    description: 'Открытая сеть для защищённой децентрализованной коммуникации',
+    url: env.services.matrix,
+    logo: '/lovable-uploads/9c78f3f8-87a0-4cf7-9c35-8a402a90f20c.png',
+    icon: <MessageSquare className="h-5 w-5" />,
+    category: 'Омниканальность',
+    status: 'online',
+    version: env.versions.matrix,
+    ssoEnabled: true
   }
 ];
 
