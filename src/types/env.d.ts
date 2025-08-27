@@ -28,7 +28,7 @@ interface ImportMetaEnv {
   readonly VITE_MATRIX_VERSION: string;
 
   readonly VITE_NEXTCLOUD_VERSION: string;
-
+}
 
 interface ImportMeta {
   readonly env: ImportMetaEnv;

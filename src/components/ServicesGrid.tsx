@@ -115,7 +115,7 @@ const SERVICES: Service[] = [
     category: 'Файлы',
     status: 'online',
     version: env.versions.nextcloud,
-    ssoEnabled: true
+    ssoEnabled: false
   },
   {
     id: 'waha',
@@ -139,7 +139,7 @@ const SERVICES: Service[] = [
     category: 'Омниканальность',
     status: 'online',
     version: env.versions.matrix,
-    ssoEnabled: true
+    ssoEnabled: false
   }
 ];
 
