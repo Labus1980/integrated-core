@@ -43,6 +43,7 @@ export const serviceUrls = {
   maubot: getEnvVar('VITE_MAUBOT_URL', 'https://maubot.okta-solutions.com/_matrix/maubot/#/'),
   keycloakAdmin: getEnvVar('VITE_KEYCLOAK_ADMIN_URL'),
   qdrant: getEnvVar('VITE_QDRANT_URL'),
+  baserow: getEnvVar('VITE_BASEROW_URL'),
   bolt: getEnvVar('VITE_BOLT_URL'),
 } as const;
 
@@ -60,6 +61,7 @@ export const serviceVersions = {
   maubot: getEnvVar('VITE_MAUBOT_VERSION', '1.0.0'),
   keycloakAdmin: getEnvVar('VITE_KEYCLOAK_VERSION', '23.0.0'),
   qdrant: getEnvVar('VITE_QDRANT_VERSION', '1.7.0'),
+  baserow: getEnvVar('VITE_BASEROW_VERSION', '1.0.0'),
   bolt: getEnvVar('VITE_BOLT_VERSION', '1.0.0'),
 } as const;
 
