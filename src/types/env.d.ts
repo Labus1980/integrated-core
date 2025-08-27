@@ -14,6 +14,7 @@ interface ImportMetaEnv {
   readonly VITE_PROMETHEUS_URL: string;
   readonly VITE_FLOWISE_URL: string;
   readonly VITE_WEBUI_URL: string;
+  readonly VITE_NEXTCLOUD_URL: string;
   readonly VITE_WAHA_URL: string;
 
   // General Settings
@@ -22,6 +23,7 @@ interface ImportMetaEnv {
 
   // Service Versions
   readonly VITE_WAHA_VERSION: string;
+  readonly VITE_NEXTCLOUD_VERSION: string;
 }
 
 interface ImportMeta {

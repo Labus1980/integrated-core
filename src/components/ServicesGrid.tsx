@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import ServiceCard, { Service } from './ServiceCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bot, Database, Activity, Zap, BarChart3, Globe, Shield, Cpu, Code, MessageSquare } from 'lucide-react';
+import { Bot, Database, Activity, Zap, BarChart3, Globe, Shield, Cpu, Code, MessageSquare, Cloud } from 'lucide-react';
 import { env } from '@/lib/env';
 import grafanaLogo from '@/assets/service-icons/grafana-original.svg';
 import supabaseLogo from '@/assets/service-icons/supabase-original.png';
@@ -103,6 +103,18 @@ const SERVICES: Service[] = [
     category: 'Данные',
     status: 'online',
     version: env.versions.qdrant,
+    ssoEnabled: true
+  },
+  {
+    id: 'nextcloud',
+    name: 'Nextcloud',
+    description: 'Облачное хранилище файлов и совместная работа',
+    url: env.services.nextcloud,
+    logo: '/lovable-uploads/9c78f3f8-87a0-4cf7-9c35-8a402a90f20b.png',
+    icon: <Cloud className="h-5 w-5" />,
+    category: 'Файлы',
+    status: 'online',
+    version: env.versions.nextcloud,
     ssoEnabled: true
   },
   {

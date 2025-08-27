@@ -52,6 +52,12 @@ const SSO_CONFIGS: Record<string, SSOConfig> = {
     method: 'oauth2',
     requiresProxy: false // Same Keycloak instance - shared session
   },
+  'nextcloud': {
+    id: 'nextcloud',
+    method: 'oauth2',
+    requiresProxy: false,
+    authEndpoint: '/apps/oauth2/authorize'
+  },
   'qdrant': {
     id: 'qdrant',
     method: 'token_url',
