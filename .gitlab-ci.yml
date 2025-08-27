@@ -69,6 +69,8 @@ deploy_application:
       sudo tar -zxf front-pack.tgz -C $DEPLOYMENT_DIR/vol/html
       rm -f front-pack.tgz
       sudo mv $DEPLOYMENT_DIR/vol/html/{dist,$NGINX_DIR}
+      cd $DEPLOYMENT_DIR
+      ./restart-studio.sh
     EOF
 
     tar -zcf front-pack.tgz dist
