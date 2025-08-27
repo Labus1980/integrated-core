@@ -17,6 +17,7 @@ interface ImportMetaEnv {
   readonly VITE_NEXTCLOUD_URL: string;
   readonly VITE_WAHA_URL: string;
   readonly VITE_MATRIX_URL: string;
+  readonly VITE_MAUBOT_URL: string;
 
   // General Settings
   readonly VITE_APP_TITLE: string;
@@ -26,6 +27,8 @@ interface ImportMetaEnv {
   readonly VITE_WAHA_VERSION: string;
 
   readonly VITE_MATRIX_VERSION: string;
+
+  readonly VITE_MAUBOT_VERSION: string;
 
   readonly VITE_NEXTCLOUD_VERSION: string;
 }
