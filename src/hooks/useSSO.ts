@@ -57,6 +57,12 @@ const SSO_CONFIGS: Record<string, SSOConfig> = {
     method: 'token_url',
     tokenParam: 'api-key', // Try API key approach
     requiresProxy: false
+  },
+  'matrix': {
+    id: 'matrix',
+    method: 'oauth2',
+    requiresProxy: false,
+    authEndpoint: '/_matrix/client/r0/login/sso/redirect'
   }
 };
 

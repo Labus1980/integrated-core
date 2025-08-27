@@ -15,6 +15,7 @@ interface ImportMetaEnv {
   readonly VITE_FLOWISE_URL: string;
   readonly VITE_WEBUI_URL: string;
   readonly VITE_WAHA_URL: string;
+  readonly VITE_MATRIX_URL: string;
 
   // General Settings
   readonly VITE_APP_TITLE: string;
@@ -22,6 +23,7 @@ interface ImportMetaEnv {
 
   // Service Versions
   readonly VITE_WAHA_VERSION: string;
+  readonly VITE_MATRIX_VERSION: string;
 }
 
 interface ImportMeta {
