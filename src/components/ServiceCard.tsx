@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Shield } from 'lucide-react';
-import ServiceAuthProxy from './ServiceAuthProxy';
-import { useSSO } from '@/hooks/useSSO';
+import { ExternalLink } from 'lucide-react';
 
 export interface Service {
   id: string;
@@ -17,7 +15,6 @@ export interface Service {
   category: string;
   status: 'online' | 'offline' | 'warning';
   version?: string;
-  ssoEnabled?: boolean;
 }
 
 interface ServiceCardProps {
@@ -25,17 +22,8 @@ interface ServiceCardProps {
 }
 
 const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
-  const [showAuthProxy, setShowAuthProxy] = useState(false);
-  const { isAuthenticated, openServiceWithSSO } = useSSO();
-
   const handleOpenService = () => {
-    // Check if service supports SSO and user is authenticated
-    if (service.ssoEnabled !== false && isAuthenticated) {
-      setShowAuthProxy(true);
-    } else {
-      // Fallback to direct opening
-      window.open(service.url, '_blank', 'noopener,noreferrer');
-    }
+    window.open(service.url, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -82,33 +70,17 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
             <Badge variant="outline" className="text-xs font-medium">
               {service.category}
             </Badge>
-            <Button 
+            <Button
               onClick={handleOpenService}
               size="sm"
-              className="bg-primary hover:bg-primary/90 border-0 shadow-md text-primary-foreground relative"
+              className="bg-primary hover:bg-primary/90 border-0 shadow-md text-primary-foreground"
             >
-              {service.ssoEnabled !== false && isAuthenticated ? (
-                <Shield className="mr-2 h-4 w-4" />
-              ) : (
-                <ExternalLink className="mr-2 h-4 w-4" />
-              )}
+              <ExternalLink className="mr-2 h-4 w-4" />
               Открыть
-              {service.ssoEnabled !== false && isAuthenticated && (
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse" />
-              )}
             </Button>
           </div>
         </CardContent>
       </Card>
-      
-      {showAuthProxy && (
-        <ServiceAuthProxy
-          serviceId={service.id}
-          serviceName={service.name}
-          serviceUrl={service.url}
-          onCancel={() => setShowAuthProxy(false)}
-        />
-      )}
     </motion.div>
   );
 };

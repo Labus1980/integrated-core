@@ -1,76 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import LoginPage from '@/components/LoginPage';
+import React, { useState } from 'react';
 import DashboardHeader from '@/components/DashboardHeader';
 import ServicesGrid from '@/components/ServicesGrid';
-import { env } from '@/lib/env';
 
 const Index = () => {
-  const { isAuthenticated, isLoading } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Handle OAuth callback
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    
-    if (code) {
-      // Exchange authorization code for access token
-      exchangeCodeForToken(code);
-      // Clean URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }, []);
-
-  const exchangeCodeForToken = async (code: string) => {
-    try {
-      console.log('Exchanging code for token...', { code: code.substring(0, 10) + '...' });
-      
-      const tokenResponse = await fetch(`${env.keycloak.url}/realms/${env.keycloak.realm}/protocol/openid-connect/token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          grant_type: 'authorization_code',
-          client_id: env.keycloak.clientId,
-          client_secret: env.keycloak.clientSecret,
-          code: code,
-          redirect_uri: window.location.origin,
-        }),
-      });
-
-      console.log('Token response status:', tokenResponse.status);
-
-      if (tokenResponse.ok) {
-        const tokens = await tokenResponse.json();
-        console.log('Tokens received, setting in localStorage');
-        localStorage.setItem('access_token', tokens.access_token);
-        localStorage.setItem('refresh_token', tokens.refresh_token);
-        window.location.reload(); // Reload to trigger auth check
-      } else {
-        const errorText = await tokenResponse.text();
-        console.error('Token exchange failed:', tokenResponse.status, errorText);
-      }
-    } catch (error) {
-      console.error('Token exchange failed:', error);
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Подключение...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <LoginPage />;
-  }
 
   return (
     <div className="min-h-screen bg-gradient-secondary">
