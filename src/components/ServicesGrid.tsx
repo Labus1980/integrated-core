@@ -192,9 +192,13 @@ const ServicesGrid: React.FC<ServicesGridProps> = ({ searchQuery }) => {
       </div>
 
       <Tabs defaultValue="Все" className="w-full">
-        <TabsList className="grid w-full bg-muted" style={{ gridTemplateColumns: `repeat(${categories.length}, minmax(0, 1fr))` }}>
+        <TabsList className="w-full overflow-x-auto justify-start">
           {categories.map(category => (
-            <TabsTrigger key={category} value={category} className="flex-1 font-medium">
+            <TabsTrigger
+              key={category}
+              value={category}
+              className="font-medium flex-shrink-0"
+            >
               {category}
               {category !== 'Все' && (
                 <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
