@@ -21,14 +21,6 @@ function getBooleanEnvVar(key: keyof ImportMetaEnv, defaultValue: boolean = fals
   return value.toLowerCase() === 'true';
 }
 
-// Keycloak/OAuth Configuration
-export const keycloakConfig = {
-  url: getEnvVar('VITE_KEYCLOAK_URL'),
-  realm: getEnvVar('VITE_KEYCLOAK_REALM'),
-  clientId: getEnvVar('VITE_KEYCLOAK_CLIENT_ID'),
-  clientSecret: getEnvVar('VITE_KEYCLOAK_CLIENT_SECRET'),
-} as const;
-
 // Service URLs
 export const serviceUrls = {
   n8n: getEnvVar('VITE_N8N_URL'),
@@ -73,7 +65,6 @@ export const appConfig = {
 
 // Export all configs
 export const env = {
-  keycloak: keycloakConfig,
   services: serviceUrls,
   versions: serviceVersions,
   app: appConfig,

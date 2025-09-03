@@ -18,8 +18,7 @@ const SERVICES: Service[] = [
     icon: <Zap className="h-5 w-5" />,
     category: 'Автоматизация',
     status: 'online',
-    version: env.versions.n8n,
-    ssoEnabled: false
+    version: env.versions.n8n
   },
   {
     id: 'grafana',
@@ -30,8 +29,7 @@ const SERVICES: Service[] = [
     icon: <BarChart3 className="h-5 w-5" />,
     category: 'Мониторинг',
     status: 'online',
-    version: env.versions.grafana,
-    ssoEnabled: true
+    version: env.versions.grafana
   },
   {
     id: 'supabase',
@@ -42,8 +40,7 @@ const SERVICES: Service[] = [
     icon: <Database className="h-5 w-5" />,
     category: 'Данные',
     status: 'online',
-    version: env.versions.supabase,
-    ssoEnabled: true
+    version: env.versions.supabase
   },
   {
     id: 'prometheus',
@@ -54,8 +51,7 @@ const SERVICES: Service[] = [
     icon: <Activity className="h-5 w-5" />,
     category: 'Мониторинг',
     status: 'warning',
-    version: env.versions.prometheus,
-    ssoEnabled: true
+    version: env.versions.prometheus
   },
   {
     id: 'flowise',
@@ -66,8 +62,7 @@ const SERVICES: Service[] = [
     icon: <Bot className="h-5 w-5" />,
     category: 'AI',
     status: 'online',
-    version: env.versions.flowise,
-    ssoEnabled: true
+    version: env.versions.flowise
   },
   {
     id: 'webui',
@@ -78,8 +73,7 @@ const SERVICES: Service[] = [
     icon: <Globe className="h-5 w-5" />,
     category: 'AI',
     status: 'offline',
-    version: env.versions.webui,
-    ssoEnabled: true
+    version: env.versions.webui
   },
   {
     id: 'keycloak-admin',
@@ -90,8 +84,7 @@ const SERVICES: Service[] = [
     icon: <Shield className="h-5 w-5" />,
     category: 'Безопасность',
     status: 'online',
-    version: env.versions.keycloakAdmin,
-    ssoEnabled: false
+    version: env.versions.keycloakAdmin
   },
   {
     id: 'qdrant',
@@ -102,8 +95,7 @@ const SERVICES: Service[] = [
     icon: <Cpu className="h-5 w-5" />,
     category: 'Данные',
     status: 'online',
-    version: env.versions.qdrant,
-    ssoEnabled: true
+    version: env.versions.qdrant
   },
   {
     id: 'baserow',
@@ -114,8 +106,7 @@ const SERVICES: Service[] = [
     icon: <Table className="h-5 w-5" />,
     category: 'Данные',
     status: 'online',
-    version: env.versions.baserow,
-    ssoEnabled: false
+    version: env.versions.baserow
   },
   {
     id: 'nextcloud',
@@ -126,8 +117,7 @@ const SERVICES: Service[] = [
     icon: <Cloud className="h-5 w-5" />,
     category: 'Файлы',
     status: 'online',
-    version: env.versions.nextcloud,
-    ssoEnabled: false
+    version: env.versions.nextcloud
   },
   {
     id: 'waha',
@@ -138,8 +128,7 @@ const SERVICES: Service[] = [
     icon: <MessageSquare className="h-5 w-5" />,
     category: 'Омниканальность',
     status: 'online',
-    version: env.versions.waha,
-    ssoEnabled: false
+    version: env.versions.waha
   },
   {
     id: 'matrix',
@@ -150,8 +139,7 @@ const SERVICES: Service[] = [
     icon: <MessageSquare className="h-5 w-5" />,
     category: 'Омниканальность',
     status: 'online',
-    version: env.versions.matrix,
-    ssoEnabled: false
+    version: env.versions.matrix
   },
   {
     id: 'maubot',
@@ -162,8 +150,7 @@ const SERVICES: Service[] = [
     icon: <MessageSquare className="h-5 w-5" />,
     category: 'Омниканальность',
     status: 'online',
-    version: env.versions.maubot,
-    ssoEnabled: false
+    version: env.versions.maubot
   }
 ];
 

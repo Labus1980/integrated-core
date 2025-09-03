@@ -1,12 +1,6 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  // Keycloak/OAuth Configuration
-  readonly VITE_KEYCLOAK_URL: string;
-  readonly VITE_KEYCLOAK_REALM: string;
-  readonly VITE_KEYCLOAK_CLIENT_ID: string;
-  readonly VITE_KEYCLOAK_CLIENT_SECRET: string;
-  
   // Service URLs
   readonly VITE_N8N_URL: string;
   readonly VITE_GRAFANA_URL: string;
