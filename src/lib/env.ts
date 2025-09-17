@@ -36,6 +36,7 @@ export const serviceUrls = {
   keycloakAdmin: getEnvVar('VITE_KEYCLOAK_ADMIN_URL'),
   qdrant: getEnvVar('VITE_QDRANT_URL'),
   baserow: getEnvVar('VITE_BASEROW_URL'),
+  jambonz: getEnvVar('VITE_JAMBONZ_URL', 'https://jambonz-portal.okta-solutions.com/'),
   bolt: getEnvVar('VITE_BOLT_URL'),
 } as const;
 
@@ -54,6 +55,7 @@ export const serviceVersions = {
   keycloakAdmin: getEnvVar('VITE_KEYCLOAK_VERSION', '23.0.0'),
   qdrant: getEnvVar('VITE_QDRANT_VERSION', '1.7.0'),
   baserow: getEnvVar('VITE_BASEROW_VERSION', '1.0.0'),
+  jambonz: getEnvVar('VITE_JAMBONZ_VERSION', '1.0.0'),
   bolt: getEnvVar('VITE_BOLT_VERSION', '1.0.0'),
 } as const;
 
