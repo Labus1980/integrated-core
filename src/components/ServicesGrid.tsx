@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import ServiceCard, { Service } from './ServiceCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bot, Database, Activity, Zap, BarChart3, Globe, Shield, Cpu, Code, MessageSquare, Cloud, Table } from 'lucide-react';
+import { Bot, Database, Activity, Zap, BarChart3, Globe, Shield, Cpu, Code, MessageSquare, Cloud, Table, PhoneCall } from 'lucide-react';
 import { env } from '@/lib/env';
 import grafanaLogo from '@/assets/service-icons/grafana-original.svg';
 import supabaseLogo from '@/assets/service-icons/supabase-original.png';
@@ -107,6 +107,18 @@ const SERVICES: Service[] = [
     category: 'Данные',
     status: 'online',
     version: env.versions.baserow
+  },
+  {
+    id: 'jambonz',
+    name: 'jambonz',
+    description:
+      'SIP-платформа с API для звонков и коннектором к AI (TTS/STT). Превращает звонки в HTTP/WS-события для автоматизации через n8n и ваши сервисы.',
+    url: env.services.jambonz,
+    logo: '/uploads/b0cd15b3-f2a6-4ba5-92e4-9e6d492fe99c.png',
+    icon: <PhoneCall className="h-5 w-5" />,
+    category: 'Телефония',
+    status: 'online',
+    version: env.versions.jambonz
   },
   {
     id: 'nextcloud',
