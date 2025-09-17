@@ -114,7 +114,7 @@ const SERVICES: Service[] = [
     description:
       'SIP-платформа с API для звонков и коннектором к AI (TTS/STT). Превращает звонки в HTTP/WS-события для автоматизации через n8n и ваши сервисы.',
     url: env.services.jambonz,
-    logo: '/uploads/b0cd15b3-f2a6-4ba5-92e4-9e6d492fe99c.png',
+    logo: '/uploads/52975289.png',
     icon: <PhoneCall className="h-5 w-5" />,
     category: 'Телефония',
     status: 'online',
