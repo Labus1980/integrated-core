@@ -68,7 +68,7 @@ const SERVICES: Service[] = [
     id: 'anything-llm',
     name: 'AnythingLLM',
     description:
-      'AnythingLLM — self-hosted платформа для работы с базой знаний: загружайте документы и подключайте внешние источники (сайты, YouTube и др.), данные автоматически сегментируются и индексируются в векторные базы (например, Qdrant) для быстрого поиска и точных ответов.',
+      'AnythingLLM — платформа для работы с базой знаний: загружайте документы и подключайте внешние источники (сайты, YouTube и др.)',
     url: env.services.anythingLlm,
     logo: '/uploads/3456455777.png',
     icon: <BookOpen className="h-5 w-5" />,
