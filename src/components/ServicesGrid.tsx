@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import ServiceCard, { Service } from './ServiceCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bot, Database, Activity, Zap, BarChart3, Globe, Shield, Cpu, Code, MessageSquare, Cloud, Table, PhoneCall } from 'lucide-react';
+import { Bot, Database, Activity, Zap, BarChart3, Globe, Shield, Cpu, Code, MessageSquare, Cloud, Table, PhoneCall, BookOpen } from 'lucide-react';
 import { env } from '@/lib/env';
 import grafanaLogo from '@/assets/service-icons/grafana-original.svg';
 import supabaseLogo from '@/assets/service-icons/supabase-original.png';
@@ -63,6 +63,18 @@ const SERVICES: Service[] = [
     category: 'AI',
     status: 'online',
     version: env.versions.flowise
+  },
+  {
+    id: 'anything-llm',
+    name: 'AnythingLLM',
+    description:
+      'AnythingLLM — self-hosted платформа для работы с базой знаний: загружайте документы и подключайте внешние источники (сайты, YouTube и др.), данные автоматически сегментируются и индексируются в векторные базы (например, Qdrant) для быстрого поиска и точных ответов.',
+    url: env.services.anythingLlm,
+    logo: '/uploads/3456455777.png',
+    icon: <BookOpen className="h-5 w-5" />,
+    category: 'AI',
+    status: 'online',
+    version: env.versions.anythingLlm
   },
   {
     id: 'webui',

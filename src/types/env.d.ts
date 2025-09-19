@@ -7,6 +7,7 @@ interface ImportMetaEnv {
   readonly VITE_SUPABASE_URL: string;
   readonly VITE_PROMETHEUS_URL: string;
   readonly VITE_FLOWISE_URL: string;
+  readonly VITE_ANYTHING_LLM_URL: string;
   readonly VITE_WEBUI_URL: string;
   readonly VITE_NEXTCLOUD_URL: string;
   readonly VITE_WAHA_URL: string;
@@ -28,6 +29,7 @@ interface ImportMetaEnv {
   readonly VITE_SUPABASE_VERSION: string;
   readonly VITE_PROMETHEUS_VERSION: string;
   readonly VITE_FLOWISE_VERSION: string;
+  readonly VITE_ANYTHING_LLM_VERSION: string;
   readonly VITE_WEBUI_VERSION: string;
   readonly VITE_NEXTCLOUD_VERSION: string;
   readonly VITE_WAHA_VERSION: string;
