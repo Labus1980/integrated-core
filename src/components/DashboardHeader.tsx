@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Moon, Sun } from 'lucide-react';
+import { Search, Moon, Sun, MessageCircle } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import oktaLogo from '@/assets/okta-logo-clean.png';
 
@@ -39,6 +39,14 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
           </div>
 
           <div className="flex items-center space-x-4">
+            <button
+              type="button"
+              className="open-zammad-chat flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-white/80 transition-colors hover:text-white"
+              aria-label="Открыть чат поддержки"
+            >
+              <MessageCircle className="h-5 w-5" />
+              <span className="hidden sm:inline">Поддержка</span>
+            </button>
             <Button
               variant="ghost"
               size="icon"
