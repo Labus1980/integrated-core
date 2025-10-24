@@ -49,7 +49,7 @@ export const useZammadChat = () => {
     }
 
     const script = document.querySelector<HTMLScriptElement>(
-      'script[src="https://zammad.okta-solutions.com/assets/chat/chat-no-jquery.min.js"]'
+      'script[src="/vendor/chat-no-jquery.min.js"], script[src="https://zammad.okta-solutions.com/assets/chat/chat-no-jquery.min.js"]'
     );
 
     if (!script) {
