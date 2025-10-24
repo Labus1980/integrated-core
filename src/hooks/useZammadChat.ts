@@ -1,5 +1,12 @@
 import { useEffect, useRef } from 'react';
 
+const ZAMMAD_WEBSOCKET_URL = 'wss://yzammad.okta-solutions.com/ws';
+const ZAMMAD_CHAT_SCRIPT_SELECTOR = [
+  'script[src="/vendor/chat-no-jquery.min.js"]',
+  'script[src="https://zammad.okta-solutions.com/assets/chat/chat-no-jquery.min.js"]',
+  'script[src="https://yzammad.okta-solutions.com/assets/chat/chat-no-jquery.min.js"]',
+].join(', ');
+
 export const useZammadChat = () => {
   const initialized = useRef(false);
 
@@ -33,6 +40,7 @@ export const useZammadChat = () => {
           chatId: 1,
           debug: false,
           show: true,
+          host: ZAMMAD_WEBSOCKET_URL,
           cssUrl: '/vendor/zammad-chat.css',
           title: '<strong>Поддержка</strong> DarFlow',
           inactiveClass: 'is-inactive',
@@ -49,9 +57,7 @@ export const useZammadChat = () => {
       return;
     }
 
-    const script = document.querySelector<HTMLScriptElement>(
-      'script[src="/vendor/chat-no-jquery.min.js"], script[src="https://zammad.okta-solutions.com/assets/chat/chat-no-jquery.min.js"]'
-    );
+    const script = document.querySelector<HTMLScriptElement>(ZAMMAD_CHAT_SCRIPT_SELECTOR);
 
     if (!script) {
       console.warn('ZammadChat script tag not found. Make sure the script is included.');
