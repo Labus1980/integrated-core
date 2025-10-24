@@ -1,10 +1,9 @@
 import { useEffect, useRef } from 'react';
 
-const ZAMMAD_WEBSOCKET_URL = 'wss://yzammad.okta-solutions.com/ws';
+const ZAMMAD_WEBSOCKET_URL = 'wss://zammad.okta-solutions.com/ws';
 const ZAMMAD_CHAT_SCRIPT_SELECTOR = [
   'script[src="/vendor/chat-no-jquery.min.js"]',
   'script[src="https://zammad.okta-solutions.com/assets/chat/chat-no-jquery.min.js"]',
-  'script[src="https://yzammad.okta-solutions.com/assets/chat/chat-no-jquery.min.js"]',
 ].join(', ');
 
 export const useZammadChat = () => {
