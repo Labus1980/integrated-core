@@ -13,10 +13,11 @@ export const useZammadChat = () => {
         new (window as any).ZammadChat({
           fontSize: '12px',
           chatId: 1, // ID твоего чата из Zammad
-          debug: false,
-          show: true, // Автоматически показывать когда агенты онлайн
+          debug: true,
+          show: false, // Открывать чат только по кнопке
           title: '<strong>Поддержка</strong>', // Заголовок чата
-          inactiveClass: 'is-inactive'
+          inactiveClass: 'is-inactive',
+          buttonClass: 'open-zammad-chat'
         });
         initialized.current = true;
         console.log('Zammad chat initialized successfully');
