@@ -33,6 +33,7 @@ export const useZammadChat = () => {
           chatId: 1,
           debug: false,
           show: true,
+          cssUrl: '/vendor/zammad-chat.css',
           title: '<strong>Поддержка</strong> DarFlow',
           inactiveClass: 'is-inactive',
         });
