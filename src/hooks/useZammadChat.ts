@@ -1,31 +1,58 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
+
+interface ZammadChatConfig {
+  fontSize?: string;
+  chatId: number;
+  debug?: boolean;
+  show?: boolean;
+  title?: string;
+  inactiveClass?: string;
+  buttonClass?: string;
+}
+
+interface ZammadChatInstance {
+  open?: () => void;
+  close?: () => void;
+}
+
+type ZammadChatConstructor = new (config: ZammadChatConfig) => ZammadChatInstance;
+
+declare global {
+  interface Window {
+    ZammadChat?: ZammadChatConstructor;
+  }
+}
 
 export const useZammadChat = () => {
   const initialized = useRef(false);
 
   useEffect(() => {
-    // Предотвращаем двойную инициализацию в React StrictMode
     if (initialized.current) return;
-    
-    // Проверяем, что скрипт загружен и ZammadChat доступен
-    if (typeof window !== 'undefined' && (window as any).ZammadChat) {
+
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const ZammadChatConstructor = window.ZammadChat;
+
+    if (ZammadChatConstructor) {
       try {
-        new (window as any).ZammadChat({
-          fontSize: '12px',
-          chatId: 1, // ID твоего чата из Zammad
+        new ZammadChatConstructor({
+          fontSize: "12px",
+          chatId: 1,
           debug: true,
-          show: false, // Открывать чат только по кнопке
-          title: '<strong>Поддержка</strong>', // Заголовок чата
-          inactiveClass: 'is-inactive',
-          buttonClass: 'open-zammad-chat'
+          show: false,
+          title: "<strong>Поддержка</strong>",
+          inactiveClass: "is-inactive",
+          buttonClass: "open-zammad-chat",
         });
         initialized.current = true;
-        console.log('Zammad chat initialized successfully');
+        console.log("Zammad chat initialized successfully");
       } catch (error) {
-        console.error('Failed to initialize Zammad chat:', error);
+        console.error("Failed to initialize Zammad chat:", error);
       }
     } else {
-      console.warn('ZammadChat not found. Make sure the script is loaded.');
+      console.warn("ZammadChat not found. Make sure the script is loaded.");
     }
   }, []);
 };
