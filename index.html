@@ -8,18 +8,19 @@
       http-equiv="Content-Security-Policy"
       content="
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' 
-    https://telegram.org 
-    https://mc.yandex.ru 
-    https://vk.com 
-    https://*.vk.com 
-    https://api-maps.yandex.ru 
-    https://yastatic.net 
-    https://mc.yandex.com 
-    https://*.yandex.com 
-    https://*.yandex.ru 
-    https://unpkg.com 
+  script-src 'self' 'unsafe-inline' 'unsafe-eval'
+    https://telegram.org
+    https://mc.yandex.ru
+    https://vk.com
+    https://*.vk.com
+    https://api-maps.yandex.ru
+    https://yastatic.net
+    https://mc.yandex.com
+    https://*.yandex.com
+    https://*.yandex.ru
+    https://unpkg.com
     https://widget.yourgood.app
+    https://code.jquery.com
     https://zammad.okta-solutions.com;
   connect-src 'self' 
     https://keycloak.okta-solutions.com 
@@ -63,6 +64,8 @@
 
   <body>
     <div id="root"></div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJ+Y3VSW3X3zJr6Y7kU5L0h9gm/8i2ZC7jqbw=" crossorigin="anonymous"></script>
+    <script id="zammad_form_script" src="https://zammad.okta-solutions.com/assets/form/form.js"></script>
     <script src="/vendor/chat-no-jquery.min.js"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>

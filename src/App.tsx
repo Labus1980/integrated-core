@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { useZammadChat } from "@/hooks/useZammadChat";
+import ZammadFeedbackButton from "@/components/ZammadFeedbackButton";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
+          <ZammadFeedbackButton />
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
