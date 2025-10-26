@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import ServiceCard, { Service } from './ServiceCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bot, Database, Activity, Zap, BarChart3, Globe, Shield, Cpu, Code, MessageSquare, Cloud, Table, PhoneCall, BookOpen } from 'lucide-react';
+import { Bot, Database, Activity, Zap, BarChart3, Globe, Shield, Cpu, Code, MessageSquare, Cloud, Table, PhoneCall, BookOpen, LifeBuoy } from 'lucide-react';
 import { env } from '@/lib/env';
 import grafanaLogo from '@/assets/service-icons/grafana-original.svg';
 import supabaseLogo from '@/assets/service-icons/supabase-original.png';
@@ -153,6 +153,17 @@ const SERVICES: Service[] = [
     category: 'Омниканальность',
     status: 'online',
     version: env.versions.waha
+  },
+  {
+    id: 'zammad',
+    name: 'Zammad',
+    description: 'Платформа сервис-деска и поддержки клиентов',
+    url: env.services.zammad,
+    logo: '/uploads/zammad.png',
+    icon: <LifeBuoy className="h-5 w-5" />,
+    category: 'Поддержка',
+    status: 'online',
+    version: env.versions.zammad
   },
   {
     id: 'matrix',
