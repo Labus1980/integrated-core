@@ -18,6 +18,7 @@ interface ImportMetaEnv {
   readonly VITE_KEYCLOAK_ADMIN_URL: string;
   readonly VITE_QDRANT_URL: string;
   readonly VITE_JAMBONZ_URL: string;
+  readonly VITE_SNIPEIT_URL: string;
   readonly VITE_BOLT_URL: string;
 
   // General Settings
@@ -41,6 +42,7 @@ interface ImportMetaEnv {
   readonly VITE_KEYCLOAK_VERSION: string;
   readonly VITE_QDRANT_VERSION: string;
   readonly VITE_JAMBONZ_VERSION: string;
+  readonly VITE_SNIPEIT_VERSION: string;
   readonly VITE_BOLT_VERSION: string;
 }
 

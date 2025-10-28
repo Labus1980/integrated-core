@@ -39,6 +39,7 @@ export const serviceUrls = {
   qdrant: getEnvVar('VITE_QDRANT_URL'),
   baserow: getEnvVar('VITE_BASEROW_URL'),
   jambonz: getEnvVar('VITE_JAMBONZ_URL', 'https://jambonz-portal.okta-solutions.com/'),
+  snipeIt: getEnvVar('VITE_SNIPEIT_URL', 'https://snipeit.okta-solutions.com/'),
   bolt: getEnvVar('VITE_BOLT_URL'),
 } as const;
 
@@ -60,6 +61,7 @@ export const serviceVersions = {
   qdrant: getEnvVar('VITE_QDRANT_VERSION', '1.7.0'),
   baserow: getEnvVar('VITE_BASEROW_VERSION', '1.0.0'),
   jambonz: getEnvVar('VITE_JAMBONZ_VERSION', '1.0.0'),
+  snipeIt: getEnvVar('VITE_SNIPEIT_VERSION', '1.0.0'),
   bolt: getEnvVar('VITE_BOLT_VERSION', '1.0.0'),
 } as const;
 
