@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Codex Voice Agent",
+  "description": "Chrome-расширение с виджетом голосового звонка через jambonz.",
+  "version": "0.1.0",
+  "permissions": ["storage"],
+  "action": {
+    "default_title": "Codex Voice Chat",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  }
+}
