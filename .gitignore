@@ -23,3 +23,6 @@ bun.lockb
 *.njsproj
 *.sln
 *.sw?
+.env
+apps/admin/public/uploads/*
+!apps/admin/public/uploads/.gitkeep

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' 'unsafe-eval'
+    https://telegram.org
+    https://mc.yandex.ru
+    https://vk.com
+    https://*.vk.com
+    https://api-maps.yandex.ru
+    https://yastatic.net
+    https://mc.yandex.com
+    https://*.yandex.com
+    https://*.yandex.ru
+    https://unpkg.com
+    https://widget.yourgood.app;
+  connect-src 'self'
+    https://keycloak.okta-solutions.com
+    https://*.okta-solutions.com
+    https://api.telegram.org
+    https://mc.yandex.ru
+    https://*.yandex.ru
+    https://mc.yandex.com
+    https://*.yandex.com
+    https://api.vk.com
+    https://*.vk.com
+    https://unpkg.com
+    https://widget.yourgood.app
+    https://zammad.okta-solutions.com
+    wss://zammad.okta-solutions.com;
+  style-src 'self' 'unsafe-inline'
+    https://fonts.googleapis.com
+    https://zammad.okta-solutions.com;
+  font-src 'self'
+    https://fonts.gstatic.com;
+  img-src 'self' data: https:;
+"
+    />
+    <title>OKTA Solutions - Платформа Автоматизации</title>
+    <meta name="description" content="OKTA Solutions - передовая платформа автоматизации корпоративных процессов, управления инфраструктурой и интеграции бизнес-систем" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+
+    <meta property="og:title" content="OKTA Solutions - Платформа Автоматизации на базе ИИ" />
+    <meta property="og:description" content="Интеллектуальная платформа автоматизации бизнес-процессов и управления корпоративной инфраструктурой от OKTA Solutions" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/placeholder.svg" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@okta_solutions" />
+    <meta name="twitter:image" content="/placeholder.svg" />
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script src="/vendor/jquery.min.js"></script>
+    <script
+      id="zammad_form_script"
+      src="/vendor/zammad-form.js"
+      data-zammad-base-url="https://zammad.okta-solutions.com"
+    ></script>
+    <script src="/vendor/chat-no-jquery.min.js"></script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
