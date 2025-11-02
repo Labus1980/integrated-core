@@ -19,7 +19,9 @@ import {
   Package,
 } from 'lucide-react';
 import { env } from '@/lib/env';
-import { GrafanaGlyph, SupabaseGlyph, PrometheusGlyph } from '@/components/icons';
+import grafanaLogo from '@/assets/service-icons/grafana-original.svg';
+import supabaseLogo from '@/assets/service-icons/supabase-original.png';
+import prometheusLogo from '@/assets/service-icons/prometheus-original.png';
 
 const SERVICES: Service[] = [
   {
@@ -27,6 +29,7 @@ const SERVICES: Service[] = [
     name: 'n8n',
     description: 'Автоматизация рабочих процессов и интеграция между сервисами',
     url: env.services.n8n,
+    logo: '/uploads/764d21da-4ba9-4a54-b3ee-f6879fcc4869.png',
     icon: <Zap className="h-5 w-5" />,
     category: 'Автоматизация',
     status: 'online',
@@ -37,7 +40,7 @@ const SERVICES: Service[] = [
     name: 'Grafana',
     description: 'Визуализация метрик и создание дашбордов для мониторинга',
     url: env.services.grafana,
-    logo: <GrafanaGlyph className="h-8 w-8" />,
+    logo: grafanaLogo,
     icon: <BarChart3 className="h-5 w-5" />,
     category: 'Мониторинг',
     status: 'online',
@@ -48,7 +51,7 @@ const SERVICES: Service[] = [
     name: 'Supabase Studio',
     description: 'Управление базами данных, аутентификация и API',
     url: env.services.supabase,
-    logo: <SupabaseGlyph className="h-8 w-8" />,
+    logo: supabaseLogo,
     icon: <Database className="h-5 w-5" />,
     category: 'Данные',
     status: 'online',
@@ -59,7 +62,7 @@ const SERVICES: Service[] = [
     name: 'Prometheus',
     description: 'Сбор и хранение метрик системы мониторинга',
     url: env.services.prometheus,
-    logo: <PrometheusGlyph className="h-8 w-8" />,
+    logo: prometheusLogo,
     icon: <Activity className="h-5 w-5" />,
     category: 'Мониторинг',
     status: 'warning',
@@ -70,6 +73,7 @@ const SERVICES: Service[] = [
     name: 'Flowise',
     description: 'Конструктор для визуальной сборки чат-ботов и AI-агентов • Создание чат-ботов для сайтов • Разработка внутренних ассистентов для компании',
     url: env.services.flowise,
+    logo: '/uploads/8a2a2a28-f334-48ae-b15e-9846838ddbf7.png',
     icon: <Bot className="h-5 w-5" />,
     category: 'AI',
     status: 'online',
@@ -81,6 +85,7 @@ const SERVICES: Service[] = [
     description:
       'AnythingLLM — платформа для работы с базой знаний: загружайте документы и подключайте внешние источники (сайты, YouTube и др.)',
     url: env.services.anythingLlm,
+    logo: '/uploads/3456455777.png',
     icon: <BookOpen className="h-5 w-5" />,
     category: 'AI',
     status: 'online',
@@ -91,6 +96,7 @@ const SERVICES: Service[] = [
     name: 'WebUI',
     description: 'Веб-интерфейс для работы с языковыми моделями ИИ',
     url: env.services.webui,
+    logo: '/uploads/d199923e-e237-479e-9fcd-1237f683b7af.png',
     icon: <Globe className="h-5 w-5" />,
     category: 'AI',
     status: 'offline',
@@ -101,6 +107,7 @@ const SERVICES: Service[] = [
     name: 'Keycloak Admin',
     description: 'Панель администрирования для управления пользователями и ролями',
     url: env.services.keycloakAdmin,
+    logo: '/uploads/fc46b386-43ad-46c7-b69d-0cd039c81f1c.png',
     icon: <Shield className="h-5 w-5" />,
     category: 'Безопасность',
     status: 'online',
@@ -111,6 +118,7 @@ const SERVICES: Service[] = [
     name: 'Qdrant',
     description: 'Векторная база данных для поиска по сходству и AI приложений',
     url: env.services.qdrant,
+    logo: '/uploads/1caac955-7ab4-4956-83cf-3154d1ec3101.png',
     icon: <Cpu className="h-5 w-5" />,
     category: 'Данные',
     status: 'online',
@@ -121,6 +129,7 @@ const SERVICES: Service[] = [
     name: 'Baserow',
     description: 'Профессиональная платформа для управления данными и организации совместных процессов в формате онлайн-таблиц',
     url: env.services.baserow,
+    logo: '/uploads/a3f7c9e2.png',
     icon: <Table className="h-5 w-5" />,
     category: 'Данные',
     status: 'online',
@@ -132,6 +141,7 @@ const SERVICES: Service[] = [
     description:
       'SIP-платформа с API для звонков и коннектором к AI (TTS/STT). Превращает звонки в HTTP/WS-события для автоматизации через n8n и ваши сервисы.',
     url: env.services.jambonz,
+    logo: '/uploads/52975289.png',
     icon: <PhoneCall className="h-5 w-5" />,
     category: 'Телефония',
     status: 'online',
@@ -142,6 +152,7 @@ const SERVICES: Service[] = [
     name: 'Nextcloud',
     description: 'Облачное хранилище файлов и совместная работа',
     url: env.services.nextcloud,
+    logo: '/uploads/9c78f3f8-87a0-4cf7-9c35-8a402a90f20b.png',
     icon: <Cloud className="h-5 w-5" />,
     category: 'Файлы',
     status: 'online',
@@ -152,6 +163,7 @@ const SERVICES: Service[] = [
     name: 'Snipe-IT',
     description: 'Система управления ИТ-активами и инвентаризацией оборудования',
     url: env.services.snipeIt,
+    logo: '/uploads/snap-it.png',
     icon: <Package className="h-5 w-5" />,
     category: 'Управление активами',
     status: 'online',
@@ -162,6 +174,7 @@ const SERVICES: Service[] = [
     name: 'Waha',
     description: 'Сервис для работы с WhatsApp',
     url: 'https://wa.okta-solutions.com/dashboard',
+    logo: '/uploads/f50412de-cc3b-4164-934c-2819d2436f85.png',
     icon: <MessageSquare className="h-5 w-5" />,
     category: 'Омниканальность',
     status: 'online',
@@ -172,6 +185,7 @@ const SERVICES: Service[] = [
     name: 'Zammad',
     description: 'Платформа сервис-деска и поддержки клиентов',
     url: env.services.zammad,
+    logo: '/uploads/zammad.png',
     icon: <LifeBuoy className="h-5 w-5" />,
     category: 'Поддержка',
     status: 'online',
