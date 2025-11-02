@@ -753,4 +753,10 @@ export function createClient(config: VoiceWidgetEnvConfig & { JAMBONZ_WSS_ADDRES
   return new CodexSipClient(sipConfig);
 }
 
-export type { CodexSipClient, VoiceChatWidgetProps, LanguageOption };
+// Export new floating widget
+export { FloatingVoiceWidget } from "./FloatingVoiceWidget";
+export type { FloatingVoiceWidgetProps } from "./FloatingVoiceWidget";
+export type { LanguageOption } from "./components/LanguageSelector";
+
+// Export original card-style widget for backwards compatibility
+export type { CodexSipClient };
