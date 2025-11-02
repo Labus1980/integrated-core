@@ -25,11 +25,15 @@ const ZammadFeedbackButton = () => {
         $("#zammad-feedback-form")
           .data("zammadFormInitialized", true)
           .ZammadForm({
+            agreementMessage: 'Accept Data Privacy Policy & Acceptable Use Policy',
             messageTitle: "Форма обратной связи",
             messageSubmit: "Отправить",
             messageThankYou:
               "Благодарим Вас за ваше обращение (#%s)! Мы свяжемся с Вами в ближайшее время.",
+            debug: true,
+            showTitle: true,
             modal: true,
+            attachmentSupport: true,
           });
       }
 
