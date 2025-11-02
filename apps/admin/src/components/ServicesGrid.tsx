@@ -232,9 +232,9 @@ const ServicesGrid: React.FC<ServicesGridProps> = ({ searchQuery = '' }) => {
       <div className="container mx-auto px-6">
         <Tabs defaultValue={activeCategory} className="space-y-6">
           <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pb-4">
-            <TabsList className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6 w-full">
+            <TabsList className="flex flex-wrap gap-2 w-full h-auto p-2">
               {tabs.map((tab) => (
-                <TabsTrigger key={tab.value} value={tab.value} className="text-xs sm:text-sm">
+                <TabsTrigger key={tab.value} value={tab.value} className="text-xs sm:text-sm flex-shrink-0">
                   {tab.label}
                 </TabsTrigger>
               ))}
