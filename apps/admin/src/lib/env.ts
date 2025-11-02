@@ -23,24 +23,24 @@ function getBooleanEnvVar(key: keyof ImportMetaEnv, defaultValue: boolean = fals
 
 // Service URLs
 export const serviceUrls = {
-  n8n: getEnvVar('VITE_N8N_URL'),
-  grafana: getEnvVar('VITE_GRAFANA_URL'),
-  supabase: getEnvVar('VITE_SUPABASE_URL'),
-  prometheus: getEnvVar('VITE_PROMETHEUS_URL'),
-  flowise: getEnvVar('VITE_FLOWISE_URL'),
+  n8n: getEnvVar('VITE_N8N_URL', 'https://n8n.okta-solutions.com'),
+  grafana: getEnvVar('VITE_GRAFANA_URL', 'https://grafana.okta-solutions.com'),
+  supabase: getEnvVar('VITE_SUPABASE_URL', 'https://supabase.okta-solutions.com'),
+  prometheus: getEnvVar('VITE_PROMETHEUS_URL', 'https://prometheus.okta-solutions.com'),
+  flowise: getEnvVar('VITE_FLOWISE_URL', 'https://flowise.okta-solutions.com'),
   anythingLlm: getEnvVar('VITE_ANYTHING_LLM_URL', 'https://anything-llm.okta-solutions.com/'),
-  webui: getEnvVar('VITE_WEBUI_URL'),
-  nextcloud: getEnvVar('VITE_NEXTCLOUD_URL'),
+  webui: getEnvVar('VITE_WEBUI_URL', 'https://webui.okta-solutions.com'),
+  nextcloud: getEnvVar('VITE_NEXTCLOUD_URL', 'https://nextcloud.okta-solutions.com'),
   waha: getEnvVar('VITE_WAHA_URL', 'https://wa.okta-solutions.com/dashboard'),
   zammad: getEnvVar('VITE_ZAMMAD_URL', 'https://zammad.okta-solutions.com/'),
-  matrix: getEnvVar('VITE_MATRIX_URL'),
+  matrix: getEnvVar('VITE_MATRIX_URL', 'https://matrix.okta-solutions.com'),
   maubot: getEnvVar('VITE_MAUBOT_URL', 'https://maubot.okta-solutions.com/_matrix/maubot/#/'),
-  keycloakAdmin: getEnvVar('VITE_KEYCLOAK_ADMIN_URL'),
-  qdrant: getEnvVar('VITE_QDRANT_URL'),
-  baserow: getEnvVar('VITE_BASEROW_URL'),
+  keycloakAdmin: getEnvVar('VITE_KEYCLOAK_ADMIN_URL', 'https://keycloak.okta-solutions.com'),
+  qdrant: getEnvVar('VITE_QDRANT_URL', 'https://qdrant.okta-solutions.com'),
+  baserow: getEnvVar('VITE_BASEROW_URL', 'https://baserow.okta-solutions.com'),
   jambonz: getEnvVar('VITE_JAMBONZ_URL', 'https://jambonz-portal.okta-solutions.com/'),
   snipeIt: getEnvVar('VITE_SNIPEIT_URL', 'https://snipeit.okta-solutions.com/'),
-  bolt: getEnvVar('VITE_BOLT_URL'),
+  bolt: getEnvVar('VITE_BOLT_URL', 'https://bolt.okta-solutions.com'),
 } as const;
 
 // Service Versions
