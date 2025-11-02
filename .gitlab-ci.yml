@@ -9,9 +9,9 @@ variables:
 cache:
   key:
     files:
-      - package-lock.json
+      - pnpm-lock.yaml
   paths:
-    - node_modules/
+    - .pnpm-store/
 
 build:
   stage: build
@@ -30,8 +30,10 @@ build:
   before_script: |
     echo "Prepare to build..."
     cat <<EOF > build_app.sh
-      npm ci
-      npm run build
+      corepack enable
+      corepack prepare pnpm@9.12.2 --activate
+      pnpm install --frozen-lockfile
+      pnpm run build
     EOF
     chmod +x build_app.sh
 
