@@ -23,6 +23,7 @@
 }
 
 .zammad-form-modal-body {
+  position: relative;
   background-color: white;
   border-radius: 8px;
   padding: 24px;
@@ -118,6 +119,34 @@
   width: 16px;
   height: 16px;
   cursor: pointer;
+  margin-right: 8px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.zammad-form-group label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+/* Checkbox label specific styles */
+.zammad-form-group label:has(input[type="checkbox"]) {
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Links inside checkbox labels */
+.zammad-form-group label a {
+  color: #3b82f6;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.zammad-form-group label a:hover {
+  color: #2563eb;
 }
 
 .zammad-form-group-has-error input,
@@ -180,36 +209,85 @@
   padding: 8px 0;
 }
 
-/* Dark mode support */
+/* Dark mode support using class (for next-themes) */
+.dark .zammad-form-modal-body {
+  background-color: #1f2937;
+  color: #f9fafb;
+}
+
+.dark .zammad-form-group label {
+  color: #f3f4f6;
+}
+
+.dark .zammad-form-group label a {
+  color: #60a5fa;
+}
+
+.dark .zammad-form-group label a:hover {
+  color: #93c5fd;
+}
+
+.dark .zammad-form-group input[type="text"],
+.dark .zammad-form-group input[type="email"],
+.dark .zammad-form-group input[type="password"],
+.dark .zammad-form-group textarea,
+.dark .zammad-form-group select {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: #f9fafb;
+}
+
+.dark .zammad-form-title {
+  color: #f9fafb;
+}
+
+.dark .zammad-form-modal-close {
+  color: #9ca3af;
+}
+
+.dark .zammad-form-modal-close:hover {
+  background-color: #374151;
+  color: #f9fafb;
+}
+
+/* Also support prefers-color-scheme for system theme */
 @media (prefers-color-scheme: dark) {
-  .zammad-form-modal-body {
+  html:not(.light) .zammad-form-modal-body {
     background-color: #1f2937;
     color: #f9fafb;
   }
 
-  .zammad-form-group label {
+  html:not(.light) .zammad-form-group label {
     color: #f3f4f6;
   }
 
-  .zammad-form-group input[type="text"],
-  .zammad-form-group input[type="email"],
-  .zammad-form-group input[type="password"],
-  .zammad-form-group textarea,
-  .zammad-form-group select {
+  html:not(.light) .zammad-form-group label a {
+    color: #60a5fa;
+  }
+
+  html:not(.light) .zammad-form-group label a:hover {
+    color: #93c5fd;
+  }
+
+  html:not(.light) .zammad-form-group input[type="text"],
+  html:not(.light) .zammad-form-group input[type="email"],
+  html:not(.light) .zammad-form-group input[type="password"],
+  html:not(.light) .zammad-form-group textarea,
+  html:not(.light) .zammad-form-group select {
     background-color: #374151;
     border-color: #4b5563;
     color: #f9fafb;
   }
 
-  .zammad-form-title {
+  html:not(.light) .zammad-form-title {
     color: #f9fafb;
   }
 
-  .zammad-form-modal-close {
+  html:not(.light) .zammad-form-modal-close {
     color: #9ca3af;
   }
 
-  .zammad-form-modal-close:hover {
+  html:not(.light) .zammad-form-modal-close:hover {
     background-color: #374151;
     color: #f9fafb;
   }

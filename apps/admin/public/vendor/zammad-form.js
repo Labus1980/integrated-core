@@ -558,6 +558,7 @@ $(function() {
     var element = "<div class=\"" + _this.options.prefixCSS + "modal\">\
       <div class=\"" + _this.options.prefixCSS + "modal-backdrop js-zammad-form-modal-backdrop\"></div>\
       <div class=\"" + _this.options.prefixCSS + "modal-body js-zammad-form-modal-body\">\
+        <button type=\"button\" class=\"" + _this.options.prefixCSS + "modal-close js-zammad-form-modal-close\" aria-label=\"Close\">&times;</button>\
         <form class=\"zammad-form\"></form>\
       </div>\
     </div>"
@@ -605,6 +606,13 @@ $(function() {
 
     // bind on close
     $element.find('.js-zammad-form-modal-backdrop').off('click.zammad-form').on('click.zammad-form', function (e) {
+      e.preventDefault()
+      _this.closeModal()
+      return true
+    })
+
+    // bind close button
+    $element.find('.js-zammad-form-modal-close').off('click.zammad-form').on('click.zammad-form', function (e) {
       e.preventDefault()
       _this.closeModal()
       return true

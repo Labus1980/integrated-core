@@ -26,7 +26,7 @@ const ZammadFeedbackButton = () => {
           .data("zammadFormInitialized", true)
           .ZammadForm({
             noCSS: true,
-            agreementMessage: 'Принять Политику конфиденциальности и Условия использования',
+            agreementMessage: 'Я принимаю <a href="https://www.okta-solutions.com/privacy-policy/" target="_blank" rel="noopener noreferrer" style="color: #3b82f6; text-decoration: underline;">Политику конфиденциальности</a>',
             messageTitle: "Форма обратной связи",
             messageSubmit: "Отправить",
             messageThankYou:
