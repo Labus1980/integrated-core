@@ -753,4 +753,4 @@ export function createClient(config: VoiceWidgetEnvConfig & { JAMBONZ_WSS_ADDRES
   return new CodexSipClient(sipConfig);
 }
 
-export type { CodexSipClient, VoiceChatWidgetProps, LanguageOption };
+export type { CodexSipClient, LanguageOption };

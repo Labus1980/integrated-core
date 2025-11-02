@@ -4,7 +4,6 @@ import {
   RegistererState,
   Session,
   SessionState,
-  TransportError,
   URI,
   UserAgent,
   UserAgentDelegate,
@@ -74,7 +73,7 @@ export interface MetricsEvent {
   ts: number;
   callId?: string;
   /** Current ICE connection state as reported by RTCPeerConnection. */
-  iceState?: RTCPeerConnectionState;
+  iceState?: RTCIceConnectionState;
   /** Selected candidate pair RTT in milliseconds (when available). */
   rttMs?: number;
   /** Audio bytes sent/received for the active stream. */
@@ -85,7 +84,7 @@ export interface MetricsEvent {
 }
 
 export interface IceEvent {
-  state: RTCPeerConnectionState;
+  state: RTCIceConnectionState;
 }
 
 export interface LogEvent {
@@ -141,11 +140,9 @@ class TypedEmitter<TEvents extends Record<string, unknown>> {
 
 const DEFAULT_MAX_REGISTER_RETRIES = 5;
 
-interface SessionWithPeer extends Session {
-  sessionDescriptionHandler?: {
-    peerConnection?: RTCPeerConnection;
-  };
-}
+type SessionWithPeer = Session & {
+  sessionDescriptionHandler?: unknown;
+};
 
 export class CodexSipClient {
   private readonly emitter = new TypedEmitter<EventMap>();
@@ -363,7 +360,7 @@ export class CodexSipClient {
     try {
       await this.currentSession.info({
         requestOptions: {
-          body,
+          body: body as any,
           extraHeaders: ["Content-Type: application/dtmf-relay"],
         },
       });
@@ -410,7 +407,7 @@ export class CodexSipClient {
           this.scheduleRegisterRetry(0);
         }
       },
-      onDisconnect: (error?: TransportError) => {
+      onDisconnect: (error?: Error) => {
         this.emit("log", {
           level: "warn",
           message: "Transport disconnected",
@@ -654,7 +651,7 @@ export class CodexSipClient {
       stateChange?.removeAllListeners?.();
       (session as any).delegate = undefined;
       if (session.state !== SessionState.Terminated) {
-        void session.terminate();
+        void (session as any).terminate();
       }
     }
     this.currentSession = undefined;
@@ -715,14 +712,4 @@ export class CodexSipClient {
   }
 }
 
-export type {
-  SipClientConfig as CodexSipConfig,
-  RegistrationEvent,
-  CallStateEvent,
-  MetricsEvent,
-  LogEvent,
-  IceEvent,
-  DtmfEvent,
-  ReconnectEvent,
-  LanguageChangeEvent,
-};
+export type { SipClientConfig as CodexSipConfig };
