@@ -19,7 +19,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <img
-              src="/okta-logo-3d.png"
+              src="/uploads/logo.png"
               alt="OKTA Solutions"
               className="h-16 w-auto"
             />
