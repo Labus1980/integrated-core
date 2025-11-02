@@ -631,11 +631,17 @@ $(function() {
 
   // thanks
   Plugin.prototype.thanks = function(data) {
+    var _this = this
     var thankYou = this.options.messageThankYou
     if (data.ticket && data.ticket.number) {
       thankYou = thankYou.replace('%s', data.ticket.number)
     }
+    var closeButton = $('<button type="button" class="btn" style="margin-top: 20px;">Закрыть</button>')
+    closeButton.on('click', function() {
+      _this.closeModal()
+    })
     var message = $('<div class="js-thankyou zammad-form-thankyou">' + thankYou + '</div>')
+    message.append(closeButton)
     this.$form.html(message)
   }
 
