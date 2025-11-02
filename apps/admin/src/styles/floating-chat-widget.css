@@ -1,0 +1,213 @@
+/* Floating Chat Widget Styles */
+
+/* Floating Button */
+.floating-chat-button {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 1000;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floating-chat-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
+}
+
+.floating-chat-button:active {
+  transform: translateY(0);
+}
+
+.floating-chat-button--open {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+/* Floating Panel */
+.floating-chat-panel {
+  position: fixed;
+  bottom: 6rem;
+  right: 1.5rem;
+  z-index: 999;
+  width: 420px;
+  height: 600px;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Panel Header */
+.floating-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.floating-chat-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.floating-chat-close {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.floating-chat-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Tabs Container */
+.floating-chat-tabs {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.floating-chat-tabs-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: hsl(var(--muted) / 0.3);
+  padding: 0.25rem;
+  margin: 0.75rem 1rem;
+  border-radius: 8px;
+}
+
+.floating-chat-tab-content {
+  flex: 1;
+  overflow: hidden;
+  padding: 0 1rem 1rem;
+}
+
+/* Zammad Chat Container */
+.floating-chat-tab-content #zammad-chat-container {
+  width: 100%;
+  height: 100%;
+  min-height: 450px;
+  overflow: auto;
+  border-radius: 8px;
+}
+
+/* Voice Widget Container */
+.floating-chat-tab-content .voice-widget-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+/* Embedded Voice Widget Adjustments */
+.floating-chat-panel .codex-floating-voice-widget--embedded {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  bottom: auto !important;
+  right: auto !important;
+  left: auto !important;
+  top: auto !important;
+  z-index: 1 !important;
+  pointer-events: auto !important;
+}
+
+.floating-chat-panel .codex-floating-voice-widget--embedded .codex-floating-voice-widget__panel {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  bottom: auto !important;
+  right: auto !important;
+  left: auto !important;
+  top: auto !important;
+  animation: none !important;
+  box-shadow: none !important;
+  border-radius: 8px;
+}
+
+.floating-chat-panel .codex-floating-voice-widget--embedded .codex-floating-voice-widget__panel-body {
+  height: calc(100% - 60px);
+  overflow-y: auto;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .floating-chat-panel {
+    width: calc(100vw - 2rem);
+    height: calc(100vh - 10rem);
+    right: 1rem;
+    bottom: 5rem;
+  }
+
+  .floating-chat-button {
+    bottom: 1rem;
+    right: 1rem;
+    width: 56px;
+    height: 56px;
+  }
+}
+
+@media (max-width: 480px) {
+  .floating-chat-panel {
+    width: calc(100vw - 1rem);
+    height: calc(100vh - 8rem);
+    right: 0.5rem;
+    bottom: 4rem;
+  }
+
+  .floating-chat-button {
+    width: 52px;
+    height: 52px;
+  }
+
+  .floating-chat-tab-content #zammad-chat-container {
+    min-height: 350px;
+  }
+}
+
+/* Dark Mode Adjustments */
+@media (prefers-color-scheme: dark) {
+  .floating-chat-panel {
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  }
+}
