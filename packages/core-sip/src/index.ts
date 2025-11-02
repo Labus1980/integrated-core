@@ -141,7 +141,7 @@ class TypedEmitter<TEvents extends Record<string, unknown>> {
 const DEFAULT_MAX_REGISTER_RETRIES = 5;
 
 type SessionWithPeer = Session & {
-  sessionDescriptionHandler?: unknown;
+  sessionDescriptionHandler?: any;
 };
 
 export class CodexSipClient {
@@ -356,7 +356,10 @@ export class CodexSipClient {
     if (!this.currentSession) {
       throw new Error("No active session to send DTMF");
     }
-    const body = `Signal=${tone}\r\nDuration=160`;
+    const body = {
+      contentType: "application/dtmf-relay",
+      body: `Signal=${tone}\r\nDuration=160`
+    };
     try {
       await this.currentSession.info({
         requestOptions: {
@@ -651,7 +654,7 @@ export class CodexSipClient {
       stateChange?.removeAllListeners?.();
       (session as any).delegate = undefined;
       if (session.state !== SessionState.Terminated) {
-        void (session as any).terminate();
+        void (session as any).terminate?.();
       }
     }
     this.currentSession = undefined;
@@ -712,4 +715,4 @@ export class CodexSipClient {
   }
 }
 
-export type { SipClientConfig as CodexSipConfig };
+export type CodexSipConfig = SipClientConfig;
