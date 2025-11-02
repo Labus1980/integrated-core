@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, Moon, Sun, MessageCircle } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { OktaWordmark } from '@/components/icons';
 import SipSettingsDialog from '@/components/SipSettingsDialog';
 
 interface DashboardHeaderProps {
@@ -19,9 +18,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <span className="h-16 w-16 rounded-full shadow-lg bg-white/10 backdrop-blur p-2">
-              <OktaWordmark className="h-full w-full" />
-            </span>
+            <img
+              src="/okta-logo-3d.png"
+              alt="OKTA Solutions"
+              className="h-16 w-auto"
+            />
             <h1 className="text-xl font-semibold text-white">Портал Сервисов</h1>
           </div>
 

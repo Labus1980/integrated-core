@@ -1,0 +1,216 @@
+/* Zammad Form Modal Styles */
+.zammad-form-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.zammad-form-modal-body {
+  background-color: white;
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.zammad-form-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.zammad-form-modal-close:hover {
+  background-color: #f3f4f6;
+  color: #000;
+}
+
+.zammad-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.zammad-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.zammad-form-group label {
+  font-weight: 500;
+  font-size: 14px;
+  color: #374151;
+}
+
+.zammad-form-group input[type="text"],
+.zammad-form-group input[type="email"],
+.zammad-form-group input[type="password"],
+.zammad-form-group textarea,
+.zammad-form-group select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.zammad-form-group input[type="text"]:focus,
+.zammad-form-group input[type="email"]:focus,
+.zammad-form-group input[type="password"]:focus,
+.zammad-form-group textarea:focus,
+.zammad-form-group select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.zammad-form-group textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.zammad-form-group input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.zammad-form-group-has-error input,
+.zammad-form-group-has-error textarea,
+.zammad-form-group-has-error select {
+  border-color: #ef4444;
+}
+
+.zammad-form-group-has-error label {
+  color: #ef4444;
+}
+
+.zammad-form button[type="submit"] {
+  background-color: #3b82f6;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.zammad-form button[type="submit"]:hover {
+  background-color: #2563eb;
+}
+
+.zammad-form button[type="submit"]:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.zammad-form-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #111827;
+}
+
+.zammad-form-thankyou {
+  text-align: center;
+  padding: 32px;
+}
+
+.zammad-form-thankyou h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #10b981;
+  margin-bottom: 12px;
+}
+
+.zammad-form-thankyou p {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* File upload styles */
+.zammad-form-group input[type="file"] {
+  padding: 8px 0;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .zammad-form-modal-body {
+    background-color: #1f2937;
+    color: #f9fafb;
+  }
+
+  .zammad-form-group label {
+    color: #f3f4f6;
+  }
+
+  .zammad-form-group input[type="text"],
+  .zammad-form-group input[type="email"],
+  .zammad-form-group input[type="password"],
+  .zammad-form-group textarea,
+  .zammad-form-group select {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+
+  .zammad-form-title {
+    color: #f9fafb;
+  }
+
+  .zammad-form-modal-close {
+    color: #9ca3af;
+  }
+
+  .zammad-form-modal-close:hover {
+    background-color: #374151;
+    color: #f9fafb;
+  }
+}
