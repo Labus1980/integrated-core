@@ -4,7 +4,6 @@ import { Input } from '@/components/ui/input';
 import { Search, Moon, Sun, Mail } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import SipSettingsDialog from '@/components/SipSettingsDialog';
-import UnifiedChatWidget from '@/components/UnifiedChatWidget';
 
 interface DashboardHeaderProps {
   searchQuery: string;
@@ -48,7 +47,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
           </div>
 
           <div className="flex items-center space-x-4">
-            <UnifiedChatWidget />
             <button
               type="button"
               onClick={handleFeedbackClick}
