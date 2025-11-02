@@ -91,7 +91,7 @@ const SipSettingsDialog: React.FC = () => {
         <Button
           variant="ghost"
           size="icon"
-          className="text-white hover:bg-white/20 hover:text-white"
+          className="text-foreground dark:text-white hover:bg-foreground/20 dark:hover:bg-white/20"
           aria-label="Настройки SIP"
         >
           <Settings className="h-5 w-5" />

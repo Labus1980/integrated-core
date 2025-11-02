@@ -21,9 +21,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
             <img
               src="/uploads/logo.png"
               alt="OKTA Solutions"
-              className="h-16 w-auto"
+              className="h-16 w-auto dark:brightness-100 brightness-[0.3]"
             />
-            <h1 className="text-xl font-semibold text-white">Портал Сервисов</h1>
+            <h1 className="text-xl font-semibold text-foreground dark:text-white">Портал Сервисов</h1>
           </div>
 
           <div className="flex-1 max-w-md mx-8">
@@ -41,7 +41,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
           <div className="flex items-center space-x-4">
             <button
               type="button"
-              className="open-zammad-chat flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-white/80 transition-colors hover:text-white"
+              className="open-zammad-chat flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-foreground/80 dark:text-white/80 transition-colors hover:text-foreground dark:hover:text-white"
               aria-label="Открыть чат поддержки"
             >
               <MessageCircle className="h-5 w-5" />
@@ -52,7 +52,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
               variant="ghost"
               size="icon"
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="text-white hover:bg-white/20"
+              className="text-foreground dark:text-white hover:bg-foreground/20 dark:hover:bg-white/20"
             >
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
