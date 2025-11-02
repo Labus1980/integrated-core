@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 interface ZammadChatConfig {
   fontSize?: string;
   chatId: number;
+  host: string;
   debug?: boolean;
   show?: boolean;
   title?: string;
@@ -40,6 +41,7 @@ export const useZammadChat = () => {
         new ZammadChatConstructor({
           fontSize: "12px",
           chatId: 1,
+          host: "https://zammad.okta-solutions.com",
           debug: true,
           show: false,
           title: "<strong>Поддержка</strong>",
