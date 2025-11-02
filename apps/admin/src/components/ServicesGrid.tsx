@@ -213,7 +213,8 @@ const SERVICES: Service[] = [
   },
 ];
 
-const CATEGORIES = Array.from(new Set(SERVICES.map((service) => service.category)));
+const ALL_SERVICES_TAB = 'Все сервисы';
+const CATEGORIES = [ALL_SERVICES_TAB, ...Array.from(new Set(SERVICES.map((service) => service.category)))];
 
 interface ServicesGridProps {
   searchQuery?: string;
@@ -257,7 +258,10 @@ const ServicesGrid: React.FC<ServicesGridProps> = ({ searchQuery = '' }) => {
           {tabs.map((tab) => (
             <TabsContent key={tab.value} value={tab.value}>
               <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                {filteredServices.filter((service) => service.category === tab.value).map((service) => (
+                {(tab.value === ALL_SERVICES_TAB
+                  ? filteredServices
+                  : filteredServices.filter((service) => service.category === tab.value)
+                ).map((service) => (
                   <ServiceCard key={service.id} service={service} />
                 ))}
               </div>

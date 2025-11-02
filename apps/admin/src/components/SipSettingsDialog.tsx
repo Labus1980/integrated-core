@@ -91,10 +91,10 @@ const SipSettingsDialog: React.FC = () => {
         <Button
           variant="ghost"
           size="icon"
-          className="text-white hover:bg-white/20"
+          className="text-white hover:bg-white/20 hover:text-white"
           aria-label="Настройки SIP"
         >
-          <Settings className="h-4 w-4" />
+          <Settings className="h-5 w-5" />
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
