@@ -4,7 +4,11 @@ import { createClient } from '@codex/web-widget';
 import type { CodexSipClient } from '@codex/core-sip';
 import { getSipConfig } from './SipSettingsDialog';
 
-export const JambonzWidget = () => {
+interface JambonzWidgetProps {
+  embedded?: boolean;
+}
+
+export const JambonzWidget: React.FC<JambonzWidgetProps> = ({ embedded = false }) => {
   const [sipClient, setSipClient] = useState<CodexSipClient | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,8 +71,9 @@ export const JambonzWidget = () => {
       client={sipClient}
       theme="dark"
       locale="ru"
-      position="bottom-right"
+      position={embedded ? undefined : "bottom-right"}
       autoRegister={true}
+      embedded={embedded}
       languages={[
         { code: 'ru', label: 'Русский', flag: '🇷🇺' },
         { code: 'en', label: 'English', flag: '🇬🇧' },

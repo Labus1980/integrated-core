@@ -1,9 +1,10 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Moon, Sun, MessageCircle } from 'lucide-react';
+import { Search, Moon, Sun, Mail } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import SipSettingsDialog from '@/components/SipSettingsDialog';
+import UnifiedChatWidget from '@/components/UnifiedChatWidget';
 
 interface DashboardHeaderProps {
   searchQuery: string;
@@ -12,6 +13,14 @@ interface DashboardHeaderProps {
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearchChange }) => {
   const { theme, setTheme } = useTheme();
+
+  const handleFeedbackClick = () => {
+    // Программно открыть форму обратной связи
+    const feedbackButton = document.querySelector('#zammad-feedback-form') as HTMLElement;
+    if (feedbackButton) {
+      feedbackButton.click();
+    }
+  };
 
   return (
     <header className="bg-gradient-secondary shadow-lg">
@@ -39,13 +48,15 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
           </div>
 
           <div className="flex items-center space-x-4">
+            <UnifiedChatWidget />
             <button
               type="button"
-              className="open-zammad-chat flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-foreground/80 dark:text-white/80 transition-colors hover:text-foreground dark:hover:text-white"
-              aria-label="Открыть чат поддержки"
+              onClick={handleFeedbackClick}
+              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-foreground/80 dark:text-white/80 transition-colors hover:text-foreground dark:hover:text-white"
+              aria-label="Открыть форму обратной связи"
             >
-              <MessageCircle className="h-5 w-5" />
-              <span className="hidden sm:inline">Поддержка</span>
+              <Mail className="h-5 w-5" />
+              <span className="hidden sm:inline">Обратная связь</span>
             </button>
             <SipSettingsDialog />
             <Button

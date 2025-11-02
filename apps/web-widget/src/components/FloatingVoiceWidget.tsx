@@ -55,6 +55,7 @@ export interface FloatingVoiceWidgetProps {
   theme?: "light" | "dark";
   position?: "bottom-right" | "bottom-left" | "top-right" | "top-left";
   autoRegister?: boolean;
+  embedded?: boolean;
 }
 
 export const FloatingVoiceWidget = ({
@@ -64,9 +65,10 @@ export const FloatingVoiceWidget = ({
   theme = "dark",
   position = "bottom-right",
   autoRegister = true,
+  embedded = false,
 }: FloatingVoiceWidgetProps) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(embedded); // В embedded режиме всегда развернут
   const [callState, setCallState] = useState<CallState>("idle");
   const [isMuted, setIsMuted] = useState(false);
   const [metrics, setMetrics] = useState<MetricsEvent | null>(null);
@@ -178,16 +180,19 @@ export const FloatingVoiceWidget = ({
       className={clsx(
         "codex-floating-voice-widget",
         `codex-floating-voice-widget--${theme}`,
-        `codex-floating-voice-widget--${position}`,
+        !embedded && `codex-floating-voice-widget--${position}`,
+        embedded && "codex-floating-voice-widget--embedded",
         isExpanded && "codex-floating-voice-widget--expanded"
       )}
     >
-      <FloatingButton
-        onClick={handleButtonClick}
-        isActive={isLive || isBusy}
-        theme={theme}
-        locale={locale}
-      />
+      {!embedded && (
+        <FloatingButton
+          onClick={handleButtonClick}
+          isActive={isLive || isBusy}
+          theme={theme}
+          locale={locale}
+        />
+      )}
 
       {isExpanded && (
         <div
@@ -197,21 +202,23 @@ export const FloatingVoiceWidget = ({
         >
           <div className="codex-floating-voice-widget__panel-header">
             <h2 className="codex-floating-voice-widget__title">{t.title}</h2>
-            <button
-              type="button"
-              className="codex-floating-voice-widget__close"
-              onClick={() => setIsExpanded(false)}
-              aria-label="Close"
-            >
-              <svg viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M18 6L6 18M6 6l12 12"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </button>
+            {!embedded && (
+              <button
+                type="button"
+                className="codex-floating-voice-widget__close"
+                onClick={() => setIsExpanded(false)}
+                aria-label="Close"
+              >
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M18 6L6 18M6 6l12 12"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            )}
           </div>
 
           <div className="codex-floating-voice-widget__panel-body">

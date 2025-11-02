@@ -7,12 +7,12 @@ import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { useZammadChat } from "@/hooks/useZammadChat";
-import ZammadFeedbackButton from "@/components/ZammadFeedbackButton";
-import { JambonzWidget } from "@/components/JambonzWidget";
+import ZammadFormInit from "@/components/ZammadFormInit";
 
 const queryClient = new QueryClient();
 
 const App = () => {
+  // Инициализируем Zammad Chat (необходимо для работы онлайн чата)
   useZammadChat();
 
   return (
@@ -28,8 +28,10 @@ const App = () => {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
-          <ZammadFeedbackButton />
-          <JambonzWidget />
+          {/* Инициализация формы обратной связи (скрытая кнопка для программного клика) */}
+          <ZammadFormInit />
+          {/* Скрытая кнопка для программного открытия Zammad Chat */}
+          <button className="open-zammad-chat hidden" aria-hidden="true" />
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
