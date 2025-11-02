@@ -34,7 +34,7 @@ function App() {
   // Создаем SIP клиент
   const client = createClient({
     JAMBONZ_SIP_DOMAIN: "your-domain.com",
-    JAMBONZ_WSS_ADDRESS: "wss://sip.your-domain.com",
+    JAMBONZ_WSS_ADDRESS: "ws://sip.your-domain.com",
     JAMBONZ_SIP_USERNAME: "username",
     JAMBONZ_SIP_PASSWORD: "password",
     TARGET_SIP_URI: "sip:assistant@your-domain.com",
@@ -67,7 +67,7 @@ import type { CodexSipConfig } from "@codex/core-sip";
 
 const sipConfig: CodexSipConfig = {
   domain: "your-domain.com",
-  wssServer: "wss://sip.your-domain.com",
+  wssServer: "ws://sip.your-domain.com",
   username: "username",
   password: "password",
   targetUri: "sip:assistant@your-domain.com",
@@ -158,7 +158,7 @@ const languages = [
 
 ```env
 VITE_JAMBONZ_SIP_DOMAIN=your-domain.com
-VITE_JAMBONZ_WSS_ADDRESS=wss://sip.your-domain.com
+VITE_JAMBONZ_WSS_ADDRESS=ws://sip.your-domain.com
 VITE_JAMBONZ_SIP_USERNAME=username
 VITE_JAMBONZ_SIP_PASSWORD=password
 VITE_TARGET_SIP_URI=sip:assistant@your-domain.com
