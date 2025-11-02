@@ -43,7 +43,7 @@ build:
 
   artifacts:
     paths:
-      - dist/
+      - apps/admin/dist/
     expire_in: 1 week  # время жизни артефакта
 
 deploy_application:
@@ -75,7 +75,7 @@ deploy_application:
       ./restart-studio.sh
     EOF
 
-    tar -zcf front-pack.tgz dist
+    tar -zcf front-pack.tgz -C apps/admin dist
 
     killall ssh-agent 2>/dev/null || true
     eval $(ssh-agent -s)
