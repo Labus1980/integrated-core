@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Search, Moon, Sun, MessageCircle } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { OktaWordmark } from '@/components/icons';
+import SipSettingsDialog from '@/components/SipSettingsDialog';
 
 interface DashboardHeaderProps {
   searchQuery: string;
@@ -45,6 +46,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
               <MessageCircle className="h-5 w-5" />
               <span className="hidden sm:inline">Поддержка</span>
             </button>
+            <SipSettingsDialog />
             <Button
               variant="ghost"
               size="icon"

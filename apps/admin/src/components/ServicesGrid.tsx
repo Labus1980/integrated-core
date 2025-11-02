@@ -215,33 +215,49 @@ const SERVICES: Service[] = [
 
 const CATEGORIES = Array.from(new Set(SERVICES.map((service) => service.category)));
 
-const ServicesGrid: React.FC = () => {
-  const [activeCategory, tabs] = useMemo(() => {
+interface ServicesGridProps {
+  searchQuery?: string;
+}
+
+const ServicesGrid: React.FC<ServicesGridProps> = ({ searchQuery = '' }) => {
+  const [activeCategory, tabs, filteredServices] = useMemo(() => {
     const defaultCategory = CATEGORIES[0];
     const tabItems = CATEGORIES.map((category) => ({
       value: category,
       label: category,
     }));
 
-    return [defaultCategory, tabItems] as const;
-  }, []);
+    // Filter services based on search query
+    const filtered = searchQuery
+      ? SERVICES.filter(
+          (service) =>
+            service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            service.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            service.category.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : SERVICES;
+
+    return [defaultCategory, tabItems, filtered] as const;
+  }, [searchQuery]);
 
   return (
     <section className="py-12">
       <div className="container mx-auto px-6">
         <Tabs defaultValue={activeCategory} className="space-y-6">
-          <TabsList className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">
-            {tabs.map((tab) => (
-              <TabsTrigger key={tab.value} value={tab.value} className="text-xs sm:text-sm">
-                {tab.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pb-4">
+            <TabsList className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6 w-full">
+              {tabs.map((tab) => (
+                <TabsTrigger key={tab.value} value={tab.value} className="text-xs sm:text-sm">
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
 
           {tabs.map((tab) => (
             <TabsContent key={tab.value} value={tab.value}>
               <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                {SERVICES.filter((service) => service.category === tab.value).map((service) => (
+                {filteredServices.filter((service) => service.category === tab.value).map((service) => (
                   <ServiceCard key={service.id} service={service} />
                 ))}
               </div>
