@@ -42,7 +42,17 @@ export const getSipConfig = (): SipConfig => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      return { ...DEFAULT_SIP_CONFIG, ...JSON.parse(stored) };
+      const config = { ...DEFAULT_SIP_CONFIG, ...JSON.parse(stored) };
+
+      // Migrate old wss:// addresses to ws://
+      if (config.serverAddress && config.serverAddress.startsWith('wss://')) {
+        config.serverAddress = config.serverAddress.replace(/^wss:\/\//, 'ws://');
+        // Save the migrated config
+        saveSipConfig(config);
+        console.log('Migrated WebSocket address from wss:// to ws://', config.serverAddress);
+      }
+
+      return config;
     }
   } catch (error) {
     console.error('Failed to load SIP config:', error);
@@ -70,7 +80,18 @@ const SipSettingsDialog: React.FC = () => {
   }, [open]);
 
   const handleSave = () => {
-    saveSipConfig(config);
+    // Ensure ws:// is used, not wss://
+    const finalConfig = { ...config };
+    if (finalConfig.serverAddress && finalConfig.serverAddress.startsWith('wss://')) {
+      finalConfig.serverAddress = finalConfig.serverAddress.replace(/^wss:\/\//, 'ws://');
+      toast({
+        title: 'Адрес изменен',
+        description: 'WebSocket адрес автоматически изменен с wss:// на ws://. Используйте ws:// для незащищенного подключения.',
+        variant: 'default',
+      });
+    }
+
+    saveSipConfig(finalConfig);
     toast({
       title: 'Настройки сохранены',
       description: 'Конфигурация SIP успешно сохранена. Перезагрузите страницу для применения изменений.',
@@ -78,7 +99,7 @@ const SipSettingsDialog: React.FC = () => {
     setOpen(false);
 
     // Dispatch custom event to notify other components
-    window.dispatchEvent(new CustomEvent('sip-config-updated', { detail: config }));
+    window.dispatchEvent(new CustomEvent('sip-config-updated', { detail: finalConfig }));
   };
 
   const handleReset = () => {
