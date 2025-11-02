@@ -34,6 +34,15 @@
       data-zammad-base-url="https://zammad.okta-solutions.com"
     ></script>
     <script src="/vendor/chat-no-jquery.min.js"></script>
+    <script>
+      (function() {
+        new ZammadChat({
+          fontSize: '12px',
+          chatId: 1,
+          host: 'https://zammad.okta-solutions.com'
+        });
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
