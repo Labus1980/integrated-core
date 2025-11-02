@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { useZammadChat } from "@/hooks/useZammadChat";
 import ZammadFeedbackButton from "@/components/ZammadFeedbackButton";
+import { JambonzWidget } from "@/components/JambonzWidget";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => {
             </Routes>
           </BrowserRouter>
           <ZammadFeedbackButton />
+          <JambonzWidget />
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
