@@ -1,32 +1,75 @@
 # Инструкция по исправлению Zammad чата
 
+## КРИТИЧЕСКИЕ ОШИБКИ В ПРЕДЫДУЩЕМ ПОДХОДЕ
+
+❌ **НЕПРАВИЛЬНО:**
+- Загружать скрипт из локальных файлов `/vendor/chat-no-jquery.min.js`
+- Использовать `host: 'wss://zammad.okta-solutions.com'` в конфигурации
+- Сложная логика с querySelector и ручным управлением DOM
+
+✅ **ПРАВИЛЬНО (согласно документации Zammad):**
+- Загружать скрипт напрямую с Zammad сервера: `https://zammad.okta-solutions.com/assets/chat/chat-no-jquery.min.js`
+- Использовать `host: 'https://zammad.okta-solutions.com'` - WebSocket URL определяется автоматически
+- Простая инициализация через `new ZammadChat({...})`
+
 ## Проблемы которые были решены
 
-1. **WebSocket connection failed** - WebSocket соединение к `wss://zammad.okta-solutions.com/` отклонялось
-2. **Cannot read properties of undefined (reading 'querySelector')** - ошибка инициализации виджета чата
+1. **WebSocket connection failed** - неправильный URL host (использовался wss:// вместо https://)
+2. **Cannot read properties of undefined (reading 'querySelector')** - скрипт загружался из локальных файлов вместо Zammad сервера
+3. **ERR_HTTP2_PROTOCOL_ERROR** - отсутствовала правильная конфигурация nginx для WebSocket
 
 ## Что было исправлено
 
 ### 1. Код приложения (apps/admin)
 
+✅ **apps/admin/index.html**
+- **КРИТИЧНО:** Изменен источник скрипта с локального файла на Zammad сервер
+- Старый (неправильный): `<script src="/vendor/chat-no-jquery.min.js"></script>`
+- Новый (правильный): `<script src="https://zammad.okta-solutions.com/assets/chat/chat-no-jquery.min.js"></script>`
+- Обновлена CSP политика для загрузки с Zammad
+
 ✅ **apps/admin/src/hooks/useZammadChat.ts**
-- Добавлена задержка 500ms перед инициализацией чата для загрузки DOM и скриптов
-- Добавлена проверка готовности document.body
-- Добавлен try-catch для отлова ошибок инициализации
-- Улучшено логирование для диагностики
+- **КРИТИЧНО:** Изменен параметр host с `wss://` на `https://`
+- Старый (неправильный): `host: "wss://zammad.okta-solutions.com"`
+- Новый (правильный): `host: "https://zammad.okta-solutions.com"`
+- Убрана избыточная логика с buttonClass и querySelector
+- Упрощена инициализация согласно документации Zammad
 
 ✅ **apps/admin/src/components/ZammadChatContainer.tsx**
-- Увеличена задержка с 300ms до 1000ms перед открытием чата
-- Добавлены try-catch блоки для безопасного вызова API
-- Улучшено логирование состояния чата
+- Упрощена логика открытия чата
+- Убраны попытки работы с DOM элементами виджета
+- Используется только API: `window.zammadChatInstance.open()`
 
-✅ **apps/admin/index.html**
-- Обновлена Content-Security-Policy для поддержки Zammad:
-  - Добавлен `https://zammad.okta-solutions.com` в script-src
-  - Добавлены `wss://zammad.okta-solutions.com` и `ws://zammad.okta-solutions.com` в connect-src
-  - Добавлены поддержка fonts, frames и media для Zammad
+### 2. Правильная инициализация Zammad чата
 
-### 2. Конфигурация nginx
+Согласно официальной документации Zammad, правильный способ встраивания:
+
+```html
+<!-- Загрузить скрипт с Zammad сервера -->
+<script src="https://zammad.okta-solutions.com/assets/chat/chat-no-jquery.min.js"></script>
+
+<!-- Инициализировать после загрузки -->
+<script>
+  new ZammadChat({
+    chatId: 1,
+    host: 'https://zammad.okta-solutions.com',  // ← HTTPS, не WSS!
+    show: false,  // false = не показывать автоматически
+    debug: true,
+    fontSize: '12px',
+    title: '<strong>Поддержка</strong>',
+    background: '#3e6f9e',
+    flat: true
+  });
+</script>
+```
+
+**Ключевые моменты:**
+- ✅ `host` должен быть `https://`, не `wss://`
+- ✅ Скрипт загружается с самого Zammad сервера
+- ✅ WebSocket URL определяется автоматически виджетом
+- ✅ chatId обязателен (получите из админки Zammad)
+
+### 3. Конфигурация nginx
 
 ✅ **nginx-zammad-config.conf** (готовый файл конфигурации)
 - Правильная настройка WebSocket проксирования

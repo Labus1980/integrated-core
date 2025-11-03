@@ -7,13 +7,14 @@ interface ZammadChatConfig {
   debug?: boolean;
   show?: boolean;
   title?: string;
-  inactiveClass?: string;
-  buttonClass?: string;
+  background?: string;
+  flat?: boolean;
 }
 
 interface ZammadChatInstance {
   open?: () => void;
   close?: () => void;
+  state?: string;
 }
 
 type ZammadChatConstructor = new (config: ZammadChatConfig) => ZammadChatInstance;
@@ -35,46 +36,44 @@ export const useZammadChat = () => {
       return;
     }
 
-    // Даем время на полную загрузку DOM и скриптов
-    const initTimer = setTimeout(() => {
+    // Ждем загрузки скрипта Zammad Chat
+    const checkAndInit = () => {
       const ZammadChatConstructor = window.ZammadChat;
 
-      if (ZammadChatConstructor) {
+      if (ZammadChatConstructor && document.body) {
         try {
-          // Убеждаемся, что body готов
-          if (!document.body) {
-            console.warn("Document body not ready, retrying...");
-            initialized.current = false;
-            return;
-          }
+          console.log("Initializing Zammad Chat...");
 
-          // Создаем и сохраняем экземпляр чата в window для программного доступа
+          // ВАЖНО: host должен быть https://, а НЕ wss://
+          // WebSocket URL определяется автоматически виджетом
           const chatInstance = new ZammadChatConstructor({
-            fontSize: "12px",
             chatId: 1,
             host: "https://zammad.okta-solutions.com",
+            show: false, // Не показывать автоматически
             debug: true,
-            show: false,
-            title: "<strong>Поддержка</strong>",
-            inactiveClass: "is-inactive",
-            buttonClass: "open-zammad-chat",
+            fontSize: "12px",
+            title: "<strong>Поддержка OKTA Solutions</strong>",
             background: "#3e6f9e",
-            // Убираем автоматическое создание кнопки чата
-            cssAutoload: true,
-            cssUrl: "",
+            flat: true,
           });
 
           window.zammadChatInstance = chatInstance;
           initialized.current = true;
-          console.log("Zammad chat initialized successfully", chatInstance);
+
+          console.log("✓ Zammad chat initialized successfully");
+          console.log("Chat instance:", chatInstance);
         } catch (error) {
-          console.error("Failed to initialize Zammad chat:", error);
+          console.error("✗ Failed to initialize Zammad chat:", error);
         }
       } else {
-        console.warn("ZammadChat not found. Make sure the script is loaded.");
+        console.warn("ZammadChat constructor or document.body not ready, retrying...");
+        setTimeout(checkAndInit, 100);
       }
-    }, 500); // Увеличиваем задержку для загрузки скриптов
+    };
 
-    return () => clearTimeout(initTimer);
+    // Начинаем проверку через небольшую задержку
+    const timer = setTimeout(checkAndInit, 300);
+
+    return () => clearTimeout(timer);
   }, []);
 };
