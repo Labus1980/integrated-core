@@ -132,8 +132,8 @@ export const ZammadDebugButton: React.FC = () => {
     addLog('=== ТЕСТ WEBSOCKET СОЕДИНЕНИЯ ===', 'info');
 
     try {
-      addLog('Попытка подключения к wss://zammad.okta-solutions.com/', 'info');
-      const ws = new WebSocket('wss://zammad.okta-solutions.com/');
+      addLog('Попытка подключения к wss://zammad.okta-solutions.com/ws', 'info');
+      const ws = new WebSocket('wss://zammad.okta-solutions.com/ws');
 
       ws.onopen = () => {
         addLog('✅ WebSocket соединение УСТАНОВЛЕНО!', 'success');
@@ -178,6 +178,7 @@ export const ZammadDebugButton: React.FC = () => {
         flat: true,
         chatId: 1,
         host: 'https://zammad.okta-solutions.com',
+        wsHost: 'wss://zammad.okta-solutions.com/ws',
         show: false,
         buttonClass: 'open-zammad-chat',
         inactiveClass: 'is-inactive',

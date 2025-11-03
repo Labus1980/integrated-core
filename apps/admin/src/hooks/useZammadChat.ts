@@ -44,6 +44,7 @@ export const useZammadChat = () => {
           flat: true,
           chatId: 1,
           host: 'https://zammad.okta-solutions.com',
+          wsHost: 'wss://zammad.okta-solutions.com/ws',
           show: false,
           buttonClass: 'open-zammad-chat',
           inactiveClass: 'is-inactive',
