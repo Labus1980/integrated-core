@@ -14,25 +14,56 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
   const { theme, setTheme } = useTheme();
 
   const handleFeedbackClick = () => {
-    // Программно открыть форму обратной связи
+    console.log('[DashboardHeader] Feedback button clicked');
+
+    // Используем jQuery для открытия формы обратной связи
+    const $ = (window as any).$ || (window as any).jQuery;
+    if ($ && typeof $.fn.ZammadForm === 'function') {
+      const feedbackButton = $('#zammad-feedback-form');
+      if (feedbackButton.length > 0) {
+        console.log('[DashboardHeader] Opening feedback form via jQuery');
+        feedbackButton.click();
+        return;
+      }
+    }
+
+    // Fallback: прямой клик по элементу
     const feedbackButton = document.querySelector('#zammad-feedback-form') as HTMLElement;
     if (feedbackButton) {
+      console.log('[DashboardHeader] Opening feedback form via DOM click');
       feedbackButton.click();
+    } else {
+      console.error('[DashboardHeader] Feedback button not found');
     }
   };
 
   const handleSupportClick = () => {
     console.log('[DashboardHeader] Support button clicked');
 
-    // Просто кликаем по кнопке FloatingZammadChat, которая уже имеет всю логику
+    // Используем глобальную функцию openZammadChat, если доступна
+    if (typeof (window as any).openZammadChat === 'function') {
+      console.log('[DashboardHeader] Opening chat via window.openZammadChat()');
+      (window as any).openZammadChat();
+      return;
+    }
+
+    // Fallback 1: Используем zammadChat напрямую
+    const chatInstance = (window as any).zammadChat;
+    if (chatInstance && typeof chatInstance.open === 'function') {
+      console.log('[DashboardHeader] Opening chat via zammadChat.open()');
+      chatInstance.open();
+      return;
+    }
+
+    // Fallback 2: Клик по кнопке FloatingZammadChat
     const zammadButton = document.querySelector('.open-zammad-chat') as HTMLElement;
     if (zammadButton) {
-      console.log('[DashboardHeader] Clicking FloatingZammadChat button');
+      console.log('[DashboardHeader] Opening chat via FloatingZammadChat button click');
       zammadButton.click();
       return;
     }
 
-    console.error('[DashboardHeader] FloatingZammadChat button not found');
+    console.error('[DashboardHeader] No method available to open support chat');
   };
 
   return (
