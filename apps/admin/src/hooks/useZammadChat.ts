@@ -32,7 +32,8 @@ export const useZammadChat = () => {
           show: false,                // Не показывать автоматически
           buttonClass: 'open-zammad-chat',
           inactiveClass: 'is-inactive',
-          debug: true                 // Включаем отладку для диагностики
+          debug: true,                 // Включаем отладку для диагностики
+          target: document.querySelector('#zammad-chat-container') || document.body  // Указываем контейнер для виджета
         });
 
         window.zammadChatInstance = chat;

@@ -108,6 +108,7 @@ export const FloatingVoiceWidget = ({
   sipDomain,
 }: FloatingVoiceWidgetProps) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const previousCallStateRef = useRef<CallState>("idle");
   const [isExpanded, setIsExpanded] = useState(embedded); // В embedded режиме всегда развернут
   const [callState, setCallState] = useState<CallState>("idle");
   const [isMuted, setIsMuted] = useState(false);
@@ -123,6 +124,36 @@ export const FloatingVoiceWidget = ({
   const initialLang = languages[0]?.code ?? client.language;
   const [selectedLanguage, setSelectedLanguage] = useState<string>(initialLang);
   const t = translations[locale];
+
+  // Функция для воспроизведения звука завершения звонка
+  const playHangupSound = () => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      // Настройка звука (короткий гудок 400 Hz)
+      oscillator.frequency.value = 400;
+      oscillator.type = 'sine';
+
+      // Плавное затухание
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.3);
+
+      // Очистка после завершения
+      setTimeout(() => {
+        audioContext.close();
+      }, 500);
+    } catch (error) {
+      console.error('Failed to play hangup sound:', error);
+    }
+  };
 
   useEffect(() => {
     if (audioRef.current) {
@@ -208,7 +239,9 @@ export const FloatingVoiceWidget = ({
 
   useEffect(() => {
     const onCall = (event: { state: CallState }) => {
+      const previousState = previousCallStateRef.current;
       setCallState(event.state);
+      previousCallStateRef.current = event.state;
 
       if (event.state === "connected") {
         setIsMuted(false);
@@ -219,7 +252,21 @@ export const FloatingVoiceWidget = ({
         }, 1000);
       }
 
-      if (event.state === "ended" || event.state === "error" || event.state === "idle") {
+      if (event.state === "ended" || event.state === "error") {
+        // Воспроизводим звук завершения звонка только если мы были в активном звонке
+        if (previousState === "connected" || previousState === "ringing" || previousState === "connecting") {
+          playHangupSound();
+        }
+
+        if (durationTimerRef.current) {
+          clearInterval(durationTimerRef.current);
+          durationTimerRef.current = null;
+        }
+        setIncomingCall(null);
+        setCurrentCallTarget("");
+      }
+
+      if (event.state === "idle") {
         if (durationTimerRef.current) {
           clearInterval(durationTimerRef.current);
           durationTimerRef.current = null;
@@ -317,8 +364,17 @@ export const FloatingVoiceWidget = ({
   };
 
   const handleHangup = async () => {
+    // Воспроизводим звук завершения звонка
+    playHangupSound();
+
     await client.hangup();
-    setIsExpanded(false);
+
+    // В embedded режиме не сворачиваем виджет, чтобы пользователь мог выбрать другое приложение
+    if (!embedded) {
+      setIsExpanded(false);
+    }
+    // Сбрасываем цель звонка для возврата к выбору приложения
+    setCurrentCallTarget("");
   };
 
   const handleMuteToggle = async () => {
