@@ -34,6 +34,36 @@
       data-zammad-base-url="https://zammad.okta-solutions.com"
     ></script>
     <script src="/vendor/chat-no-jquery.min.js"></script>
+    <!-- Инициализация Zammad чата строго по документации -->
+    <script>
+      (function() {
+        // Ждем загрузки ZammadChat
+        function initZammadChat() {
+          if (typeof ZammadChat === 'undefined') {
+            setTimeout(initZammadChat, 100);
+            return;
+          }
+
+          try {
+            new ZammadChat({
+              chatId: 1,
+              title: '<strong>Поддержка</strong>',
+              fontSize: '12px',
+              show: false,
+              buttonClass: 'open-zammad-chat',
+              inactiveClass: 'is-inactive',
+              debug: true,
+              flat: true
+            });
+            console.log('Zammad chat initialized from inline script');
+          } catch (error) {
+            console.error('Error initializing Zammad chat:', error);
+          }
+        }
+
+        initZammadChat();
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

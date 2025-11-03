@@ -6,14 +6,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import { useZammadChat } from "@/hooks/useZammadChat";
 import ZammadFormInit from "@/components/ZammadFormInit";
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  // Инициализируем Zammad Chat (необходимо для работы онлайн чата)
-  useZammadChat();
+  // Zammad Chat инициализируется через встроенный скрипт в index.html
 
   return (
     <QueryClientProvider client={queryClient}>

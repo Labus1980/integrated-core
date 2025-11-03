@@ -1,64 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { MessageCircle, X } from 'lucide-react';
-import { ZammadChatContainer } from './ZammadChatContainer';
+import React from 'react';
+import { MessageCircle } from 'lucide-react';
 import '@/styles/floating-chat-widget.css';
 
+/**
+ * Плавающая кнопка для открытия Zammad чата
+ * Согласно документации Zammad, достаточно добавить класс 'open-zammad-chat' к кнопке
+ * и виджет чата откроется автоматически при клике
+ */
 export const FloatingZammadChat: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const toggleChat = () => {
-    setIsOpen(!isOpen);
-  };
-
-  // Listen for custom event to open chat from header
-  useEffect(() => {
-    const handleOpenChat = () => {
-      setIsOpen(true);
-    };
-
-    window.addEventListener('open-zammad-chat', handleOpenChat);
-    return () => {
-      window.removeEventListener('open-zammad-chat', handleOpenChat);
-    };
-  }, []);
-
   return (
-    <>
-      {/* Floating Panel for Zammad Chat */}
-      {isOpen && (
-        <div className="floating-chat-panel">
-          <div className="floating-chat-header">
-            <h3 className="floating-chat-title">Чат поддержки</h3>
-            <button
-              type="button"
-              onClick={toggleChat}
-              className="floating-chat-close"
-              aria-label="Закрыть чат"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-
-          <div className="floating-chat-body">
-            <ZammadChatContainer isActive={isOpen} />
-          </div>
-        </div>
-      )}
-
-      {/* Floating Button for Zammad Chat */}
-      <button
-        type="button"
-        onClick={toggleChat}
-        className={`floating-zammad-button ${isOpen ? 'floating-zammad-button--open' : ''}`}
-        aria-label={isOpen ? 'Закрыть чат поддержки' : 'Открыть чат поддержки'}
-      >
-        {isOpen ? (
-          <X className="h-6 w-6" />
-        ) : (
-          <MessageCircle className="h-6 w-6" />
-        )}
-      </button>
-    </>
+    <button
+      type="button"
+      className="open-zammad-chat floating-zammad-button"
+      aria-label="Открыть чат поддержки"
+      title="Чат поддержки"
+    >
+      <MessageCircle className="h-6 w-6" />
+    </button>
   );
 };
 
