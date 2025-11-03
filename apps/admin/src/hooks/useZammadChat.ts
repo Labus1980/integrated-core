@@ -21,6 +21,7 @@ type ZammadChatConstructor = new (config: ZammadChatConfig) => ZammadChatInstanc
 declare global {
   interface Window {
     ZammadChat?: ZammadChatConstructor;
+    zammadChatInstance?: ZammadChatInstance;
   }
 }
 
@@ -38,7 +39,8 @@ export const useZammadChat = () => {
 
     if (ZammadChatConstructor) {
       try {
-        new ZammadChatConstructor({
+        // Создаем и сохраняем экземпляр чата в window для программного доступа
+        const chatInstance = new ZammadChatConstructor({
           fontSize: "12px",
           chatId: 1,
           host: "https://zammad.okta-solutions.com",
@@ -48,6 +50,8 @@ export const useZammadChat = () => {
           inactiveClass: "is-inactive",
           buttonClass: "open-zammad-chat",
         });
+
+        window.zammadChatInstance = chatInstance;
         initialized.current = true;
         console.log("Zammad chat initialized successfully");
       } catch (error) {
