@@ -110,7 +110,10 @@ export const useZammadChat = () => {
 
         // Шаг 3: Инициализация чата
         console.log('[useZammadChat] Шаг 3: Инициализация чата...');
-        window.ZammadChat.init({
+        console.log('[useZammadChat] Тип window.ZammadChat:', typeof window.ZammadChat);
+
+        // Правильная инициализация через конструктор
+        const chatInstance = new window.ZammadChat({
           chatId: 1,
           host: 'https://zammad.okta-solutions.com',
           title: 'Поддержка OKTA Solutions',
@@ -121,10 +124,10 @@ export const useZammadChat = () => {
           inactiveClass: 'is-inactive',
           debug: true,
         });
-        console.log('[useZammadChat] ✅ Шаг 3 завершен - ZammadChat.init() вызван');
+        console.log('[useZammadChat] ✅ Шаг 3 завершен - new ZammadChat() создан');
 
         // Шаг 4: Сохранение экземпляра
-        window.zammadChatInstance = window.ZammadChat;
+        window.zammadChatInstance = chatInstance;
         window.zammadChatReady = true;
 
         // Dispatch событие готовности
@@ -136,12 +139,12 @@ export const useZammadChat = () => {
           console.log('[openZammadChat] Вызвана функция открытия чата');
 
           try {
-            if (window.ZammadChat && typeof window.ZammadChat.open === 'function') {
-              console.log('[openZammadChat] Вызов ZammadChat.open()');
-              window.ZammadChat.open();
+            if (window.zammadChatInstance && typeof window.zammadChatInstance.open === 'function') {
+              console.log('[openZammadChat] Вызов zammadChatInstance.open()');
+              window.zammadChatInstance.open();
               return;
             }
-            console.warn('[openZammadChat] ZammadChat.open() не доступен');
+            console.warn('[openZammadChat] zammadChatInstance.open() не доступен');
           } catch (err) {
             console.error('[openZammadChat] Ошибка:', err);
           }
