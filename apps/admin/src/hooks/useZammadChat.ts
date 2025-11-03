@@ -37,17 +37,12 @@ export const useZammadChat = () => {
       console.log('[useZammadChat] ✅ ZammadChat found, creating instance...');
 
       try {
-        // Создание экземпляра чата
+        // Создание экземпляра чата СТРОГО ПО ДОКУМЕНТАЦИИ
         const chat = new window.ZammadChat({
-          title: 'Поддержка OKTA Solutions',
+          title: 'Чат поддержки',
           fontSize: '12px',
-          flat: true,
           chatId: 1,
-          host: 'https://zammad.okta-solutions.com/ws', // Добавляем /ws к хосту
-          show: false,
-          buttonClass: 'open-zammad-chat',
-          inactiveClass: 'is-inactive',
-          debug: true,
+          show: false
         });
 
         console.log('[useZammadChat] ✅ Chat instance created:', chat);

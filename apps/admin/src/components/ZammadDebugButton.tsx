@@ -173,15 +173,10 @@ export const ZammadDebugButton: React.FC = () => {
     try {
       addLog('Создание нового экземпляра ZammadChat...', 'info');
       const chat = new window.ZammadChat({
-        title: 'Поддержка OKTA Solutions',
+        title: 'Чат поддержки',
         fontSize: '12px',
-        flat: true,
         chatId: 1,
-        host: 'https://zammad.okta-solutions.com/ws', // Добавляем /ws к хосту
-        show: false,
-        buttonClass: 'open-zammad-chat',
-        inactiveClass: 'is-inactive',
-        debug: true,
+        show: false
       });
 
       window.zammadChat = chat;
