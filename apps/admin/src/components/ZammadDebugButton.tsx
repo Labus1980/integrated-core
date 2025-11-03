@@ -1,0 +1,184 @@
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { MessageCircle, Bug } from 'lucide-react';
+
+/**
+ * Тестовая кнопка для диагностики Zammad чата
+ * Выводит подробные логи для отладки
+ */
+export const ZammadDebugButton: React.FC = () => {
+  const [logs, setLogs] = useState<string[]>([]);
+  const [chatReady, setChatReady] = useState(false);
+
+  const addLog = (message: string, type: 'info' | 'error' | 'success' = 'info') => {
+    const timestamp = new Date().toLocaleTimeString();
+    const emoji = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+    const log = `[${timestamp}] ${emoji} ${message}`;
+    console.log(log);
+    setLogs(prev => [...prev, log]);
+  };
+
+  const checkZammadStatus = () => {
+    addLog('=== ПРОВЕРКА СТАТУСА ZAMMAD ===', 'info');
+
+    // Проверка скрипта
+    if (typeof window.ZammadChat === 'undefined') {
+      addLog('ZammadChat НЕ ЗАГРУЖЕН! Проверьте <script> в index.html', 'error');
+    } else {
+      addLog('ZammadChat загружен в window', 'success');
+      addLog(`Тип: ${typeof window.ZammadChat}`, 'info');
+
+      // Проверяем доступные методы
+      if (window.ZammadChat.init) {
+        addLog('Метод ZammadChat.init() доступен', 'success');
+      } else {
+        addLog('Метод ZammadChat.init() НЕ НАЙДЕН', 'error');
+      }
+
+      if (window.ZammadChat.open) {
+        addLog('Метод ZammadChat.open() доступен', 'success');
+      } else {
+        addLog('Метод ZammadChat.open() НЕ НАЙДЕН', 'error');
+      }
+    }
+
+    // Проверка экземпляра
+    if (window.zammadChatInstance) {
+      addLog('window.zammadChatInstance существует', 'success');
+    } else {
+      addLog('window.zammadChatInstance НЕ СОЗДАН', 'error');
+    }
+
+    // Проверка флага готовности
+    if (window.zammadChatReady) {
+      addLog('window.zammadChatReady = true', 'success');
+      setChatReady(true);
+    } else {
+      addLog('window.zammadChatReady = false или undefined', 'error');
+      setChatReady(false);
+    }
+
+    // Проверка глобальной функции
+    if (window.openZammadChat) {
+      addLog('window.openZammadChat() доступна', 'success');
+    } else {
+      addLog('window.openZammadChat() НЕ НАЙДЕНА', 'error');
+    }
+
+    // Проверка кнопок в DOM
+    const buttons = document.querySelectorAll('.open-zammad-chat, .zammad-chat-button');
+    addLog(`Найдено кнопок чата в DOM: ${buttons.length}`, buttons.length > 0 ? 'success' : 'error');
+    buttons.forEach((btn, idx) => {
+      addLog(`  Кнопка ${idx + 1}: ${btn.className}`, 'info');
+    });
+
+    addLog('=== КОНЕЦ ПРОВЕРКИ ===', 'info');
+  };
+
+  const tryOpenChat = () => {
+    addLog('=== ПОПЫТКА ОТКРЫТЬ ЧАТ ===', 'info');
+
+    // Метод 1: через window.openZammadChat()
+    if (window.openZammadChat) {
+      try {
+        addLog('Вызов window.openZammadChat()...', 'info');
+        window.openZammadChat();
+        addLog('window.openZammadChat() выполнен', 'success');
+      } catch (err) {
+        addLog(`Ошибка window.openZammadChat(): ${err}`, 'error');
+      }
+      return;
+    }
+
+    // Метод 2: напрямую через ZammadChat.open()
+    if (window.ZammadChat && typeof window.ZammadChat.open === 'function') {
+      try {
+        addLog('Вызов ZammadChat.open()...', 'info');
+        window.ZammadChat.open();
+        addLog('ZammadChat.open() выполнен', 'success');
+      } catch (err) {
+        addLog(`Ошибка ZammadChat.open(): ${err}`, 'error');
+      }
+      return;
+    }
+
+    // Метод 3: клик по кнопке
+    const btn = document.querySelector('.open-zammad-chat, .zammad-chat-button') as HTMLElement;
+    if (btn) {
+      try {
+        addLog('Клик по кнопке .open-zammad-chat...', 'info');
+        btn.click();
+        addLog('Клик выполнен', 'success');
+      } catch (err) {
+        addLog(`Ошибка клика: ${err}`, 'error');
+      }
+      return;
+    }
+
+    addLog('ВСЕ МЕТОДЫ ОТКРЫТИЯ НЕДОСТУПНЫ!', 'error');
+  };
+
+  const clearLogs = () => {
+    setLogs([]);
+    addLog('Логи очищены', 'info');
+  };
+
+  return (
+    <Card className="fixed bottom-4 right-4 w-96 max-h-[600px] overflow-hidden flex flex-col z-50 shadow-xl">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2">
+          <Bug className="h-5 w-5" />
+          Диагностика Zammad
+        </CardTitle>
+        <CardDescription>
+          Тестовая панель для проверки чата
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-2">
+        <div className="flex gap-2">
+          <Button
+            onClick={checkZammadStatus}
+            variant="outline"
+            size="sm"
+            className="flex-1"
+          >
+            Проверить статус
+          </Button>
+          <Button
+            onClick={tryOpenChat}
+            variant="default"
+            size="sm"
+            className="flex-1"
+            disabled={!chatReady}
+          >
+            <MessageCircle className="h-4 w-4 mr-2" />
+            Открыть чат
+          </Button>
+        </div>
+
+        <Button
+          onClick={clearLogs}
+          variant="ghost"
+          size="sm"
+        >
+          Очистить логи
+        </Button>
+
+        <div className="mt-2 p-2 bg-black text-green-400 text-xs font-mono rounded max-h-[400px] overflow-y-auto">
+          {logs.length === 0 ? (
+            <div className="text-gray-500">Нажмите "Проверить статус" для диагностики</div>
+          ) : (
+            logs.map((log, idx) => (
+              <div key={idx} className="mb-1 whitespace-pre-wrap break-all">
+                {log}
+              </div>
+            ))
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default ZammadDebugButton;

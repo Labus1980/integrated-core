@@ -179,10 +179,6 @@ export class CodexSipClient {
   constructor(config: SipClientConfig) {
     this.config = config;
     this.preferredLanguage = config.defaultLanguage;
-
-    // Validate WebSocket URL
-    this.validateWebSocketUrl(config.wssServer);
-
     this.userAgentOptions = this.createUserAgentOptions(config);
 
     if (config.onLog) {
@@ -925,36 +921,6 @@ export class CodexSipClient {
 
   private emit<TKey extends keyof EventMap>(event: TKey, payload: EventMap[TKey]) {
     this.emitter.emit(event, payload);
-  }
-
-  /**
-   * Validate WebSocket URL to ensure secure connection
-   */
-  private validateWebSocketUrl(url: string): void {
-    if (!url) {
-      throw new Error("WebSocket URL is required");
-    }
-
-    // Check if URL starts with ws:// (insecure)
-    if (url.toLowerCase().startsWith("ws://")) {
-      // Warn about insecure connection
-      this.emit("log", {
-        level: "warn",
-        message: "Insecure WebSocket connection (ws://) detected. Consider using wss:// for secure connections.",
-        context: { url },
-      });
-
-      // If running in HTTPS context, this will likely fail due to mixed content policy
-      if (typeof window !== "undefined" && window.location.protocol === "https:") {
-        throw new Error(
-          "Cannot use insecure WebSocket (ws://) connection from HTTPS page. Please use wss:// instead."
-        );
-      }
-    } else if (!url.toLowerCase().startsWith("wss://")) {
-      throw new Error(
-        `Invalid WebSocket URL format: ${url}. Expected format: wss://hostname:port or ws://hostname:port`
-      );
-    }
   }
 
   /**
