@@ -124,11 +124,11 @@ export const useZammadChat = () => {
         console.log('[useZammadChat] Шаг 4: Инициализация чата...');
         console.log('[useZammadChat] Тип window.ZammadChat:', typeof window.ZammadChat);
 
-        // Правильная инициализация через конструктор с указанием target
+        // Правильная инициализация через конструктор БЕЗ target
+        // Zammad сам создаст нужные элементы в body
         const chatInstance = new window.ZammadChat({
           chatId: 1,
           host: 'https://zammad.okta-solutions.com',
-          target: document.body, // Указываем, куда рендерить чат
           title: 'Поддержка OKTA Solutions',
           fontSize: '12px',
           flat: true,
@@ -138,6 +138,10 @@ export const useZammadChat = () => {
           debug: true,
         });
         console.log('[useZammadChat] ✅ Шаг 4 завершен - new ZammadChat() создан');
+
+        // Даем время Zammad создать DOM элементы
+        await new Promise(resolve => setTimeout(resolve, 500));
+        console.log('[useZammadChat] ✅ Дали время Zammad создать элементы (500ms)');
 
         // Шаг 5: Сохранение экземпляра
         console.log('[useZammadChat] Шаг 5: Сохранение экземпляра...');
@@ -154,6 +158,16 @@ export const useZammadChat = () => {
 
           try {
             if (window.zammadChatInstance && typeof window.zammadChatInstance.open === 'function') {
+              console.log('[openZammadChat] Проверка готовности DOM элементов...');
+
+              // Проверяем, создал ли Zammad свои элементы
+              const zammadEl = document.querySelector('.zammad-chat');
+              if (!zammadEl) {
+                console.warn('[openZammadChat] Элемент .zammad-chat не найден, используем fallback');
+                throw new Error('Zammad elements not ready');
+              }
+
+              console.log('[openZammadChat] ✅ Элемент .zammad-chat найден');
               console.log('[openZammadChat] Вызов zammadChatInstance.open()');
               window.zammadChatInstance.open();
               return;
