@@ -38,7 +38,6 @@ export const JambonzWidget: React.FC<JambonzWidgetProps> = ({ embedded = false }
       setSipClient(client);
       setError(null);
     } catch (err) {
-      console.error('Failed to initialize SIP client:', err);
       setError('Failed to initialize voice widget');
     }
   }, []);
@@ -58,7 +57,6 @@ export const JambonzWidget: React.FC<JambonzWidgetProps> = ({ embedded = false }
 
   // Don't render if there's an error or no client
   if (error) {
-    console.warn('Jambonz widget:', error);
     return null;
   }
 
@@ -71,7 +69,7 @@ export const JambonzWidget: React.FC<JambonzWidgetProps> = ({ embedded = false }
       client={sipClient}
       theme="dark"
       locale="ru"
-      position={embedded ? undefined : "bottom-right"}
+      position={embedded ? undefined : "bottom-left"}
       autoRegister={true}
       embedded={embedded}
       languages={[
