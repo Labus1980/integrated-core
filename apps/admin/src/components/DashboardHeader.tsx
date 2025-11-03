@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Moon, Sun, Mail } from 'lucide-react';
+import { Search, Moon, Sun, Mail, MessageCircle } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import SipSettingsDialog from '@/components/SipSettingsDialog';
 
@@ -19,6 +19,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
     if (feedbackButton) {
       feedbackButton.click();
     }
+  };
+
+  const handleSupportClick = () => {
+    // Dispatch event to open Zammad chat
+    window.dispatchEvent(new CustomEvent('open-zammad-chat'));
   };
 
   return (
@@ -47,6 +52,15 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
           </div>
 
           <div className="flex items-center space-x-4">
+            <button
+              type="button"
+              onClick={handleSupportClick}
+              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-foreground/80 dark:text-white/80 transition-colors hover:text-foreground dark:hover:text-white"
+              aria-label="Открыть чат поддержки"
+            >
+              <MessageCircle className="h-5 w-5" />
+              <span className="hidden sm:inline">Поддержка</span>
+            </button>
             <button
               type="button"
               onClick={handleFeedbackClick}

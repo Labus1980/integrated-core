@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import DashboardHeader from '@/components/DashboardHeader';
 import ServicesGrid from '@/components/ServicesGrid';
 import FloatingChatWidget from '@/components/FloatingChatWidget';
+import FloatingZammadChat from '@/components/FloatingZammadChat';
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -17,8 +18,11 @@ const Index = () => {
         <ServicesGrid searchQuery={searchQuery} />
       </main>
 
-      {/* Floating Chat Widget in bottom-right corner */}
+      {/* Voice Widget in bottom-right corner */}
       <FloatingChatWidget />
+
+      {/* Zammad Chat Widget in bottom-left corner */}
+      <FloatingZammadChat />
     </div>
   );
 };
