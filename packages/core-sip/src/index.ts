@@ -1,4 +1,5 @@
 import {
+  Invitation,
   Inviter,
   Registerer,
   RegistererState,
@@ -164,6 +165,7 @@ export class CodexSipClient {
   private activeCallId?: string;
   private muted = false;
   private speakerMuted = false;
+  private isRegistering = false;
 
   constructor(config: SipClientConfig) {
     this.config = config;
@@ -211,10 +213,29 @@ export class CodexSipClient {
   }
 
   async register(): Promise<void> {
+    // Prevent multiple simultaneous registration attempts
+    if (this.isRegistering) {
+      this.emit("log", {
+        level: "debug",
+        message: "Registration already in progress, skipping duplicate request",
+      });
+      return;
+    }
+
+    // Check if already registered
+    if (this.registerer?.state === RegistererState.Registered) {
+      this.emit("log", {
+        level: "debug",
+        message: "Already registered, skipping registration",
+      });
+      return;
+    }
+
+    this.isRegistering = true;
     const ua = await this.ensureUserAgent();
     if (!this.registerer) {
       this.registerer = new Registerer(ua);
-      this.registerer.stateChange.addListener((state) => {
+      this.registerer.stateChange.addListener((state: RegistererState) => {
         this.handleRegistererStateChange(state);
       });
     }
@@ -228,6 +249,7 @@ export class CodexSipClient {
       await ua.start();
       await this.registerer.register();
     } catch (error) {
+      this.isRegistering = false;
       this.emit("registration", {
         state: "failed",
         attempt: this.registerAttempt,
@@ -246,6 +268,7 @@ export class CodexSipClient {
 
   async unregister() {
     this.clearRegisterTimer();
+    this.isRegistering = false;
     if (this.registerer) {
       try {
         await this.registerer.unregister();
@@ -275,8 +298,43 @@ export class CodexSipClient {
       await ua.start();
     }
 
-    if (!this.registerer) {
+    // Ensure we're registered before making a call
+    if (!this.registerer || this.registerer.state !== RegistererState.Registered) {
       await this.register();
+
+      // Wait for registration to complete
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error("Registration timeout"));
+        }, 10000); // 10 second timeout
+
+        const checkRegistration = () => {
+          if (this.registerer?.state === RegistererState.Registered) {
+            clearTimeout(timeout);
+            resolve();
+          } else if (this.registerer?.state === RegistererState.Terminated) {
+            clearTimeout(timeout);
+            reject(new Error("Registration failed"));
+          }
+        };
+
+        // Check immediately in case already registered
+        checkRegistration();
+
+        // Listen for state changes
+        const stateListener = () => checkRegistration();
+        this.registerer?.stateChange.addListener(stateListener);
+
+        // Clean up listener when done
+        Promise.race([
+          new Promise((r) => setTimeout(r, 10000)),
+          new Promise((r) => {
+            if (this.registerer?.state === RegistererState.Registered) r(undefined);
+          }),
+        ]).finally(() => {
+          this.registerer?.stateChange.removeListener(stateListener);
+        });
+      });
     }
 
     const target = this.resolveTargetUri(options?.targetUri || this.config.targetUri);
@@ -297,7 +355,7 @@ export class CodexSipClient {
     });
 
     this.currentSession = inviter as SessionWithPeer;
-    this.currentSession.stateChange.addListener((state) => this.handleSessionStateChange(state));
+    this.currentSession.stateChange.addListener((state: SessionState) => this.handleSessionStateChange(state));
     this.hookSessionDelegates(this.currentSession);
     this.setState("connecting");
     this.emit("log", { level: "info", message: "Outbound INVITE sent", context: { target: target.toString() } });
@@ -406,7 +464,14 @@ export class CodexSipClient {
     return {
       onConnect: () => {
         this.emit("log", { level: "info", message: "Transport connected" });
-        if (this.registerAttempt > 0 && this.registerAttempt <= (this.config.maxRegisterRetries ?? DEFAULT_MAX_REGISTER_RETRIES)) {
+        // Only retry registration if we were attempting and not currently registered
+        const shouldRetry =
+          this.registerAttempt > 0 &&
+          this.registerAttempt <= (this.config.maxRegisterRetries ?? DEFAULT_MAX_REGISTER_RETRIES) &&
+          !this.isRegistering &&
+          this.registerer?.state !== RegistererState.Registered;
+
+        if (shouldRetry) {
           this.scheduleRegisterRetry(0);
         }
       },
@@ -416,9 +481,10 @@ export class CodexSipClient {
           message: "Transport disconnected",
           context: error ? { message: error.message } : undefined,
         });
+        this.isRegistering = false;
         this.scheduleRegisterRetry();
       },
-      onInvite: (invitation) => {
+      onInvite: (invitation: Invitation) => {
         // Inbound calls are currently not supported by the widget.
         invitation.reject({ statusCode: 486 });
         this.emit("log", { level: "warn", message: "Inbound INVITE rejected" });
@@ -470,6 +536,7 @@ export class CodexSipClient {
   private handleRegistererStateChange(state: RegistererState) {
     switch (state) {
       case RegistererState.Registered:
+        this.isRegistering = false;
         this.emit("registration", { state: "registered", attempt: this.registerAttempt });
         this.registerAttempt = 0;
         this.registerBackoffMs = 1_000;
@@ -478,9 +545,11 @@ export class CodexSipClient {
         }
         break;
       case RegistererState.Unregistered:
+        this.isRegistering = false;
         this.emit("registration", { state: "unregistered" });
         break;
       case RegistererState.Terminated:
+        this.isRegistering = false;
         this.emit("registration", { state: "failed", reason: "terminated" });
         this.scheduleRegisterRetry();
         break;
