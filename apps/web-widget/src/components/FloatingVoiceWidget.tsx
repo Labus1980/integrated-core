@@ -324,7 +324,13 @@ export const FloatingVoiceWidget = ({
     if (callState === "idle" || callState === "ended" || callState === "error") {
       setIsExpanded(true);
 
-      // Find selected application and its phone number or name
+      // Если приложений больше одного, НЕ звоним автоматически - даем пользователю выбрать
+      if (applications.length > 1) {
+        console.log('[FloatingVoiceWidget] Multiple applications available, waiting for user selection');
+        return;
+      }
+
+      // Если приложение одно, звоним автоматически
       const app = applications.find(a => a.application_sid === selectedApplication);
       if (!app) {
         console.error("No application selected");

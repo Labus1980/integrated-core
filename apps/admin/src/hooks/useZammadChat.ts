@@ -44,6 +44,10 @@ export const useZammadChat = () => {
         });
 
         window.zammadChatInstance = chat;
+        window.zammadChatReady = true;
+
+        // Диспатчим событие готовности чата
+        window.dispatchEvent(new Event('zammad:ready'));
 
         initialized.current = true;
         console.log('Zammad chat initialized successfully');
