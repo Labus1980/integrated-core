@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { MessageCircle } from 'lucide-react';
 import '@/styles/floating-chat-widget.css';
 
 declare global {
   interface Window {
-    zammadChatInstance?: any;
-    zammadChatReady?: boolean;
+    zammadChat?: any;
+    openZammadChat?: () => void;
   }
 }
 
@@ -13,36 +13,24 @@ declare global {
  * Плавающая кнопка для открытия Zammad чата
  */
 export const FloatingZammadChat: React.FC = () => {
-  const [chatReady, setChatReady] = useState(false);
-
-  useEffect(() => {
-    // Слушаем событие готовности чата
-    const handleReady = () => {
-      console.log('[FloatingZammadChat] Chat ready event received');
-      setChatReady(true);
-    };
-
-    // Проверяем, может чат уже готов
-    if (window.zammadChatReady) {
-      handleReady();
-    }
-
-    // Подписываемся на событие
-    window.addEventListener('zammad:ready', handleReady);
-
-    return () => {
-      window.removeEventListener('zammad:ready', handleReady);
-    };
-  }, []);
-
   const handleClick = () => {
-    if (!chatReady || !window.zammadChatInstance) {
-      console.warn('[FloatingZammadChat] Chat not ready yet');
+    console.log('[FloatingZammadChat] Button clicked');
+
+    // Используем глобальную функцию openZammadChat
+    if (typeof window.openZammadChat === 'function') {
+      console.log('[FloatingZammadChat] Opening via window.openZammadChat()');
+      window.openZammadChat();
       return;
     }
 
-    console.log('[FloatingZammadChat] Opening chat');
-    window.zammadChatInstance.open();
+    // Fallback: прямой вызов
+    if (window.zammadChat && typeof window.zammadChat.open === 'function') {
+      console.log('[FloatingZammadChat] Opening via zammadChat.open()');
+      window.zammadChat.open();
+      return;
+    }
+
+    console.error('[FloatingZammadChat] Chat not initialized yet');
   };
 
   return (
@@ -52,11 +40,6 @@ export const FloatingZammadChat: React.FC = () => {
       aria-label="Открыть чат поддержки"
       title="Чат поддержки"
       onClick={handleClick}
-      disabled={!chatReady}
-      style={{
-        opacity: chatReady ? 1 : 0.5,
-        cursor: chatReady ? 'pointer' : 'not-allowed',
-      }}
     >
       <MessageCircle className="h-6 w-6" />
     </button>

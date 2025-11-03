@@ -47,10 +47,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
       return;
     }
 
-    // Fallback 1: Используем zammadChatInstance напрямую
-    const chatInstance = (window as any).zammadChatInstance;
+    // Fallback 1: Используем zammadChat напрямую
+    const chatInstance = (window as any).zammadChat;
     if (chatInstance && typeof chatInstance.open === 'function') {
-      console.log('[DashboardHeader] Opening chat via zammadChatInstance.open()');
+      console.log('[DashboardHeader] Opening chat via zammadChat.open()');
       chatInstance.open();
       return;
     }
