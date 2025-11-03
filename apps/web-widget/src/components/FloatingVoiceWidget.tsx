@@ -503,7 +503,7 @@ export const FloatingVoiceWidget = ({
 
             <AudioVisualizer isActive={isLive} />
 
-            {(callState === "idle" || callState === "ended" || callState === "error") && applications.length > 0 && !currentCallTarget && (
+            {!isLive && !isBusy && applications.length > 0 && (
               <div className="codex-floating-voice-widget__application-selector">
                 <label htmlFor="app-select" className="codex-floating-voice-widget__label">
                   {t.selectApplication}

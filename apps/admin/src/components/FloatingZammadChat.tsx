@@ -51,37 +51,7 @@ export const FloatingZammadChat: React.FC = () => {
     }
   }, [chatReady]);
 
-  const waitForZammadDOM = (): Promise<boolean> => {
-    return new Promise((resolve) => {
-      // Проверяем, существует ли уже DOM
-      if (document.querySelector('.zammad-chat')) {
-        console.log('[FloatingZammadChat] Zammad DOM already exists');
-        resolve(true);
-        return;
-      }
-
-      console.log('[FloatingZammadChat] Waiting for Zammad DOM to be created...');
-
-      let attempts = 0;
-      const maxAttempts = 20; // 2 секунды максимум
-
-      const checkInterval = setInterval(() => {
-        attempts++;
-
-        if (document.querySelector('.zammad-chat')) {
-          console.log('[FloatingZammadChat] Zammad DOM created after', attempts * 100, 'ms');
-          clearInterval(checkInterval);
-          resolve(true);
-        } else if (attempts >= maxAttempts) {
-          console.error('[FloatingZammadChat] Zammad DOM not created after', attempts * 100, 'ms');
-          clearInterval(checkInterval);
-          resolve(false);
-        }
-      }, 100);
-    });
-  };
-
-  const handleClick = async () => {
+  const handleClick = () => {
     console.log('[FloatingZammadChat] Button clicked');
 
     if (typeof window === 'undefined') {
@@ -89,35 +59,9 @@ export const FloatingZammadChat: React.FC = () => {
       return;
     }
 
-    // Ждем создания DOM элементов Zammad
-    const domReady = await waitForZammadDOM();
-
-    if (!domReady) {
-      console.error('[FloatingZammadChat] Zammad DOM not ready');
-      return;
-    }
-
-    // Проверяем, не застрял ли чат в состоянии "открыт"
-    const chatWidget = document.querySelector('.zammad-chat');
-    if (chatWidget) {
-      const isOpen = chatWidget.classList.contains('zammad-chat--open');
-      const isVisible = chatWidget.classList.contains('is-visible');
-
-      console.log('[FloatingZammadChat] Chat state:', { isOpen, isVisible });
-
-      // Если чат считается открытым, но не виден - сбрасываем состояние
-      if (isOpen && !isVisible) {
-        console.log('[FloatingZammadChat] Chat stuck in open state, resetting...');
-        chatWidget.classList.remove('zammad-chat--open');
-        if (window.zammadChatInstance && window.zammadChatInstance.state) {
-          window.zammadChatInstance.state = 'closed';
-        }
-      }
-    }
-
-    // Способ 1: Через глобальный экземпляр
+    // Способ 1: Через глобальный экземпляр (основной метод)
     if (window.zammadChatInstance) {
-      console.log('[FloatingZammadChat] Opening chat via zammadChatInstance');
+      console.log('[FloatingZammadChat] Opening chat via zammadChatInstance.open()');
       try {
         if (typeof window.zammadChatInstance.open === 'function') {
           window.zammadChatInstance.open();
@@ -128,7 +72,7 @@ export const FloatingZammadChat: React.FC = () => {
       }
     }
 
-    // Способ 2: Через ZammadChat.open()
+    // Способ 2: Через статический метод ZammadChat
     if (window.ZammadChat && typeof window.ZammadChat.open === 'function') {
       console.log('[FloatingZammadChat] Opening chat via ZammadChat.open()');
       try {
@@ -139,29 +83,12 @@ export const FloatingZammadChat: React.FC = () => {
       }
     }
 
-    // Способ 3: Ищем кнопку чата в DOM
-    const zammadButton = document.querySelector('.zammad-chat-button, .js-zammad-open');
-    if (zammadButton instanceof HTMLElement) {
-      console.log('[FloatingZammadChat] Opening chat via DOM button click');
-      zammadButton.click();
-      return;
-    }
-
-    // Способ 4: Ищем элемент чата и показываем его
-    if (chatWidget instanceof HTMLElement) {
-      console.log('[FloatingZammadChat] Showing chat widget directly');
-      chatWidget.classList.remove('zammad-chat--hide');
-      chatWidget.classList.add('zammad-chat--open');
-      chatWidget.classList.add('is-visible');
-      return;
-    }
-
     console.error('[FloatingZammadChat] Unable to open Zammad chat - no methods available');
-    console.log('[FloatingZammadChat] Available:', {
+    console.log('[FloatingZammadChat] Debug info:', {
       ZammadChat: !!window.ZammadChat,
       zammadChatInstance: !!window.zammadChatInstance,
-      chatButton: !!document.querySelector('.zammad-chat-button'),
-      chatWidget: !!document.querySelector('.zammad-chat'),
+      zammadChatInstanceOpen: window.zammadChatInstance && typeof window.zammadChatInstance.open === 'function',
+      chatReady: chatReady,
     });
   };
 

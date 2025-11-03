@@ -21,7 +21,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
     }
   };
 
-  const handleSupportClick = async () => {
+  const handleSupportClick = () => {
     console.log('[DashboardHeader] Support button clicked');
 
     // Просто кликаем по кнопке FloatingZammadChat, которая уже имеет всю логику
