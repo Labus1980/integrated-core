@@ -27,59 +27,10 @@
 
   <body>
     <div id="root"></div>
-    <script src="/vendor/jquery.min.js"></script>
-    <script
-      id="zammad_form_script"
-      src="/vendor/zammad-form.js"
-      data-zammad-base-url="https://zammad.okta-solutions.com"
-    ></script>
-    <script src="/vendor/chat-no-jquery.min.js"></script>
-    <!-- Инициализация Zammad чата строго по документации -->
-    <script>
-      (function() {
-        console.log('[Zammad Init] Starting initialization...');
 
-        // Ждем загрузки ZammadChat
-        function initZammadChat() {
-          if (typeof ZammadChat === 'undefined') {
-            console.log('[Zammad Init] ZammadChat not yet loaded, retrying...');
-            setTimeout(initZammadChat, 100);
-            return;
-          }
+    <!-- Zammad Chat Widget -->
+    <script src="https://zammad.okta-solutions.com/assets/chat/chat-no-jquery.min.js"></script>
 
-          try {
-            console.log('[Zammad Init] Creating ZammadChat instance...');
-
-            // Создаем экземпляр строго по документации
-            const chatInstance = new ZammadChat({
-              chatId: 1,
-              title: '<strong>Поддержка</strong>',
-              fontSize: '12px',
-              show: false,
-              debug: true,
-              flat: true
-            });
-
-            console.log('[Zammad Init] Zammad chat initialized');
-
-            // Ждем события chat:ready
-            chatInstance.on('chat:ready', function() {
-              console.log('[Zammad Init] Chat is ready!');
-              window.zammadChatInstance = chatInstance;
-              window.zammadChatReady = true;
-
-              // Диспатчим кастомное событие для React
-              window.dispatchEvent(new CustomEvent('zammad:ready'));
-            });
-
-          } catch (error) {
-            console.error('[Zammad Init] Error initializing Zammad chat:', error);
-          }
-        }
-
-        initZammadChat();
-      })();
-    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

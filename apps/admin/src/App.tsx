@@ -7,11 +7,12 @@ import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ZammadFormInit from "@/components/ZammadFormInit";
+import { useZammadChat } from "@/hooks/useZammadChat";
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  // Zammad Chat инициализируется через встроенный скрипт в index.html
+  useZammadChat(); // Инициализация чата
 
   return (
     <QueryClientProvider client={queryClient}>

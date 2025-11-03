@@ -1,19 +1,5 @@
 import { useEffect, useRef } from 'react';
 
-declare global {
-  interface Window {
-    ZammadChat?: any;
-    zammadChatInstance?: any;
-  }
-}
-
-/**
- * Хук для инициализации Zammad чата строго по документации
- * https://zammad.okta-solutions.com
- *
- * Важно: НЕ указываем target - чат сам добавится в body
- * Управление открытием - через кнопку с классом 'open-zammad-chat'
- */
 export const useZammadChat = () => {
   const initialized = useRef(false);
 
@@ -23,31 +9,38 @@ export const useZammadChat = () => {
     }
 
     const initChat = () => {
-      if (typeof window === 'undefined' || !window.ZammadChat) {
-        console.error('ZammadChat not found! Make sure chat-no-jquery.min.js is loaded');
+      if (typeof window === 'undefined' || !(window as any).ZammadChat) {
+        console.error('ZammadChat not found!');
         return false;
       }
 
       try {
-        // Инициализация строго по документации Zammad
-        const chat = new window.ZammadChat({
-          chatId: 1,
-          title: '<strong>Поддержка</strong>',
+        const chat = new (window as any).ZammadChat({
+          title: 'Поддержка',        // Заголовок окна чата
           fontSize: '12px',
-          show: false,  // Не показывать автоматически
-          buttonClass: 'open-zammad-chat',  // Класс для кнопок открытия
+          flat: true,
+          chatId: 1,                  // ID чата из админки Zammad
+          show: false,                // Не показывать автоматически
+          buttonClass: 'open-zammad-chat',
           inactiveClass: 'is-inactive',
-          debug: true,
-          flat: true
-          // НЕ указываем target - пусть чат сам добавляется в body!
-          // НЕ указываем host - автоопределение из script src
+          debug: false                // Отключаем debug в продакшене
         });
 
-        window.zammadChatInstance = chat;
-        window.zammadChatReady = true;
+        (window as any).zammadChat = chat;
 
-        // Диспатчим событие готовности чата
-        window.dispatchEvent(new Event('zammad:ready'));
+        // Глобальная функция для открытия чата программно
+        (window as any).openZammadChat = () => {
+          try {
+            if (chat && typeof (chat as any).open === 'function') {
+              (chat as any).open();
+              return;
+            }
+          } catch {}
+
+          // Fallback: клик по кнопке
+          const btn = document.querySelector('.open-zammad-chat') as HTMLElement | null;
+          if (btn) btn.click();
+        };
 
         initialized.current = true;
         console.log('Zammad chat initialized successfully');
@@ -58,7 +51,6 @@ export const useZammadChat = () => {
       }
     };
 
-    // Ждем загрузки скрипта, если еще не загружен
     if (!initChat()) {
       const timer = setTimeout(() => {
         if (!initialized.current) {
