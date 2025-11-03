@@ -14,18 +14,25 @@ declare global {
  */
 const ZammadFormInit = () => {
   useEffect(() => {
+    console.log('[ZammadFormInit] 🚀 Component mounted');
+
     if (typeof window === "undefined") {
+      console.error('[ZammadFormInit] ❌ window is undefined');
       return;
     }
 
     const initializeForm = () => {
       const $ = window.$ ?? window.jQuery;
       if (!$ || !$.fn || typeof $.fn.ZammadForm !== "function") {
+        console.log('[ZammadFormInit] ⏳ jQuery or ZammadForm not ready yet');
         return false;
       }
 
+      console.log('[ZammadFormInit] ✅ jQuery and ZammadForm available');
+
       const existingInstance = $("#zammad-feedback-form").data("zammadFormInitialized");
       if (!existingInstance) {
+        console.log('[ZammadFormInit] 🔄 Initializing feedback form...');
         $("#zammad-feedback-form")
           .data("zammadFormInitialized", true)
           .ZammadForm({
@@ -40,6 +47,9 @@ const ZammadFormInit = () => {
             modal: true,
             attachmentSupport: true,
           });
+        console.log('[ZammadFormInit] ✅ Feedback form initialized');
+      } else {
+        console.log('[ZammadFormInit] ⚠️ Form already initialized');
       }
 
       return true;
@@ -47,6 +57,7 @@ const ZammadFormInit = () => {
 
     const tryInitialize = () => {
       if (initializeForm()) {
+        console.log('[ZammadFormInit] ✅✅✅ FORM INITIALIZATION COMPLETE ✅✅✅');
         window.clearInterval(intervalId);
       }
     };
@@ -55,6 +66,7 @@ const ZammadFormInit = () => {
     tryInitialize();
 
     return () => {
+      console.log('[ZammadFormInit] 🧹 Cleanup');
       window.clearInterval(intervalId);
     };
   }, []);
