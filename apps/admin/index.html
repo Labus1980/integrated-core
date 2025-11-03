@@ -50,33 +50,28 @@
           try {
             console.log('[Zammad Init] Creating ZammadChat instance...');
 
-            // Создаем экземпляр и сохраняем в window
+            // Создаем экземпляр строго по документации
             const chatInstance = new ZammadChat({
               chatId: 1,
               title: '<strong>Поддержка</strong>',
               fontSize: '12px',
               show: false,
-              buttonClass: 'open-zammad-chat',
-              inactiveClass: 'is-inactive',
               debug: true,
               flat: true
             });
 
-            // Сохраняем экземпляр глобально
-            window.zammadChatInstance = chatInstance;
+            console.log('[Zammad Init] Zammad chat initialized');
 
-            console.log('[Zammad Init] Zammad chat initialized successfully');
-            console.log('[Zammad Init] Instance methods:', Object.keys(chatInstance));
+            // Ждем события chat:ready
+            chatInstance.on('chat:ready', function() {
+              console.log('[Zammad Init] Chat is ready!');
+              window.zammadChatInstance = chatInstance;
+              window.zammadChatReady = true;
 
-            // Добавляем событие для отладки
-            if (chatInstance.on) {
-              chatInstance.on('chat:open', function() {
-                console.log('[Zammad] Chat opened');
-              });
-              chatInstance.on('chat:close', function() {
-                console.log('[Zammad] Chat closed');
-              });
-            }
+              // Диспатчим кастомное событие для React
+              window.dispatchEvent(new CustomEvent('zammad:ready'));
+            });
+
           } catch (error) {
             console.error('[Zammad Init] Error initializing Zammad chat:', error);
           }
