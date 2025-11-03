@@ -192,19 +192,28 @@ export const FloatingVoiceWidget = ({
 
           const appsData: JambonzApplication[] = await appsResponse.json();
 
-          // Load phone numbers
-          const numbersUrl = `${apiBaseUrl}/Accounts/${accountSid}/PhoneNumbers`;
-          const numbersResponse = await fetch(numbersUrl, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${apiKey}`,
-              'Content-Type': 'application/json',
-            },
-          });
-
+          // Load phone numbers (optional - may not be available on all Jambonz instances)
           let phoneNumbers: JambonzPhoneNumber[] = [];
-          if (numbersResponse.ok) {
-            phoneNumbers = await numbersResponse.json();
+          try {
+            const numbersUrl = `${apiBaseUrl}/Accounts/${accountSid}/PhoneNumbers`;
+            const numbersResponse = await fetch(numbersUrl, {
+              method: 'GET',
+              headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+              },
+            });
+
+            if (numbersResponse.ok) {
+              phoneNumbers = await numbersResponse.json();
+              console.log('[FloatingVoiceWidget] Loaded phone numbers:', phoneNumbers.length);
+            } else if (numbersResponse.status === 404) {
+              console.warn('[FloatingVoiceWidget] Phone numbers endpoint not available (404). Applications will work without phone number display.');
+            } else {
+              console.warn('[FloatingVoiceWidget] Failed to load phone numbers:', numbersResponse.status, numbersResponse.statusText);
+            }
+          } catch (error) {
+            console.warn('[FloatingVoiceWidget] Phone numbers are not available:', error instanceof Error ? error.message : 'Unknown error');
           }
 
           // Merge applications with their phone numbers
