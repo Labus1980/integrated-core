@@ -30,8 +30,6 @@ const App = () => {
           </BrowserRouter>
           {/* Инициализация формы обратной связи (скрытая кнопка для программного клика) */}
           <ZammadFormInit />
-          {/* Скрытая кнопка для программного открытия Zammad Chat */}
-          <button className="open-zammad-chat hidden" aria-hidden="true" />
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
