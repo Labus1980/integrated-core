@@ -372,6 +372,11 @@ export class CodexSipClient {
     try {
       const response = await inviter.invite();
       this.activeCallId = inviter.request.callId;
+      this.emit("log", {
+        level: "info",
+        message: "Call initiated with unique ID",
+        context: { callId: this.activeCallId, target: target.toString() }
+      });
       if (response && "statusCode" in response && response.statusCode === 180) {
         this.setState("ringing");
       }
