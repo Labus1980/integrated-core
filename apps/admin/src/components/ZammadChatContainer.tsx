@@ -20,7 +20,7 @@ export const ZammadChatContainer: React.FC<ZammadChatContainerProps> = ({ isActi
 
     if (chatOpenedRef.current) return;
 
-    // Пытаемся открыть чат после инициализации
+    // Пытаемся открыть чат после полной инициализации
     const tryOpenChat = () => {
       if (window.zammadChatInstance?.open) {
         try {
@@ -31,15 +31,17 @@ export const ZammadChatContainer: React.FC<ZammadChatContainerProps> = ({ isActi
         } catch (error) {
           console.error('✗ Error opening Zammad chat:', error);
           console.error('Error details:', error);
+          // Пытаемся снова через некоторое время
+          setTimeout(tryOpenChat, 500);
         }
       } else {
         console.warn('Zammad chat instance not ready yet, retrying...');
-        setTimeout(tryOpenChat, 200);
+        setTimeout(tryOpenChat, 300);
       }
     };
 
-    // Даем время на инициализацию виджета
-    const timer = setTimeout(tryOpenChat, 500);
+    // Даем время на полную инициализацию виджета (виджет инициализируется и закрывается через 1 сек)
+    const timer = setTimeout(tryOpenChat, 1500);
 
     return () => {
       clearTimeout(timer);

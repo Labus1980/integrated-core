@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Zammad Chat Test</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>Zammad Chat Test</h1>
+    <p>Откройте консоль (F12) для просмотра логов</p>
+
+    <button onclick="testWebSocket()">Test WebSocket Connection</button>
+    <button onclick="testChatInit()">Test Chat Initialization</button>
+    <button onclick="testChatOpen()">Open Chat</button>
+
+    <div id="status"></div>
+
+    <!-- Загружаем скрипт Zammad Chat -->
+    <script src="https://zammad.okta-solutions.com/assets/chat/chat-no-jquery.min.js"></script>
+
+    <script>
+        let chatInstance = null;
+        const statusDiv = document.getElementById('status');
+
+        function log(message, isError = false) {
+            console.log(message);
+            const p = document.createElement('p');
+            p.textContent = message;
+            p.style.color = isError ? 'red' : 'green';
+            statusDiv.appendChild(p);
+        }
+
+        // Тест 1: Проверка WebSocket соединения
+        function testWebSocket() {
+            log('Testing WebSocket connection...');
+            try {
+                const ws = new WebSocket('wss://zammad.okta-solutions.com/');
+
+                ws.onopen = () => {
+                    log('✓ WebSocket connected successfully!');
+                    ws.close();
+                };
+
+                ws.onerror = (error) => {
+                    log('✗ WebSocket connection failed: ' + error, true);
+                    log('NGINX не настроен для WebSocket!', true);
+                };
+
+                ws.onclose = (event) => {
+                    log('WebSocket closed. Code: ' + event.code + ', Reason: ' + event.reason);
+                };
+            } catch (error) {
+                log('✗ WebSocket error: ' + error.message, true);
+            }
+        }
+
+        // Тест 2: Инициализация чата
+        function testChatInit() {
+            log('Testing Zammad Chat initialization...');
+
+            if (typeof ZammadChat === 'undefined') {
+                log('✗ ZammadChat не загружен!', true);
+                return;
+            }
+
+            try {
+                chatInstance = new ZammadChat({
+                    chatId: 1,
+                    host: 'https://zammad.okta-solutions.com',
+                    show: false,
+                    debug: true,
+                    fontSize: '12px',
+                    title: '<strong>Test Chat</strong>',
+                    background: '#3e6f9e'
+                });
+
+                log('✓ Zammad Chat initialized!');
+                log('Chat instance: ' + typeof chatInstance);
+
+                // Даём время на создание элементов
+                setTimeout(() => {
+                    log('Chat state: ' + chatInstance.state);
+                }, 2000);
+
+            } catch (error) {
+                log('✗ Chat initialization failed: ' + error.message, true);
+            }
+        }
+
+        // Тест 3: Открытие чата
+        function testChatOpen() {
+            if (!chatInstance) {
+                log('✗ Chat not initialized! Run Test Chat Initialization first.', true);
+                return;
+            }
+
+            log('Testing chat open...');
+            try {
+                chatInstance.open();
+                log('✓ Chat open() called successfully');
+            } catch (error) {
+                log('✗ Chat open failed: ' + error.message, true);
+                log('Error stack: ' + error.stack, true);
+            }
+        }
+
+        // Автоматически запускаем тест WebSocket при загрузке
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                log('=== Automatic tests ===');
+                testWebSocket();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

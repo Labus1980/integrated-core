@@ -46,10 +46,13 @@ export const useZammadChat = () => {
 
           // ВАЖНО: host должен быть https://, а НЕ wss://
           // WebSocket URL определяется автоматически виджетом
+
+          // Инициализируем с show: true, чтобы виджет создал все DOM элементы
+          // Потом можем программно управлять через API
           const chatInstance = new ZammadChatConstructor({
             chatId: 1,
             host: "https://zammad.okta-solutions.com",
-            show: false, // Не показывать автоматически
+            show: true, // Показываем сразу, чтобы виджет создал DOM элементы
             debug: true,
             fontSize: "12px",
             title: "<strong>Поддержка OKTA Solutions</strong>",
@@ -58,10 +61,17 @@ export const useZammadChat = () => {
           });
 
           window.zammadChatInstance = chatInstance;
-          initialized.current = true;
 
+          // Даём виджету время создать DOM элементы, потом скрываем
+          setTimeout(() => {
+            if (chatInstance.close) {
+              chatInstance.close();
+              console.log("✓ Zammad chat initialized and closed, ready for programmatic control");
+            }
+          }, 1000);
+
+          initialized.current = true;
           console.log("✓ Zammad chat initialized successfully");
-          console.log("Chat instance:", chatInstance);
         } catch (error) {
           console.error("✗ Failed to initialize Zammad chat:", error);
         }
