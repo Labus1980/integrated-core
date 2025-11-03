@@ -293,6 +293,7 @@ const statusColorMap: Record<CallState, string> = {
   registering: "#f59e0b",
   connecting: "#f59e0b",
   ringing: "#f59e0b",
+  incoming: "#22c55e",
   connected: "#22c55e",
   ended: "#94a3b8",
   error: "#ef4444",

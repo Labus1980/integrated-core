@@ -387,6 +387,84 @@ export const floatingWidgetStyles = `
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
   }
 
+  .codex-floating-voice-widget__control-btn--success {
+    background: var(--codex-success);
+    border-color: var(--codex-success);
+    color: white;
+  }
+
+  .codex-floating-voice-widget__control-btn--success:hover {
+    background: #059669;
+    border-color: #059669;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  }
+
+  /* ===== Incoming Call ===== */
+  .codex-floating-voice-widget__incoming-call {
+    padding: 16px;
+    background: var(--codex-surface-elevated);
+    border-radius: 12px;
+    border: 2px solid var(--codex-success);
+    animation: codex-pulse 2s ease-in-out infinite;
+  }
+
+  .codex-floating-voice-widget__incoming-from {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--codex-text);
+    text-align: center;
+  }
+
+  /* ===== Application Selector ===== */
+  .codex-floating-voice-widget__application-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .codex-floating-voice-widget__label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--codex-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .codex-floating-voice-widget__select {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--codex-surface-elevated);
+    color: var(--codex-text);
+    border: 1px solid var(--codex-border);
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a0a0b8' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+  }
+
+  .codex-floating-voice-widget__select:hover {
+    border-color: var(--codex-primary);
+  }
+
+  .codex-floating-voice-widget__select:focus {
+    outline: none;
+    border-color: var(--codex-primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  .codex-floating-voice-widget__select option {
+    background: var(--codex-surface-elevated);
+    color: var(--codex-text);
+    padding: 8px;
+  }
+
   /* ===== Mobile Responsive ===== */
   @media (max-width: 768px) {
     .codex-floating-voice-widget--bottom-right,
