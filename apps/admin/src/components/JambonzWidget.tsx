@@ -81,6 +81,7 @@ export const JambonzWidget: React.FC<JambonzWidgetProps> = ({ embedded = false }
       apiBaseUrl={getSipConfig().apiBaseUrl}
       apiKey={getSipConfig().apiKey}
       accountSid={getSipConfig().accountSid}
+      sipDomain={getSipConfig().sipDomain}
     />
   );
 };

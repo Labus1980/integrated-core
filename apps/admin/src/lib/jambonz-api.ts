@@ -26,6 +26,14 @@ export interface JambonzApplication {
   speech_recognizer_language?: string;
 }
 
+export interface JambonzPhoneNumber {
+  phone_number_sid: string;
+  account_sid: string;
+  application_sid?: string;
+  number: string;
+  voip_carrier_sid?: string;
+}
+
 export interface JambonzApiConfig {
   apiBaseUrl: string;
   apiKey: string;
@@ -87,6 +95,32 @@ export class JambonzApiClient {
       return data as JambonzApplication;
     } catch (error) {
       console.error('Error fetching Jambonz application:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch all phone numbers for the account
+   */
+  async getPhoneNumbers(): Promise<JambonzPhoneNumber[]> {
+    try {
+      const url = `${this.config.apiBaseUrl}/Accounts/${this.config.accountSid}/PhoneNumbers`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.config.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch phone numbers: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data as JambonzPhoneNumber[];
+    } catch (error) {
+      console.error('Error fetching Jambonz phone numbers:', error);
       throw error;
     }
   }
