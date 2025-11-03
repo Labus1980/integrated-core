@@ -101,6 +101,7 @@ export class JambonzApiClient {
 
   /**
    * Fetch all phone numbers for the account
+   * Note: This endpoint may not be available on all Jambonz instances
    */
   async getPhoneNumbers(): Promise<JambonzPhoneNumber[]> {
     try {
@@ -114,6 +115,10 @@ export class JambonzApiClient {
       });
 
       if (!response.ok) {
+        if (response.status === 404) {
+          console.warn('Phone numbers endpoint not available (404). Returning empty array.');
+          return [];
+        }
         throw new Error(`Failed to fetch phone numbers: ${response.status} ${response.statusText}`);
       }
 
@@ -121,7 +126,8 @@ export class JambonzApiClient {
       return data as JambonzPhoneNumber[];
     } catch (error) {
       console.error('Error fetching Jambonz phone numbers:', error);
-      throw error;
+      // Return empty array instead of throwing to allow graceful degradation
+      return [];
     }
   }
 }
