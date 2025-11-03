@@ -12,6 +12,17 @@ import {
 } from "sip.js";
 import { TinyEmitter } from "tiny-emitter";
 
+/**
+ * Generates a unique UUID v4 identifier.
+ */
+function generateUUID(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 export type LogLevel = "debug" | "info" | "warn" | "error";
 
 export type CallState =
@@ -370,8 +381,9 @@ export class CodexSipClient {
     this.emit("log", { level: "info", message: "Outbound INVITE sent", context: { target: target.toString() } });
 
     try {
+      // Generate a unique call ID for this session
+      this.activeCallId = generateUUID();
       const response = await inviter.invite();
-      this.activeCallId = inviter.request.callId;
       this.emit("log", {
         level: "info",
         message: "Call initiated with unique ID",
@@ -557,7 +569,8 @@ export class CodexSipClient {
       onInvite: (invitation: Invitation) => {
         // Store pending invitation for user to accept/reject
         this.pendingInvitation = invitation;
-        this.activeCallId = invitation.request.callId;
+        // Generate a unique call ID for this incoming session
+        this.activeCallId = generateUUID();
 
         const from = invitation.remoteIdentity?.displayName || invitation.remoteIdentity?.uri?.user || "Unknown";
         const to = invitation.request.to?.uri?.user || "";
