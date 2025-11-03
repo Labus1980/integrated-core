@@ -21,26 +21,41 @@ export const ZammadChatContainer: React.FC<ZammadChatContainerProps> = ({ isActi
 
     if (chatOpenedRef.current) return;
 
-    // Даем время на инициализацию Zammad Chat
+    // Даем время на инициализацию Zammad Chat (увеличено до 1 секунды)
     const timer = setTimeout(() => {
+      console.log('Attempting to open Zammad chat...', window.zammadChatInstance);
+
       // Программно открываем Zammad Chat через API
       if (window.zammadChatInstance?.open) {
-        window.zammadChatInstance.open();
-        chatOpenedRef.current = true;
-        console.log('Zammad chat opened programmatically via API');
+        try {
+          window.zammadChatInstance.open();
+          chatOpenedRef.current = true;
+          console.log('Zammad chat opened programmatically via API');
+        } catch (error) {
+          console.error('Error opening Zammad chat:', error);
+        }
       } else {
         console.warn('Zammad chat instance not found. Trying to find chat button...');
         // Fallback: пытаемся найти и кликнуть по кнопке
         const chatButton = document.querySelector('.open-zammad-chat') as HTMLElement;
         if (chatButton) {
-          chatButton.click();
-          chatOpenedRef.current = true;
-          console.log('Zammad chat opened via button click');
+          try {
+            chatButton.click();
+            chatOpenedRef.current = true;
+            console.log('Zammad chat opened via button click');
+          } catch (error) {
+            console.error('Error clicking chat button:', error);
+          }
         } else {
           console.error('Could not open Zammad chat: instance and button not found');
+          console.log('Available elements:', {
+            body: !!document.body,
+            chatInstance: !!window.zammadChatInstance,
+            chatButton: !!document.querySelector('.open-zammad-chat')
+          });
         }
       }
-    }, 300);
+    }, 1000); // Увеличена задержка с 300ms до 1000ms
 
     return () => {
       clearTimeout(timer);
