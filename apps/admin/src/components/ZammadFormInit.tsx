@@ -36,6 +36,7 @@ const ZammadFormInit = () => {
         $("#zammad-feedback-form")
           .data("zammadFormInitialized", true)
           .ZammadForm({
+            zammadURL: 'https://zammad.okta-solutions.com',
             noCSS: true,
             agreementMessage: 'Я принимаю <a href="https://www.okta-solutions.com/privacy-policy/" target="_blank" rel="noopener noreferrer" style="color: #3b82f6; text-decoration: underline;">Политику конфиденциальности</a>',
             messageTitle: "Форма обратной связи",
