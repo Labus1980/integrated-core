@@ -340,3 +340,45 @@
     bottom: 4rem;
   }
 }
+
+/* Mobile Adjustments for Voice Widget (Jambonz) - Keep it on the left */
+@media (max-width: 768px) {
+  /* Voice widget button stays on the left */
+  .codex-floating-voice-widget__button {
+    left: 1rem !important;
+    right: auto !important;
+    bottom: 1rem !important;
+    width: 56px !important;
+    height: 56px !important;
+  }
+
+  /* Voice widget panel stays on the left */
+  .codex-floating-voice-widget__panel {
+    left: 1rem !important;
+    right: auto !important;
+    bottom: 5rem !important;
+    width: calc(100vw - 2rem) !important;
+    max-width: calc(100vw - 2rem) !important;
+    height: calc(100vh - 10rem) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Voice widget button - smaller on mobile */
+  .codex-floating-voice-widget__button {
+    left: 0.5rem !important;
+    right: auto !important;
+    width: 52px !important;
+    height: 52px !important;
+  }
+
+  /* Voice widget panel - full width on small mobile */
+  .codex-floating-voice-widget__panel {
+    left: 0.5rem !important;
+    right: auto !important;
+    bottom: 4rem !important;
+    width: calc(100vw - 1rem) !important;
+    max-width: calc(100vw - 1rem) !important;
+    height: calc(100vh - 8rem) !important;
+  }
+}
