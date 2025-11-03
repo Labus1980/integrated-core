@@ -48,7 +48,7 @@ export const FloatingZammadChat: React.FC = () => {
   return (
     <button
       type="button"
-      className="floating-zammad-button"
+      className="floating-zammad-button open-zammad-chat"
       aria-label="Открыть чат поддержки"
       title="Чат поддержки"
       onClick={handleClick}
