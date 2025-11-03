@@ -46,6 +46,7 @@ const translations = {
     status_connected: "Live",
     status_error: "Error",
     status_ended: "Ended",
+    call: "Call",
     hangup: "End Call",
     mute: "Mute",
     unmute: "Unmute",
@@ -66,6 +67,7 @@ const translations = {
     status_connected: "На линии",
     status_error: "Ошибка",
     status_ended: "Завершено",
+    call: "Позвонить",
     hangup: "Завершить",
     mute: "Откл. звук",
     unmute: "Вкл. звук",
@@ -285,6 +287,35 @@ export const FloatingVoiceWidget = ({
     }
   };
 
+  const handleCall = async () => {
+    // Find selected application and its phone number or name
+    const app = applications.find(a => a.application_sid === selectedApplication);
+    if (!app) {
+      console.error("No application selected");
+      return;
+    }
+
+    try {
+      // Determine target URI: use phone number if available, otherwise use app name
+      let targetUri: string;
+      if (app.phoneNumber) {
+        // Call using phone number
+        targetUri = sipDomain ? `sip:${app.phoneNumber}@${sipDomain}` : `sip:${app.phoneNumber}`;
+        setCurrentCallTarget(`${app.name} (${app.phoneNumber})`);
+      } else {
+        // Fallback to calling by application name
+        targetUri = sipDomain ? `sip:${app.name}@${sipDomain}` : `sip:${app.name}`;
+        setCurrentCallTarget(app.name);
+      }
+
+      console.log(`Calling application: ${app.name}, target URI: ${targetUri}`);
+      await client.startCall({ language: selectedLanguage, targetUri });
+    } catch (error) {
+      console.error("Failed to start call:", error);
+      setCurrentCallTarget("");
+    }
+  };
+
   const handleHangup = async () => {
     await client.hangup();
     setIsExpanded(false);
@@ -434,6 +465,23 @@ export const FloatingVoiceWidget = ({
             />
 
             <div className="codex-floating-voice-widget__controls">
+              {(callState === "idle" || callState === "ended" || callState === "error") && (
+                <button
+                  type="button"
+                  className="codex-floating-voice-widget__control-btn codex-floating-voice-widget__control-btn--success"
+                  onClick={handleCall}
+                  disabled={!selectedApplication}
+                >
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                  <span>{t.call}</span>
+                </button>
+              )}
+
               {callState === "incoming" && (
                 <>
                   <button
