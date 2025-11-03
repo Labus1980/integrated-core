@@ -212,9 +212,14 @@ export const FloatingVoiceWidget = ({
 
           setApplications(appsWithNumbers);
 
+          console.log('Loaded Jambonz applications:', appsWithNumbers);
+
           // Select first application by default
           if (appsWithNumbers.length > 0) {
             setSelectedApplication(appsWithNumbers[0].application_sid);
+            console.log('Selected default application:', appsWithNumbers[0]);
+          } else {
+            console.warn('No applications found. Application selector will not be displayed.');
           }
         } catch (error) {
           console.error('Failed to load applications and phone numbers:', error);
@@ -222,6 +227,12 @@ export const FloatingVoiceWidget = ({
       };
 
       loadApplicationsAndNumbers();
+    } else {
+      console.warn('Jambonz API credentials missing:', {
+        hasApiBaseUrl: !!apiBaseUrl,
+        hasApiKey: !!apiKey,
+        hasAccountSid: !!accountSid,
+      });
     }
   }, [apiBaseUrl, apiKey, accountSid]);
 

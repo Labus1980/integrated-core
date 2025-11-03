@@ -22,8 +22,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
   };
 
   const handleSupportClick = () => {
-    // Dispatch event to open Zammad chat
-    window.dispatchEvent(new CustomEvent('open-zammad-chat'));
+    // Кликнуть по кнопке Zammad чата с классом 'open-zammad-chat'
+    const zammadButton = document.querySelector('.open-zammad-chat') as HTMLElement;
+    if (zammadButton) {
+      zammadButton.click();
+    } else {
+      console.warn('Zammad chat button not found');
+    }
   };
 
   return (
