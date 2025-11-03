@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 declare global {
   interface Window {
     ZammadChat?: any;
-    zammadChat?: any;
+    zammadChatInstance?: any;
     openZammadChat?: () => void;
   }
 }
@@ -24,7 +24,7 @@ export const useZammadChat = () => {
 
       try {
         const chat = new window.ZammadChat({
-          host: 'wss://zammad.okta-solutions.com',  // WebSocket host для подключения
+          host: 'https://zammad.okta-solutions.com',  // Base URL для подключения (без wss://)
           title: 'Поддержка',        // Заголовок окна чата
           fontSize: '12px',
           flat: true,
@@ -32,10 +32,10 @@ export const useZammadChat = () => {
           show: false,                // Не показывать автоматически
           buttonClass: 'open-zammad-chat',
           inactiveClass: 'is-inactive',
-          debug: false                // Поставьте true для отладки
+          debug: true                 // Включаем отладку для диагностики
         });
 
-        window.zammadChat = chat;
+        window.zammadChatInstance = chat;
 
         // Глобальная функция для открытия чата программно
         window.openZammadChat = () => {
