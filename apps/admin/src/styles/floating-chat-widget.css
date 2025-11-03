@@ -212,11 +212,11 @@
   }
 }
 
-/* Floating Zammad Chat Button (Left Side) */
+/* Floating Zammad Chat Button (Right Side) */
 .floating-zammad-button {
   position: fixed;
   bottom: 1.5rem;
-  left: 1.5rem;
+  right: 1.5rem;
   z-index: 1000;
   width: 60px;
   height: 60px;
@@ -245,10 +245,10 @@
   background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
 }
 
-/* Floating Zammad Panel (Left Side) */
+/* Floating Zammad Panel (Right Side) */
 .floating-zammad-button ~ .floating-chat-panel {
-  left: 1.5rem;
-  right: auto;
+  right: 1.5rem;
+  left: auto;
 }
 
 /* Floating Chat Body */
@@ -313,13 +313,13 @@
 @media (max-width: 768px) {
   .floating-zammad-button {
     bottom: 1rem;
-    left: 1rem;
+    right: 1rem;
     width: 56px;
     height: 56px;
   }
 
   .floating-zammad-button ~ .floating-chat-panel {
-    left: 1rem;
+    right: 1rem;
     width: calc(100vw - 2rem);
     height: calc(100vh - 10rem);
     bottom: 5rem;
@@ -330,11 +330,11 @@
   .floating-zammad-button {
     width: 52px;
     height: 52px;
-    left: 0.5rem;
+    right: 0.5rem;
   }
 
   .floating-zammad-button ~ .floating-chat-panel {
-    left: 0.5rem;
+    right: 0.5rem;
     width: calc(100vw - 1rem);
     height: calc(100vh - 8rem);
     bottom: 4rem;

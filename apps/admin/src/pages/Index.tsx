@@ -19,10 +19,10 @@ const Index = () => {
         <ServicesGrid searchQuery={searchQuery} />
       </main>
 
-      {/* Voice Widget in bottom-right corner */}
+      {/* Voice Widget in bottom-left corner */}
       <FloatingChatWidget />
 
-      {/* Zammad Chat Widget in bottom-left corner */}
+      {/* Zammad Chat Widget in bottom-right corner */}
       <FloatingZammadChat />
 
       {/* Debug panel for Zammad */}
