@@ -1,59 +1,105 @@
 import { useEffect, useRef } from 'react';
 
+declare global {
+  interface Window {
+    ZammadChat?: any;
+    zammadChatInstance?: any;
+    zammadChatReady?: boolean;
+    openZammadChat?: () => void;
+  }
+}
+
 export const useZammadChat = () => {
   const initialized = useRef(false);
 
   useEffect(() => {
     if (initialized.current) {
+      console.log('[useZammadChat] Already initialized, skipping');
       return;
     }
 
+    console.log('[useZammadChat] Starting initialization');
+
     const initChat = () => {
-      if (typeof window === 'undefined' || !(window as any).ZammadChat) {
-        console.error('ZammadChat not found!');
+      console.log('[useZammadChat] Checking for ZammadChat...');
+
+      if (typeof window === 'undefined') {
+        console.error('[useZammadChat] Window is undefined');
         return false;
       }
 
+      if (!window.ZammadChat) {
+        console.error('[useZammadChat] ZammadChat script not loaded yet');
+        return false;
+      }
+
+      console.log('[useZammadChat] ZammadChat found, initializing...');
+
       try {
-        const chat = new (window as any).ZammadChat({
-          title: 'Поддержка',        // Заголовок окна чата
+        // Используем официальный метод инициализации из документации Zammad
+        window.ZammadChat.init({
+          chatId: 1,
+          host: 'https://zammad.okta-solutions.com',
+          title: 'Поддержка OKTA Solutions',
           fontSize: '12px',
           flat: true,
-          chatId: 1,                  // ID чата из админки Zammad
-          show: false,                // Не показывать автоматически
+          show: false,
           buttonClass: 'open-zammad-chat',
           inactiveClass: 'is-inactive',
-          debug: false                // Отключаем debug в продакшене
+          debug: true, // Включаем debug для диагностики
         });
 
-        (window as any).zammadChat = chat;
+        console.log('[useZammadChat] ZammadChat.init() called');
 
-        // Глобальная функция для открытия чата программно
-        (window as any).openZammadChat = () => {
+        // Сохраняем экземпляр в window
+        window.zammadChatInstance = window.ZammadChat;
+        window.zammadChatReady = true;
+
+        // Dispatch событие готовности
+        window.dispatchEvent(new Event('zammad:ready'));
+        console.log('[useZammadChat] Dispatched zammad:ready event');
+
+        // Глобальная функция для открытия чата
+        window.openZammadChat = () => {
+          console.log('[useZammadChat] openZammadChat() called');
+
           try {
-            if (chat && typeof (chat as any).open === 'function') {
-              (chat as any).open();
+            if (window.ZammadChat && typeof window.ZammadChat.open === 'function') {
+              console.log('[useZammadChat] Calling ZammadChat.open()');
+              window.ZammadChat.open();
               return;
             }
-          } catch {}
+            console.warn('[useZammadChat] ZammadChat.open() not available');
+          } catch (err) {
+            console.error('[useZammadChat] Error calling ZammadChat.open():', err);
+          }
 
-          // Fallback: клик по кнопке
-          const btn = document.querySelector('.open-zammad-chat') as HTMLElement | null;
-          if (btn) btn.click();
+          // Fallback: поиск и клик по кнопке
+          console.log('[useZammadChat] Trying fallback button click');
+          const btn = document.querySelector('.open-zammad-chat, .zammad-chat-button') as HTMLElement | null;
+          if (btn) {
+            console.log('[useZammadChat] Found button, clicking');
+            btn.click();
+          } else {
+            console.error('[useZammadChat] Button not found');
+          }
         };
 
         initialized.current = true;
-        console.log('Zammad chat initialized successfully');
+        console.log('[useZammadChat] ✅ Initialization successful');
         return true;
       } catch (error) {
-        console.error('Failed to initialize Zammad chat:', error);
+        console.error('[useZammadChat] ❌ Failed to initialize:', error);
         return false;
       }
     };
 
+    // Попытка инициализации
     if (!initChat()) {
+      console.log('[useZammadChat] First attempt failed, retrying in 1000ms');
       const timer = setTimeout(() => {
         if (!initialized.current) {
+          console.log('[useZammadChat] Retry attempt...');
           initChat();
         }
       }, 1000);
