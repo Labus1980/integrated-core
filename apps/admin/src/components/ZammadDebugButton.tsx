@@ -128,6 +128,79 @@ export const ZammadDebugButton: React.FC = () => {
     addLog('ВСЕ МЕТОДЫ ОТКРЫТИЯ НЕДОСТУПНЫ!', 'error');
   };
 
+  const testWebSocket = () => {
+    addLog('=== ТЕСТ WEBSOCKET СОЕДИНЕНИЯ ===', 'info');
+
+    try {
+      addLog('Попытка подключения к wss://zammad.okta-solutions.com/', 'info');
+      const ws = new WebSocket('wss://zammad.okta-solutions.com/');
+
+      ws.onopen = () => {
+        addLog('✅ WebSocket соединение УСТАНОВЛЕНО!', 'success');
+        ws.close();
+      };
+
+      ws.onerror = (error) => {
+        addLog(`❌ WebSocket ошибка: ${error}`, 'error');
+      };
+
+      ws.onclose = (event) => {
+        addLog(`WebSocket закрыт. Код: ${event.code}, Причина: ${event.reason || 'не указана'}`, 'info');
+      };
+
+      // Таймаут 5 секунд
+      setTimeout(() => {
+        if (ws.readyState !== WebSocket.OPEN) {
+          addLog('❌ Таймаут подключения WebSocket (5 сек)', 'error');
+          ws.close();
+        }
+      }, 5000);
+    } catch (error) {
+      addLog(`❌ Ошибка создания WebSocket: ${error}`, 'error');
+    }
+  };
+
+  const forceInitChat = () => {
+    addLog('=== ПРИНУДИТЕЛЬНАЯ ИНИЦИАЛИЗАЦИЯ ЧАТА ===', 'info');
+
+    if (!window.ZammadChat) {
+      addLog('❌ window.ZammadChat не найден!', 'error');
+      return;
+    }
+
+    addLog('✅ window.ZammadChat найден', 'success');
+
+    try {
+      addLog('Создание нового экземпляра ZammadChat...', 'info');
+      const chat = new window.ZammadChat({
+        title: 'Поддержка OKTA Solutions',
+        fontSize: '12px',
+        flat: true,
+        chatId: 1,
+        host: 'https://zammad.okta-solutions.com',
+        show: false,
+        buttonClass: 'open-zammad-chat',
+        inactiveClass: 'is-inactive',
+        debug: true,
+      });
+
+      window.zammadChat = chat;
+      addLog('✅ Экземпляр создан и сохранен в window.zammadChat', 'success');
+
+      window.openZammadChat = () => {
+        if (chat && typeof chat.open === 'function') {
+          chat.open();
+        }
+      };
+      addLog('✅ window.openZammadChat() создана', 'success');
+
+      setChatReady(true);
+      addLog('✅✅✅ ИНИЦИАЛИЗАЦИЯ ЗАВЕРШЕНА ✅✅✅', 'success');
+    } catch (error) {
+      addLog(`❌ Ошибка инициализации: ${error}`, 'error');
+    }
+  };
+
   const clearLogs = () => {
     setLogs([]);
     addLog('Логи очищены', 'info');
@@ -163,6 +236,25 @@ export const ZammadDebugButton: React.FC = () => {
           >
             <MessageCircle className="h-4 w-4 mr-2" />
             Открыть чат
+          </Button>
+        </div>
+
+        <div className="flex gap-2">
+          <Button
+            onClick={testWebSocket}
+            variant="secondary"
+            size="sm"
+            className="flex-1"
+          >
+            Тест WebSocket
+          </Button>
+          <Button
+            onClick={forceInitChat}
+            variant="destructive"
+            size="sm"
+            className="flex-1"
+          >
+            Принудительный Init
           </Button>
         </div>
 
