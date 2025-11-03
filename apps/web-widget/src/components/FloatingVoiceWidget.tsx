@@ -257,6 +257,8 @@ export const FloatingVoiceWidget = ({
   useEffect(() => {
     const onCall = (event: { state: CallState }) => {
       const previousState = previousCallStateRef.current;
+      console.log(`[FloatingVoiceWidget] Call state changed: ${previousState} -> ${event.state}`);
+
       setCallState(event.state);
       previousCallStateRef.current = event.state;
 
@@ -270,6 +272,7 @@ export const FloatingVoiceWidget = ({
       }
 
       if (event.state === "ended" || event.state === "error") {
+        console.log('[FloatingVoiceWidget] Call ended/error, clearing currentCallTarget');
         // Воспроизводим звук завершения звонка только если мы были в активном звонке
         if (previousState === "connected" || previousState === "ringing" || previousState === "connecting") {
           playHangupSound();
@@ -284,6 +287,7 @@ export const FloatingVoiceWidget = ({
       }
 
       if (event.state === "idle") {
+        console.log('[FloatingVoiceWidget] Call idle, clearing currentCallTarget');
         if (durationTimerRef.current) {
           clearInterval(durationTimerRef.current);
           durationTimerRef.current = null;
@@ -499,7 +503,7 @@ export const FloatingVoiceWidget = ({
 
             <AudioVisualizer isActive={isLive} />
 
-            {callState === "idle" && applications.length > 0 && (
+            {(callState === "idle" || callState === "ended" || callState === "error") && applications.length > 0 && !currentCallTarget && (
               <div className="codex-floating-voice-widget__application-selector">
                 <label htmlFor="app-select" className="codex-floating-voice-widget__label">
                   {t.selectApplication}
@@ -507,7 +511,10 @@ export const FloatingVoiceWidget = ({
                 <select
                   id="app-select"
                   value={selectedApplication}
-                  onChange={(e) => setSelectedApplication(e.target.value)}
+                  onChange={(e) => {
+                    console.log('[FloatingVoiceWidget] Application changed to:', e.target.value);
+                    setSelectedApplication(e.target.value);
+                  }}
                   className="codex-floating-voice-widget__select"
                 >
                   {applications.map((app) => (

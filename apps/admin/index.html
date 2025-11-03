@@ -37,15 +37,21 @@
     <!-- Инициализация Zammad чата строго по документации -->
     <script>
       (function() {
+        console.log('[Zammad Init] Starting initialization...');
+
         // Ждем загрузки ZammadChat
         function initZammadChat() {
           if (typeof ZammadChat === 'undefined') {
+            console.log('[Zammad Init] ZammadChat not yet loaded, retrying...');
             setTimeout(initZammadChat, 100);
             return;
           }
 
           try {
-            new ZammadChat({
+            console.log('[Zammad Init] Creating ZammadChat instance...');
+
+            // Создаем экземпляр и сохраняем в window
+            const chatInstance = new ZammadChat({
               chatId: 1,
               title: '<strong>Поддержка</strong>',
               fontSize: '12px',
@@ -55,9 +61,24 @@
               debug: true,
               flat: true
             });
-            console.log('Zammad chat initialized from inline script');
+
+            // Сохраняем экземпляр глобально
+            window.zammadChatInstance = chatInstance;
+
+            console.log('[Zammad Init] Zammad chat initialized successfully');
+            console.log('[Zammad Init] Instance methods:', Object.keys(chatInstance));
+
+            // Добавляем событие для отладки
+            if (chatInstance.on) {
+              chatInstance.on('chat:open', function() {
+                console.log('[Zammad] Chat opened');
+              });
+              chatInstance.on('chat:close', function() {
+                console.log('[Zammad] Chat closed');
+              });
+            }
           } catch (error) {
-            console.error('Error initializing Zammad chat:', error);
+            console.error('[Zammad Init] Error initializing Zammad chat:', error);
           }
         }
 

@@ -22,13 +22,39 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ searchQuery, onSearch
   };
 
   const handleSupportClick = () => {
-    // Напрямую кликаем по кнопке Zammad чата
+    console.log('[DashboardHeader] Support button clicked');
+
+    // Способ 1: Через глобальный экземпляр чата
+    if ((window as any).zammadChatInstance) {
+      console.log('[DashboardHeader] Opening via zammadChatInstance');
+      try {
+        const instance = (window as any).zammadChatInstance;
+        if (typeof instance.open === 'function') {
+          instance.open();
+          return;
+        }
+      } catch (error) {
+        console.error('[DashboardHeader] Error opening chat via instance:', error);
+      }
+    }
+
+    // Способ 2: Кликаем по кнопке FloatingZammadChat
     const zammadButton = document.querySelector('.open-zammad-chat') as HTMLElement;
     if (zammadButton) {
+      console.log('[DashboardHeader] Clicking FloatingZammadChat button');
       zammadButton.click();
-    } else {
-      console.warn('Zammad chat button not found');
+      return;
     }
+
+    // Способ 3: Ищем кнопку чата в DOM
+    const chatButton = document.querySelector('.zammad-chat-button, .js-zammad-open') as HTMLElement;
+    if (chatButton) {
+      console.log('[DashboardHeader] Clicking Zammad chat button');
+      chatButton.click();
+      return;
+    }
+
+    console.error('[DashboardHeader] Unable to open Zammad chat - no methods available');
   };
 
   return (
