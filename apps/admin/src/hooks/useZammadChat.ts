@@ -106,6 +106,16 @@ export const useZammadChat = () => {
         if (!window.ZammadChat) {
           throw new Error('window.ZammadChat not available after script load');
         }
+
+        // ДИАГНОСТИКА: выводим что есть в ZammadChat
+        console.log('[useZammadChat] 📊 ДИАГНОСТИКА window.ZammadChat:');
+        console.log('[useZammadChat] typeof ZammadChat:', typeof window.ZammadChat);
+        console.log('[useZammadChat] ZammadChat.constructor.name:', window.ZammadChat?.constructor?.name);
+        console.log('[useZammadChat] Доступные методы и свойства:', Object.keys(window.ZammadChat));
+        console.log('[useZammadChat] Доступные методы прототипа:', window.ZammadChat.prototype ? Object.keys(window.ZammadChat.prototype) : 'нет прототипа');
+        console.log('[useZammadChat] init метод:', typeof window.ZammadChat.init);
+        console.log('[useZammadChat] Полный объект:', window.ZammadChat);
+
         console.log('[useZammadChat] ✅ Шаг 2 завершен');
 
         // Шаг 3: Инициализация чата
