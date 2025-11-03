@@ -19,6 +19,7 @@ export type CallState =
   | "registering"
   | "connecting"
   | "ringing"
+  | "incoming"
   | "connected"
   | "ended"
   | "error";
@@ -108,6 +109,12 @@ export interface LanguageChangeEvent {
   language: string;
 }
 
+export interface IncomingCallEvent {
+  callId?: string;
+  from?: string;
+  to?: string;
+}
+
 type EventMap = {
   registration: RegistrationEvent;
   call: CallStateEvent;
@@ -117,6 +124,7 @@ type EventMap = {
   dtmf: DtmfEvent;
   reconnecting: ReconnectEvent;
   language: LanguageChangeEvent;
+  incomingCall: IncomingCallEvent;
 };
 
 class TypedEmitter<TEvents extends Record<string, unknown>> {
@@ -155,6 +163,7 @@ export class CodexSipClient {
   private registerer?: Registerer;
   private currentSession?: SessionWithPeer;
   private remoteAudio?: HTMLAudioElement;
+  private pendingInvitation?: Invitation;
 
   private currentState: CallState = "idle";
   private preferredLanguage: string;
@@ -393,6 +402,62 @@ export class CodexSipClient {
     this.terminateSession(reason || "hangup");
   }
 
+  async acceptIncomingCall(options?: { language?: string }) {
+    if (!this.pendingInvitation) {
+      throw new Error("No incoming call to accept");
+    }
+
+    const invitation = this.pendingInvitation;
+    this.pendingInvitation = undefined;
+
+    const lang = options?.language || this.preferredLanguage || this.config.defaultLanguage;
+    this.preferredLanguage = lang;
+    this.emit("language", { language: this.preferredLanguage });
+
+    const answerHeaders = [`${this.languageHeader}: ${lang}`];
+
+    this.currentSession = invitation as SessionWithPeer;
+    this.currentSession.stateChange.addListener((state: SessionState) => this.handleSessionStateChange(state));
+    this.hookSessionDelegates(this.currentSession);
+
+    try {
+      await invitation.accept({
+        sessionDescriptionHandlerOptions: this.buildSessionDescriptionHandlerOptions(),
+        extraHeaders: answerHeaders,
+      });
+      this.emit("log", { level: "info", message: "Incoming call accepted" });
+    } catch (error) {
+      this.setState("error", error instanceof Error ? error.message : "Failed to accept call");
+      this.emit("log", {
+        level: "error",
+        message: "Failed to accept incoming call",
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
+      throw error;
+    }
+  }
+
+  async rejectIncomingCall(reason?: string) {
+    if (!this.pendingInvitation) {
+      throw new Error("No incoming call to reject");
+    }
+
+    try {
+      await this.pendingInvitation.reject({ statusCode: 486 });
+      this.emit("log", { level: "info", message: "Incoming call rejected" });
+    } catch (error) {
+      this.emit("log", {
+        level: "warn",
+        message: "Error rejecting incoming call",
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
+    } finally {
+      this.pendingInvitation = undefined;
+      this.activeCallId = undefined;
+      this.setState("idle", reason || "rejected");
+    }
+  }
+
   async mute() {
     this.muted = true;
     this.applyMuteState();
@@ -485,9 +550,24 @@ export class CodexSipClient {
         this.scheduleRegisterRetry();
       },
       onInvite: (invitation: Invitation) => {
-        // Inbound calls are currently not supported by the widget.
-        invitation.reject({ statusCode: 486 });
-        this.emit("log", { level: "warn", message: "Inbound INVITE rejected" });
+        // Store pending invitation for user to accept/reject
+        this.pendingInvitation = invitation;
+        this.activeCallId = invitation.request.callId;
+
+        const from = invitation.remoteIdentity?.displayName || invitation.remoteIdentity?.uri?.user || "Unknown";
+        const to = invitation.request.to?.uri?.user || "";
+
+        this.setState("incoming");
+        this.emit("incomingCall", {
+          callId: this.activeCallId,
+          from,
+          to,
+        });
+        this.emit("log", {
+          level: "info",
+          message: "Incoming call received",
+          context: { from, to, callId: this.activeCallId }
+        });
       },
     };
   }

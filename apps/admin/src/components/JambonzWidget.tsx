@@ -78,6 +78,9 @@ export const JambonzWidget: React.FC<JambonzWidgetProps> = ({ embedded = false }
         { code: 'ru', label: 'Русский', flag: '🇷🇺' },
         { code: 'en', label: 'English', flag: '🇬🇧' },
       ]}
+      apiBaseUrl={getSipConfig().apiBaseUrl}
+      apiKey={getSipConfig().apiKey}
+      accountSid={getSipConfig().accountSid}
     />
   );
 };
