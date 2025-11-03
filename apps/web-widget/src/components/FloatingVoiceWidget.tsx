@@ -168,6 +168,12 @@ export const FloatingVoiceWidget = ({
   // Load applications and phone numbers from Jambonz API
   useEffect(() => {
     if (apiBaseUrl && apiKey && accountSid) {
+      console.log('[FloatingVoiceWidget] Loading Jambonz applications...', {
+        apiBaseUrl,
+        accountSid,
+        hasApiKey: !!apiKey,
+      });
+
       const loadApplicationsAndNumbers = async () => {
         try {
           // Load applications
@@ -212,16 +218,27 @@ export const FloatingVoiceWidget = ({
 
           setApplications(appsWithNumbers);
 
+          console.log('[FloatingVoiceWidget] Loaded Jambonz applications:', appsWithNumbers);
+
           // Select first application by default
           if (appsWithNumbers.length > 0) {
             setSelectedApplication(appsWithNumbers[0].application_sid);
+            console.log('[FloatingVoiceWidget] Selected default application:', appsWithNumbers[0]);
+          } else {
+            console.warn('[FloatingVoiceWidget] No applications found!');
           }
         } catch (error) {
-          console.error('Failed to load applications and phone numbers:', error);
+          console.error('[FloatingVoiceWidget] Failed to load applications and phone numbers:', error);
         }
       };
 
       loadApplicationsAndNumbers();
+    } else {
+      console.warn('[FloatingVoiceWidget] Missing API credentials:', {
+        hasApiBaseUrl: !!apiBaseUrl,
+        hasApiKey: !!apiKey,
+        hasAccountSid: !!accountSid,
+      });
     }
   }, [apiBaseUrl, apiKey, accountSid]);
 
