@@ -24,6 +24,7 @@ export const useZammadChat = () => {
 
       try {
         const chat = new window.ZammadChat({
+          host: 'wss://zammad.okta-solutions.com',  // WebSocket host для подключения
           title: 'Поддержка',        // Заголовок окна чата
           fontSize: '12px',
           flat: true,
