@@ -179,6 +179,10 @@ export class CodexSipClient {
   constructor(config: SipClientConfig) {
     this.config = config;
     this.preferredLanguage = config.defaultLanguage;
+
+    // Validate WebSocket URL
+    this.validateWebSocketUrl(config.wssServer);
+
     this.userAgentOptions = this.createUserAgentOptions(config);
 
     if (config.onLog) {
@@ -255,7 +259,18 @@ export class CodexSipClient {
     this.setState("registering");
 
     try {
-      await ua.start();
+      // Start user agent if not connected
+      if (!ua.isConnected()) {
+        this.emit("log", {
+          level: "debug",
+          message: "Transport not connected, starting user agent",
+        });
+        await ua.start();
+
+        // Wait for transport to connect (with timeout)
+        await this.waitForTransportConnection(ua, 5000);
+      }
+
       await this.registerer.register();
     } catch (error) {
       this.isRegistering = false;
@@ -303,8 +318,25 @@ export class CodexSipClient {
     this.emit("language", { language: this.preferredLanguage });
 
     const ua = await this.ensureUserAgent();
+
+    // Ensure transport is connected before attempting call
     if (!ua.isConnected()) {
-      await ua.start();
+      this.emit("log", {
+        level: "debug",
+        message: "Transport not connected, starting user agent before call",
+      });
+
+      try {
+        await ua.start();
+        await this.waitForTransportConnection(ua, 5000);
+      } catch (error) {
+        this.emit("log", {
+          level: "error",
+          message: "Failed to establish transport connection",
+          error: error instanceof Error ? error : new Error(String(error)),
+        });
+        throw new Error("Cannot start call: transport connection failed");
+      }
     }
 
     // Ensure we're registered before making a call
@@ -533,7 +565,11 @@ export class CodexSipClient {
   private buildUserAgentDelegate(): UserAgentDelegate {
     return {
       onConnect: () => {
-        this.emit("log", { level: "info", message: "Transport connected" });
+        this.emit("log", {
+          level: "info",
+          message: "Transport connected successfully",
+          context: { wssServer: this.config.wssServer },
+        });
         // Only retry registration if we were attempting and not currently registered
         const shouldRetry =
           this.registerAttempt > 0 &&
@@ -542,6 +578,10 @@ export class CodexSipClient {
           this.registerer?.state !== RegistererState.Registered;
 
         if (shouldRetry) {
+          this.emit("log", {
+            level: "debug",
+            message: "Retrying registration after transport reconnection",
+          });
           this.scheduleRegisterRetry(0);
         }
       },
@@ -549,10 +589,29 @@ export class CodexSipClient {
         this.emit("log", {
           level: "warn",
           message: "Transport disconnected",
-          context: error ? { message: error.message } : undefined,
+          context: {
+            wssServer: this.config.wssServer,
+            error: error?.message,
+            registrationState: this.registerer?.state,
+          },
         });
+
+        // Mark as not registering to allow retry
         this.isRegistering = false;
-        this.scheduleRegisterRetry();
+
+        // Only schedule retry if we haven't exceeded max attempts
+        if (this.registerAttempt < (this.config.maxRegisterRetries ?? DEFAULT_MAX_REGISTER_RETRIES)) {
+          this.emit("log", {
+            level: "debug",
+            message: "Scheduling registration retry after disconnect",
+          });
+          this.scheduleRegisterRetry();
+        } else {
+          this.emit("log", {
+            level: "error",
+            message: "Max registration retries exceeded, not scheduling retry",
+          });
+        }
       },
       onInvite: (invitation: Invitation) => {
         // Store pending invitation for user to accept/reject
@@ -866,6 +925,92 @@ export class CodexSipClient {
 
   private emit<TKey extends keyof EventMap>(event: TKey, payload: EventMap[TKey]) {
     this.emitter.emit(event, payload);
+  }
+
+  /**
+   * Validate WebSocket URL to ensure secure connection
+   */
+  private validateWebSocketUrl(url: string): void {
+    if (!url) {
+      throw new Error("WebSocket URL is required");
+    }
+
+    // Check if URL starts with ws:// (insecure)
+    if (url.toLowerCase().startsWith("ws://")) {
+      // Warn about insecure connection
+      this.emit("log", {
+        level: "warn",
+        message: "Insecure WebSocket connection (ws://) detected. Consider using wss:// for secure connections.",
+        context: { url },
+      });
+
+      // If running in HTTPS context, this will likely fail due to mixed content policy
+      if (typeof window !== "undefined" && window.location.protocol === "https:") {
+        throw new Error(
+          "Cannot use insecure WebSocket (ws://) connection from HTTPS page. Please use wss:// instead."
+        );
+      }
+    } else if (!url.toLowerCase().startsWith("wss://")) {
+      throw new Error(
+        `Invalid WebSocket URL format: ${url}. Expected format: wss://hostname:port or ws://hostname:port`
+      );
+    }
+  }
+
+  /**
+   * Wait for transport to establish connection with timeout
+   */
+  private async waitForTransportConnection(ua: UserAgent, timeoutMs: number): Promise<void> {
+    if (ua.isConnected()) {
+      return;
+    }
+
+    return new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        cleanup();
+        reject(new Error(`Transport connection timeout after ${timeoutMs}ms`));
+      }, timeoutMs);
+
+      const onConnect = () => {
+        cleanup();
+        resolve();
+      };
+
+      const onDisconnect = (error?: Error) => {
+        cleanup();
+        reject(error || new Error("Transport disconnected during connection attempt"));
+      };
+
+      const cleanup = () => {
+        clearTimeout(timeout);
+        if (ua.delegate) {
+          const delegate = ua.delegate as any;
+          if (delegate.onConnect === onConnect) {
+            delete delegate.onConnect;
+          }
+          if (delegate.onDisconnect === onDisconnect) {
+            delete delegate.onDisconnect;
+          }
+          // Restore original delegate
+          ua.delegate = this.buildUserAgentDelegate();
+        }
+      };
+
+      // Check if already connected
+      if (ua.isConnected()) {
+        cleanup();
+        resolve();
+        return;
+      }
+
+      // Temporarily override delegate to listen for connection
+      const currentDelegate = ua.delegate || {};
+      ua.delegate = {
+        ...currentDelegate,
+        onConnect,
+        onDisconnect,
+      };
+    });
   }
 }
 

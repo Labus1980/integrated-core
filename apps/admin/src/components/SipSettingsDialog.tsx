@@ -28,7 +28,7 @@ export interface SipConfig {
 const DEFAULT_SIP_CONFIG: SipConfig = {
   displayName: 'Boris',
   sipDomain: 'avayalab.ru',
-  serverAddress: 'ws://jambonz-sipws.okta-solutions.com',
+  serverAddress: 'wss://jambonz-sipws.okta-solutions.com',
   username: '170',
   password: 'QApassw3',
   apiBaseUrl: 'https://jambonz-api.okta-solutions.com/api/v1',
@@ -135,7 +135,7 @@ const SipSettingsDialog: React.FC = () => {
               id="serverAddress"
               value={config.serverAddress}
               onChange={(e) => setConfig({ ...config, serverAddress: e.target.value })}
-              placeholder="ws://jambonz-sipws.okta-solutions.com"
+              placeholder="wss://jambonz-sipws.okta-solutions.com"
               required
             />
           </div>
