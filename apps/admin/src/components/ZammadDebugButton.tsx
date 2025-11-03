@@ -3,6 +3,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { MessageCircle, Bug } from 'lucide-react';
 
+declare global {
+  interface Window {
+    ZammadChat?: any;
+    zammadChat?: any;
+    openZammadChat?: () => void;
+  }
+}
+
 /**
  * Тестовая кнопка для диагностики Zammad чата
  * Выводит подробные логи для отладки
@@ -44,18 +52,19 @@ export const ZammadDebugButton: React.FC = () => {
     }
 
     // Проверка экземпляра
-    if (window.zammadChatInstance) {
-      addLog('window.zammadChatInstance существует', 'success');
-    } else {
-      addLog('window.zammadChatInstance НЕ СОЗДАН', 'error');
-    }
-
-    // Проверка флага готовности
-    if (window.zammadChatReady) {
-      addLog('window.zammadChatReady = true', 'success');
+    if (window.zammadChat) {
+      addLog('window.zammadChat существует', 'success');
+      addLog(`Тип: ${typeof window.zammadChat}`, 'info');
       setChatReady(true);
+
+      // Проверяем методы экземпляра
+      if (window.zammadChat.open) {
+        addLog('Метод zammadChat.open() доступен', 'success');
+      } else {
+        addLog('Метод zammadChat.open() НЕ НАЙДЕН', 'error');
+      }
     } else {
-      addLog('window.zammadChatReady = false или undefined', 'error');
+      addLog('window.zammadChat НЕ СОЗДАН', 'error');
       setChatReady(false);
     }
 
@@ -91,14 +100,14 @@ export const ZammadDebugButton: React.FC = () => {
       return;
     }
 
-    // Метод 2: напрямую через ZammadChat.open()
-    if (window.ZammadChat && typeof window.ZammadChat.open === 'function') {
+    // Метод 2: напрямую через window.zammadChat.open()
+    if (window.zammadChat && typeof window.zammadChat.open === 'function') {
       try {
-        addLog('Вызов ZammadChat.open()...', 'info');
-        window.ZammadChat.open();
-        addLog('ZammadChat.open() выполнен', 'success');
+        addLog('Вызов window.zammadChat.open()...', 'info');
+        window.zammadChat.open();
+        addLog('window.zammadChat.open() выполнен', 'success');
       } catch (err) {
-        addLog(`Ошибка ZammadChat.open(): ${err}`, 'error');
+        addLog(`Ошибка window.zammadChat.open(): ${err}`, 'error');
       }
       return;
     }
