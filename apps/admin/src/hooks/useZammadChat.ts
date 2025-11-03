@@ -1,27 +1,10 @@
-import { useEffect, useRef } from "react";
-
-interface ZammadChatConfig {
-  fontSize?: string;
-  chatId: number;
-  host: string;
-  debug?: boolean;
-  show?: boolean;
-  title?: string;
-  inactiveClass?: string;
-  buttonClass?: string;
-}
-
-interface ZammadChatInstance {
-  open?: () => void;
-  close?: () => void;
-}
-
-type ZammadChatConstructor = new (config: ZammadChatConfig) => ZammadChatInstance;
+import { useEffect, useRef } from 'react';
 
 declare global {
   interface Window {
-    ZammadChat?: ZammadChatConstructor;
-    zammadChatInstance?: ZammadChatInstance;
+    ZammadChat?: any;
+    zammadChat?: any;
+    openZammadChat?: () => void;
   }
 }
 
@@ -29,52 +12,62 @@ export const useZammadChat = () => {
   const initialized = useRef(false);
 
   useEffect(() => {
-    if (initialized.current) return;
-
-    if (typeof window === "undefined") {
+    if (initialized.current) {
       return;
     }
 
-    // Даем время на полную загрузку DOM и скриптов
-    const initTimer = setTimeout(() => {
-      const ZammadChatConstructor = window.ZammadChat;
+    const initChat = () => {
+      if (typeof window === 'undefined' || !window.ZammadChat) {
+        console.error('ZammadChat not found!');
+        return false;
+      }
 
-      if (ZammadChatConstructor) {
-        try {
-          // Убеждаемся, что body готов
-          if (!document.body) {
-            console.warn("Document body not ready, retrying...");
-            initialized.current = false;
-            return;
+      try {
+        const chat = new window.ZammadChat({
+          title: 'Поддержка',        // Заголовок окна чата
+          fontSize: '12px',
+          flat: true,
+          chatId: 1,                  // ID чата из админки Zammad
+          show: false,                // Не показывать автоматически
+          buttonClass: 'open-zammad-chat',
+          inactiveClass: 'is-inactive',
+          debug: false                // Поставьте true для отладки
+        });
+
+        window.zammadChat = chat;
+
+        // Глобальная функция для открытия чата программно
+        window.openZammadChat = () => {
+          try {
+            if (chat && typeof chat.open === 'function') {
+              chat.open();
+              return;
+            }
+          } catch (err) {
+            console.error('Error opening chat:', err);
           }
 
-          // Создаем и сохраняем экземпляр чата в window для программного доступа
-          const chatInstance = new ZammadChatConstructor({
-            fontSize: "12px",
-            chatId: 1,
-            host: "https://zammad.okta-solutions.com",
-            debug: true,
-            show: false,
-            title: "<strong>Поддержка</strong>",
-            inactiveClass: "is-inactive",
-            buttonClass: "open-zammad-chat",
-            background: "#3e6f9e",
-            // Убираем автоматическое создание кнопки чата
-            cssAutoload: true,
-            cssUrl: "",
-          });
+          // Fallback: клик по кнопке
+          const btn = document.querySelector('.open-zammad-chat') as HTMLElement | null;
+          if (btn) btn.click();
+        };
 
-          window.zammadChatInstance = chatInstance;
-          initialized.current = true;
-          console.log("Zammad chat initialized successfully", chatInstance);
-        } catch (error) {
-          console.error("Failed to initialize Zammad chat:", error);
-        }
-      } else {
-        console.warn("ZammadChat not found. Make sure the script is loaded.");
+        initialized.current = true;
+        console.log('Zammad chat initialized successfully');
+        return true;
+      } catch (error) {
+        console.error('Failed to initialize Zammad chat:', error);
+        return false;
       }
-    }, 500); // Увеличиваем задержку для загрузки скриптов
+    };
 
-    return () => clearTimeout(initTimer);
+    if (!initChat()) {
+      const timer = setTimeout(() => {
+        if (!initialized.current) {
+          initChat();
+        }
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
   }, []);
 };

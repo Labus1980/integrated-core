@@ -118,3 +118,82 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Zammad Chat Widget Styling */
+.zammad-chat {
+  font-family: inherit !important;
+}
+
+.zammad-chat-button {
+  bottom: 20px !important;
+  right: 20px !important;
+  background: hsl(var(--primary)) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  transition: transform 0.2s ease !important;
+}
+
+.zammad-chat-button:hover {
+  transform: scale(1.05) !important;
+}
+
+.zammad-chat-window {
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2) !important;
+  overflow: hidden !important;
+}
+
+.zammad-chat-header {
+  background: hsl(var(--primary)) !important;
+  color: white !important;
+  padding: 16px !important;
+}
+
+.zammad-chat-body {
+  background: hsl(var(--background)) !important;
+  padding: 16px !important;
+}
+
+.zammad-chat-message--customer {
+  background: hsl(var(--primary)) !important;
+  color: white !important;
+  border-radius: 12px !important;
+  padding: 10px 14px !important;
+}
+
+.zammad-chat-message--agent {
+  background: hsl(var(--muted)) !important;
+  color: hsl(var(--foreground)) !important;
+  border-radius: 12px !important;
+  padding: 10px 14px !important;
+}
+
+.zammad-chat-input {
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 8px !important;
+  padding: 10px !important;
+  background: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.zammad-chat-send {
+  background: hsl(var(--primary)) !important;
+  color: white !important;
+  border-radius: 8px !important;
+  padding: 10px 16px !important;
+  transition: opacity 0.2s ease !important;
+}
+
+.zammad-chat-send:hover {
+  opacity: 0.9 !important;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .zammad-chat-window {
+    width: 100vw !important;
+    height: 100vh !important;
+    border-radius: 0 !important;
+    bottom: 0 !important;
+    right: 0 !important;
+  }
+}
