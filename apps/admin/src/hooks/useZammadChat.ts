@@ -81,9 +81,12 @@ const loadZammadScript = (): Promise<void> => {
 };
 
 export const useZammadChat = () => {
+  console.log('[useZammadChat] 🚀 ХУК ВЫЗВАН! Начало выполнения');
   const initialized = useRef(false);
 
   useEffect(() => {
+    console.log('[useZammadChat] 🚀 useEffect ЗАПУЩЕН');
+
     if (initialized.current) {
       console.log('[useZammadChat] Already initialized, skipping');
       return;
