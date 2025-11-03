@@ -21,9 +21,27 @@ export const ZammadChatContainer: React.FC<ZammadChatContainerProps> = ({ isActi
 
     if (chatOpenedRef.current) return;
 
-    // Даем время на инициализацию Zammad Chat (увеличено до 1 секунды)
-    const timer = setTimeout(() => {
-      console.log('Attempting to open Zammad chat...', window.zammadChatInstance);
+    // Функция для попытки открыть чат
+    const tryOpenChat = (attempt: number = 0) => {
+      const maxAttempts = 10;
+
+      console.log(`Attempting to open Zammad chat (attempt ${attempt + 1}/${maxAttempts})...`, {
+        instance: !!window.zammadChatInstance,
+        hasOpen: typeof window.zammadChatInstance?.open === 'function',
+        openFunction: !!window.openZammadChat
+      });
+
+      // Используем глобальную функцию openZammadChat, если доступна
+      if (window.openZammadChat) {
+        try {
+          window.openZammadChat();
+          chatOpenedRef.current = true;
+          console.log('Zammad chat opened via openZammadChat()');
+          return true;
+        } catch (error) {
+          console.error('Error calling openZammadChat():', error);
+        }
+      }
 
       // Программно открываем Zammad Chat через API
       if (window.zammadChatInstance?.open) {
@@ -31,31 +49,46 @@ export const ZammadChatContainer: React.FC<ZammadChatContainerProps> = ({ isActi
           window.zammadChatInstance.open();
           chatOpenedRef.current = true;
           console.log('Zammad chat opened programmatically via API');
+          return true;
         } catch (error) {
           console.error('Error opening Zammad chat:', error);
         }
-      } else {
-        console.warn('Zammad chat instance not found. Trying to find chat button...');
-        // Fallback: пытаемся найти и кликнуть по кнопке
-        const chatButton = document.querySelector('.open-zammad-chat') as HTMLElement;
-        if (chatButton) {
-          try {
-            chatButton.click();
-            chatOpenedRef.current = true;
-            console.log('Zammad chat opened via button click');
-          } catch (error) {
-            console.error('Error clicking chat button:', error);
-          }
-        } else {
-          console.error('Could not open Zammad chat: instance and button not found');
-          console.log('Available elements:', {
-            body: !!document.body,
-            chatInstance: !!window.zammadChatInstance,
-            chatButton: !!document.querySelector('.open-zammad-chat')
-          });
+      }
+
+      // Fallback: пытаемся найти и кликнуть по кнопке
+      const chatButton = document.querySelector('.open-zammad-chat') as HTMLElement;
+      if (chatButton) {
+        try {
+          chatButton.click();
+          chatOpenedRef.current = true;
+          console.log('Zammad chat opened via button click');
+          return true;
+        } catch (error) {
+          console.error('Error clicking chat button:', error);
         }
       }
-    }, 1000); // Увеличена задержка с 300ms до 1000ms
+
+      // Если не удалось открыть, повторяем попытку
+      if (attempt < maxAttempts - 1) {
+        const nextDelay = 500 + (attempt * 200); // Увеличиваем задержку с каждой попыткой
+        console.log(`Retrying in ${nextDelay}ms...`);
+        setTimeout(() => tryOpenChat(attempt + 1), nextDelay);
+      } else {
+        console.error('Could not open Zammad chat after', maxAttempts, 'attempts');
+        console.log('Debug info:', {
+          body: !!document.body,
+          chatInstance: !!window.zammadChatInstance,
+          chatButton: !!document.querySelector('.open-zammad-chat'),
+          ZammadChat: !!window.ZammadChat,
+          openFunction: !!window.openZammadChat
+        });
+      }
+
+      return false;
+    };
+
+    // Начинаем попытки через 1 секунду после активации
+    const timer = setTimeout(() => tryOpenChat(), 1000);
 
     return () => {
       clearTimeout(timer);
