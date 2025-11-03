@@ -108,14 +108,27 @@ export const useZammadChat = () => {
         }
         console.log('[useZammadChat] ✅ Шаг 2 завершен');
 
-        // Шаг 3: Инициализация чата
-        console.log('[useZammadChat] Шаг 3: Инициализация чата...');
+        // Шаг 3: Создание или проверка контейнера для чата
+        console.log('[useZammadChat] Шаг 3: Подготовка контейнера...');
+        let container = document.getElementById('zammad-chat-container');
+
+        if (!container) {
+          console.log('[useZammadChat] Контейнер не найден, создаём новый');
+          container = document.createElement('div');
+          container.id = 'zammad-chat-container';
+          document.body.appendChild(container);
+        }
+        console.log('[useZammadChat] ✅ Контейнер готов:', container.id);
+
+        // Шаг 4: Инициализация чата
+        console.log('[useZammadChat] Шаг 4: Инициализация чата...');
         console.log('[useZammadChat] Тип window.ZammadChat:', typeof window.ZammadChat);
 
-        // Правильная инициализация через конструктор
+        // Правильная инициализация через конструктор с указанием target
         const chatInstance = new window.ZammadChat({
           chatId: 1,
           host: 'https://zammad.okta-solutions.com',
+          target: document.body, // Указываем, куда рендерить чат
           title: 'Поддержка OKTA Solutions',
           fontSize: '12px',
           flat: true,
@@ -124,9 +137,10 @@ export const useZammadChat = () => {
           inactiveClass: 'is-inactive',
           debug: true,
         });
-        console.log('[useZammadChat] ✅ Шаг 3 завершен - new ZammadChat() создан');
+        console.log('[useZammadChat] ✅ Шаг 4 завершен - new ZammadChat() создан');
 
-        // Шаг 4: Сохранение экземпляра
+        // Шаг 5: Сохранение экземпляра
+        console.log('[useZammadChat] Шаг 5: Сохранение экземпляра...');
         window.zammadChatInstance = chatInstance;
         window.zammadChatReady = true;
 
