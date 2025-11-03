@@ -465,6 +465,32 @@ export const floatingWidgetStyles = `
     padding: 8px;
   }
 
+  /* ===== Call Target Display ===== */
+  .codex-floating-voice-widget__call-target {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, var(--codex-gradient-start), var(--codex-gradient-end));
+    border-radius: 12px;
+    animation: codex-fade-in 0.3s ease-out;
+  }
+
+  .codex-floating-voice-widget__call-target-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .codex-floating-voice-widget__call-target-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.3;
+  }
+
   /* ===== Mobile Responsive ===== */
   @media (max-width: 768px) {
     .codex-floating-voice-widget--bottom-right,
