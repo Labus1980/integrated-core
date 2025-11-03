@@ -43,8 +43,7 @@ export const useZammadChat = () => {
           fontSize: '12px',
           flat: true,
           chatId: 1,
-          host: 'https://zammad.okta-solutions.com',
-          wsHost: 'wss://zammad.okta-solutions.com/ws',
+          host: 'https://zammad.okta-solutions.com/ws', // Добавляем /ws к хосту
           show: false,
           buttonClass: 'open-zammad-chat',
           inactiveClass: 'is-inactive',
