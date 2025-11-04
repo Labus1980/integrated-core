@@ -526,20 +526,39 @@ export class CodexSipClient {
     }
 
     try {
-      await this.currentSession.info({
-        requestOptions: {
-          body: {
-            contentDisposition: "render",
-            contentType: "application/dtmf-relay",
-            content: `Signal=${tone}\r\nDuration=160`
-          },
-        },
-      });
+      // Get the peer connection and audio sender
+      const handler = this.currentSession.sessionDescriptionHandler as unknown as { peerConnection?: RTCPeerConnection } | undefined;
+      const peer = handler?.peerConnection;
+
+      if (!peer) {
+        throw new Error("No peer connection available");
+      }
+
+      // Find the audio sender
+      const audioSender = peer.getSenders().find(sender => sender.track?.kind === 'audio');
+
+      if (!audioSender) {
+        throw new Error("No audio sender available for DTMF");
+      }
+
+      // Check if DTMF is supported
+      if (!audioSender.dtmf) {
+        this.emit("log", {
+          level: "warn",
+          message: "DTMF not supported by this browser/connection",
+        });
+        throw new Error("DTMF not supported");
+      }
+
+      // Send DTMF using WebRTC standard method
+      // Duration: 100ms (recommended), gap: 70ms (recommended)
+      audioSender.dtmf.insertDTMF(tone, 100, 70);
+
       this.emit("dtmf", { tone });
       this.emit("log", {
         level: "info",
         message: "DTMF sent successfully",
-        context: { tone },
+        context: { tone, method: "insertDTMF" },
       });
     } catch (error) {
       this.emit("log", {
