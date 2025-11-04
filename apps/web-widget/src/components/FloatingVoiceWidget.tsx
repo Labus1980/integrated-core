@@ -38,6 +38,8 @@ const translations = {
     accept: "Accept",
     reject: "Reject",
     incomingFrom: "Incoming call from",
+    showKeypad: "Show Keypad",
+    hideKeypad: "Hide Keypad",
   },
   ru: {
     title: "Голосовой чат",
@@ -57,6 +59,8 @@ const translations = {
     accept: "Принять",
     reject: "Отклонить",
     incomingFrom: "Входящий звонок от",
+    showKeypad: "Показать клавиатуру",
+    hideKeypad: "Скрыть клавиатуру",
   },
 };
 
@@ -88,6 +92,7 @@ export const FloatingVoiceWidget = ({
   const [callDuration, setCallDuration] = useState(0);
   const durationTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [incomingCall, setIncomingCall] = useState<IncomingCallEvent | null>(null);
+  const [showKeypad, setShowKeypad] = useState(false);
 
   const initialLang = languages[0]?.code ?? client.language;
   const [selectedLanguage, setSelectedLanguage] = useState<string>(initialLang);
@@ -352,7 +357,7 @@ export const FloatingVoiceWidget = ({
 
             <AudioVisualizer isActive={isLive} />
 
-            {isLive && (
+            {isLive && showKeypad && (
               <DTMFKeypad
                 onKeyPress={handleDtmfKeyPress}
                 theme={theme}
@@ -416,38 +421,63 @@ export const FloatingVoiceWidget = ({
               )}
 
               {isLive && (
-                <button
-                  type="button"
-                  className={clsx(
-                    "codex-floating-voice-widget__control-btn",
-                    isMuted && "codex-floating-voice-widget__control-btn--active"
-                  )}
-                  onClick={handleMuteToggle}
-                  aria-pressed={isMuted}
-                >
-                  <svg viewBox="0 0 24 24" fill="none">
-                    {isMuted ? (
-                      <>
+                <>
+                  <button
+                    type="button"
+                    className={clsx(
+                      "codex-floating-voice-widget__control-btn",
+                      isMuted && "codex-floating-voice-widget__control-btn--active"
+                    )}
+                    onClick={handleMuteToggle}
+                    aria-pressed={isMuted}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none">
+                      {isMuted ? (
+                        <>
+                          <path
+                            d="M3 3l18 18M17 10v2a5 5 0 0 1-7 4.6M5 10v2a7 7 0 0 0 10.9 5.8"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                          />
+                          <path
+                            d="M12 1a3 3 0 0 0-3 3v8l3-3V4a3 3 0 0 0-3-3z"
+                            fill="currentColor"
+                          />
+                        </>
+                      ) : (
                         <path
-                          d="M3 3l18 18M17 10v2a5 5 0 0 1-7 4.6M5 10v2a7 7 0 0 0 10.9 5.8"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                        <path
-                          d="M12 1a3 3 0 0 0-3 3v8l3-3V4a3 3 0 0 0-3-3z"
+                          d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"
                           fill="currentColor"
                         />
-                      </>
-                    ) : (
-                      <path
-                        d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"
-                        fill="currentColor"
-                      />
+                      )}
+                    </svg>
+                    <span>{isMuted ? t.unmute : t.mute}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={clsx(
+                      "codex-floating-voice-widget__control-btn",
+                      showKeypad && "codex-floating-voice-widget__control-btn--active"
                     )}
-                  </svg>
-                  <span>{isMuted ? t.unmute : t.mute}</span>
-                </button>
+                    onClick={() => setShowKeypad(!showKeypad)}
+                    aria-pressed={showKeypad}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="4" y="4" width="4" height="4" rx="1" fill="currentColor" />
+                      <rect x="10" y="4" width="4" height="4" rx="1" fill="currentColor" />
+                      <rect x="16" y="4" width="4" height="4" rx="1" fill="currentColor" />
+                      <rect x="4" y="10" width="4" height="4" rx="1" fill="currentColor" />
+                      <rect x="10" y="10" width="4" height="4" rx="1" fill="currentColor" />
+                      <rect x="16" y="10" width="4" height="4" rx="1" fill="currentColor" />
+                      <rect x="4" y="16" width="4" height="4" rx="1" fill="currentColor" />
+                      <rect x="10" y="16" width="4" height="4" rx="1" fill="currentColor" />
+                      <rect x="16" y="16" width="4" height="4" rx="1" fill="currentColor" />
+                    </svg>
+                    <span>{showKeypad ? t.hideKeypad : t.showKeypad}</span>
+                  </button>
+                </>
               )}
 
               {(isLive || isBusy) && (
