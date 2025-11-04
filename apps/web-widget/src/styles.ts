@@ -495,8 +495,8 @@ export const floatingWidgetStyles = `
   .dtmf-keypad {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    padding: 16px;
+    gap: 8px;
+    padding: 12px;
     background: var(--codex-surface-elevated);
     border-radius: 12px;
   }
@@ -507,10 +507,12 @@ export const floatingWidgetStyles = `
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 2px;
     width: 100%;
     aspect-ratio: 1;
-    padding: 16px 8px;
+    max-width: 64px;
+    max-height: 64px;
+    padding: 8px 4px;
     background: var(--codex-surface);
     border: 2px solid var(--codex-border);
     border-radius: 50%;
@@ -519,6 +521,7 @@ export const floatingWidgetStyles = `
     overflow: hidden;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
+    margin: 0 auto;
   }
 
   .dtmf-key:hover:not(.dtmf-key--disabled) {
@@ -560,7 +563,7 @@ export const floatingWidgetStyles = `
   }
 
   .dtmf-key__digit {
-    font-size: 24px;
+    font-size: 18px;
     font-weight: 700;
     color: var(--codex-text);
     line-height: 1;
@@ -572,10 +575,10 @@ export const floatingWidgetStyles = `
   }
 
   .dtmf-key__letters {
-    font-size: 10px;
+    font-size: 8px;
     font-weight: 600;
     color: var(--codex-text-muted);
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     line-height: 1;
     text-transform: uppercase;
   }
@@ -627,20 +630,22 @@ export const floatingWidgetStyles = `
     }
 
     .dtmf-keypad {
-      gap: 8px;
-      padding: 12px;
+      gap: 6px;
+      padding: 10px;
     }
 
     .dtmf-key {
-      padding: 12px 6px;
+      padding: 6px 4px;
+      max-width: 56px;
+      max-height: 56px;
     }
 
     .dtmf-key__digit {
-      font-size: 20px;
+      font-size: 16px;
     }
 
     .dtmf-key__letters {
-      font-size: 9px;
+      font-size: 7px;
     }
   }
 

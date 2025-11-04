@@ -524,18 +524,23 @@ export class CodexSipClient {
     if (!this.currentSession) {
       throw new Error("No active session to send DTMF");
     }
-    const body = {
-      contentType: "application/dtmf-relay",
-      body: `Signal=${tone}\r\nDuration=160`
-    };
+
     try {
       await this.currentSession.info({
         requestOptions: {
-          body: body as any,
-          extraHeaders: ["Content-Type: application/dtmf-relay"],
+          body: {
+            contentDisposition: "render",
+            contentType: "application/dtmf-relay",
+            content: `Signal=${tone}\r\nDuration=160`
+          },
         },
       });
       this.emit("dtmf", { tone });
+      this.emit("log", {
+        level: "info",
+        message: "DTMF sent successfully",
+        context: { tone },
+      });
     } catch (error) {
       this.emit("log", {
         level: "warn",
