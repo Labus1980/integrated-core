@@ -312,8 +312,9 @@
 /* Mobile Adjustments for Zammad Button */
 @media (max-width: 768px) {
   .floating-zammad-button {
-    bottom: 1rem;
-    right: 1rem;
+    bottom: 1rem !important;
+    right: 1rem !important;
+    left: auto !important;
     width: 56px;
     height: 56px;
   }
@@ -330,7 +331,9 @@
   .floating-zammad-button {
     width: 52px;
     height: 52px;
-    right: 0.5rem;
+    right: 0.5rem !important;
+    left: auto !important;
+    bottom: 1rem !important;
   }
 
   .floating-zammad-button ~ .floating-chat-panel {
