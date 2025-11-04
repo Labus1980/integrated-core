@@ -1,5 +1,6 @@
 import { useState } from "react";
 import clsx from "clsx";
+import { playDtmfTone } from "../utils/dtmfAudio";
 
 interface DTMFKey {
   digit: string;
@@ -34,6 +35,11 @@ export const DTMFKeypad = ({ onKeyPress, theme = "dark", disabled = false }: DTM
     if (disabled) return;
 
     setActiveKey(digit);
+
+    // Play DTMF audio tone locally
+    playDtmfTone(digit, 100, 0.3);
+
+    // Send DTMF to remote party
     onKeyPress(digit);
 
     // Vibration feedback on mobile
