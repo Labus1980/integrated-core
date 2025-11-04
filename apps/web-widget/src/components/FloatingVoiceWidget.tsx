@@ -11,23 +11,6 @@ import { FloatingButton } from "./FloatingButton";
 import { AudioVisualizer } from "./AudioVisualizer";
 import { LanguageSelector, LanguageOption } from "./LanguageSelector";
 
-interface JambonzApplication {
-  application_sid: string;
-  name: string;
-}
-
-interface JambonzPhoneNumber {
-  phone_number_sid: string;
-  account_sid: string;
-  application_sid?: string;
-  number: string;
-  voip_carrier_sid?: string;
-}
-
-interface ApplicationWithNumber extends JambonzApplication {
-  phoneNumber?: string;
-}
-
 const defaultLanguages: LanguageOption[] = [
   { code: "en", label: "English", flag: "🇬🇧" },
   { code: "ru", label: "Русский", flag: "🇷🇺" },
@@ -54,8 +37,6 @@ const translations = {
     accept: "Accept",
     reject: "Reject",
     incomingFrom: "Incoming call from",
-    selectApplication: "Select Application",
-    noApplications: "No applications available",
   },
   ru: {
     title: "Голосовой чат",
@@ -75,8 +56,6 @@ const translations = {
     accept: "Принять",
     reject: "Отклонить",
     incomingFrom: "Входящий звонок от",
-    selectApplication: "Выбор Оператора",
-    noApplications: "Нет доступных приложений",
   },
 };
 
@@ -88,10 +67,6 @@ export interface FloatingVoiceWidgetProps {
   position?: "bottom-right" | "bottom-left" | "top-right" | "top-left";
   autoRegister?: boolean;
   embedded?: boolean;
-  apiBaseUrl?: string;
-  apiKey?: string;
-  accountSid?: string;
-  sipDomain?: string;
 }
 
 export const FloatingVoiceWidget = ({
@@ -102,10 +77,6 @@ export const FloatingVoiceWidget = ({
   position = "bottom-right",
   autoRegister = true,
   embedded = false,
-  apiBaseUrl,
-  apiKey,
-  accountSid,
-  sipDomain,
 }: FloatingVoiceWidgetProps) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const previousCallStateRef = useRef<CallState>("idle");
@@ -116,10 +87,6 @@ export const FloatingVoiceWidget = ({
   const [callDuration, setCallDuration] = useState(0);
   const durationTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [incomingCall, setIncomingCall] = useState<IncomingCallEvent | null>(null);
-  const [applications, setApplications] = useState<ApplicationWithNumber[]>([]);
-  const [selectedApplication, setSelectedApplication] = useState<string>("");
-  const [showApplicationSelector, setShowApplicationSelector] = useState(false);
-  const [currentCallTarget, setCurrentCallTarget] = useState<string>("");
 
   const initialLang = languages[0]?.code ?? client.language;
   const [selectedLanguage, setSelectedLanguage] = useState<string>(initialLang);
@@ -165,92 +132,6 @@ export const FloatingVoiceWidget = ({
     client.setLanguage(selectedLanguage);
   }, [client, selectedLanguage]);
 
-  // Load applications and phone numbers from Jambonz API
-  useEffect(() => {
-    if (apiBaseUrl && apiKey && accountSid) {
-      console.log('[FloatingVoiceWidget] Loading Jambonz applications...', {
-        apiBaseUrl,
-        accountSid,
-        hasApiKey: !!apiKey,
-      });
-
-      const loadApplicationsAndNumbers = async () => {
-        try {
-          // Load applications
-          const appsUrl = `${apiBaseUrl}/Accounts/${accountSid}/Applications`;
-          const appsResponse = await fetch(appsUrl, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${apiKey}`,
-              'Content-Type': 'application/json',
-            },
-          });
-
-          if (!appsResponse.ok) {
-            throw new Error('Failed to load applications');
-          }
-
-          const appsData: JambonzApplication[] = await appsResponse.json();
-
-          // Load phone numbers (optional - may not be available on all Jambonz instances)
-          let phoneNumbers: JambonzPhoneNumber[] = [];
-          try {
-            const numbersUrl = `${apiBaseUrl}/Accounts/${accountSid}/PhoneNumbers`;
-            const numbersResponse = await fetch(numbersUrl, {
-              method: 'GET',
-              headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json',
-              },
-            });
-
-            if (numbersResponse.ok) {
-              phoneNumbers = await numbersResponse.json();
-              console.log('[FloatingVoiceWidget] Loaded phone numbers:', phoneNumbers.length);
-            } else if (numbersResponse.status === 404) {
-              console.warn('[FloatingVoiceWidget] Phone numbers endpoint not available (404). Applications will work without phone number display.');
-            } else {
-              console.warn('[FloatingVoiceWidget] Failed to load phone numbers:', numbersResponse.status, numbersResponse.statusText);
-            }
-          } catch (error) {
-            console.warn('[FloatingVoiceWidget] Phone numbers are not available:', error instanceof Error ? error.message : 'Unknown error');
-          }
-
-          // Merge applications with their phone numbers
-          const appsWithNumbers: ApplicationWithNumber[] = appsData.map(app => {
-            const phoneNumber = phoneNumbers.find(num => num.application_sid === app.application_sid);
-            return {
-              ...app,
-              phoneNumber: phoneNumber?.number,
-            };
-          });
-
-          setApplications(appsWithNumbers);
-
-          console.log('[FloatingVoiceWidget] Loaded Jambonz applications:', appsWithNumbers);
-
-          // Select first application by default
-          if (appsWithNumbers.length > 0) {
-            setSelectedApplication(appsWithNumbers[0].application_sid);
-            console.log('[FloatingVoiceWidget] Selected default application:', appsWithNumbers[0]);
-          } else {
-            console.warn('[FloatingVoiceWidget] No applications found!');
-          }
-        } catch (error) {
-          console.error('[FloatingVoiceWidget] Failed to load applications and phone numbers:', error);
-        }
-      };
-
-      loadApplicationsAndNumbers();
-    } else {
-      console.warn('[FloatingVoiceWidget] Missing API credentials:', {
-        hasApiBaseUrl: !!apiBaseUrl,
-        hasApiKey: !!apiKey,
-        hasAccountSid: !!accountSid,
-      });
-    }
-  }, [apiBaseUrl, apiKey, accountSid]);
-
   useEffect(() => {
     if (!autoRegister) return;
 
@@ -281,7 +162,7 @@ export const FloatingVoiceWidget = ({
       }
 
       if (event.state === "ended" || event.state === "error") {
-        console.log('[FloatingVoiceWidget] Call ended/error, clearing currentCallTarget');
+        console.log('[FloatingVoiceWidget] Call ended/error');
         // Воспроизводим звук завершения звонка только если мы были в активном звонке
         if (previousState === "connected" || previousState === "ringing" || previousState === "connecting") {
           playHangupSound();
@@ -292,17 +173,15 @@ export const FloatingVoiceWidget = ({
           durationTimerRef.current = null;
         }
         setIncomingCall(null);
-        setCurrentCallTarget("");
       }
 
       if (event.state === "idle") {
-        console.log('[FloatingVoiceWidget] Call idle, clearing currentCallTarget');
+        console.log('[FloatingVoiceWidget] Call idle');
         if (durationTimerRef.current) {
           clearInterval(durationTimerRef.current);
           durationTimerRef.current = null;
         }
         setIncomingCall(null);
-        setCurrentCallTarget("");
       }
     };
 
@@ -332,70 +211,17 @@ export const FloatingVoiceWidget = ({
   const handleButtonClick = async () => {
     if (callState === "idle" || callState === "ended" || callState === "error") {
       setIsExpanded(true);
-
-      // Если приложений больше одного, НЕ звоним автоматически - даем пользователю выбрать
-      if (applications.length > 1) {
-        console.log('[FloatingVoiceWidget] Multiple applications available, waiting for user selection');
-        return;
-      }
-
-      // Если приложение одно, звоним автоматически
-      const app = applications.find(a => a.application_sid === selectedApplication);
-      if (!app) {
-        console.error("No application selected");
-        return;
-      }
-
-      try {
-        // Determine target URI: use phone number if available, otherwise use app name
-        let targetUri: string;
-        if (app.phoneNumber) {
-          // Call using phone number
-          targetUri = sipDomain ? `sip:${app.phoneNumber}@${sipDomain}` : `sip:${app.phoneNumber}`;
-          setCurrentCallTarget(`${app.name} (${app.phoneNumber})`);
-        } else {
-          // Fallback to calling by application name
-          targetUri = sipDomain ? `sip:${app.name}@${sipDomain}` : `sip:${app.name}`;
-          setCurrentCallTarget(app.name);
-        }
-
-        console.log(`Calling application: ${app.name}, target URI: ${targetUri}`);
-        await client.startCall({ language: selectedLanguage, targetUri });
-      } catch (error) {
-        console.error("Failed to start call:", error);
-        setCurrentCallTarget("");
-      }
     } else {
       setIsExpanded(!isExpanded);
     }
   };
 
   const handleCall = async () => {
-    // Find selected application and its phone number or name
-    const app = applications.find(a => a.application_sid === selectedApplication);
-    if (!app) {
-      console.error("No application selected");
-      return;
-    }
-
     try {
-      // Determine target URI: use phone number if available, otherwise use app name
-      let targetUri: string;
-      if (app.phoneNumber) {
-        // Call using phone number
-        targetUri = sipDomain ? `sip:${app.phoneNumber}@${sipDomain}` : `sip:${app.phoneNumber}`;
-        setCurrentCallTarget(`${app.name} (${app.phoneNumber})`);
-      } else {
-        // Fallback to calling by application name
-        targetUri = sipDomain ? `sip:${app.name}@${sipDomain}` : `sip:${app.name}`;
-        setCurrentCallTarget(app.name);
-      }
-
-      console.log(`Calling application: ${app.name}, target URI: ${targetUri}`);
-      await client.startCall({ language: selectedLanguage, targetUri });
+      console.log(`Starting call with language: ${selectedLanguage}`);
+      await client.startCall({ language: selectedLanguage });
     } catch (error) {
       console.error("Failed to start call:", error);
-      setCurrentCallTarget("");
     }
   };
 
@@ -405,12 +231,10 @@ export const FloatingVoiceWidget = ({
 
     await client.hangup();
 
-    // В embedded режиме не сворачиваем виджет, чтобы пользователь мог выбрать другое приложение
+    // В embedded режиме не сворачиваем виджет
     if (!embedded) {
       setIsExpanded(false);
     }
-    // Сбрасываем цель звонка для возврата к выбору приложения
-    setCurrentCallTarget("");
   };
 
   const handleMuteToggle = async () => {
@@ -518,40 +342,6 @@ export const FloatingVoiceWidget = ({
 
             <AudioVisualizer isActive={isLive} />
 
-            {!isLive && !isBusy && applications.length > 0 && (
-              <div className="codex-floating-voice-widget__application-selector">
-                <label htmlFor="app-select" className="codex-floating-voice-widget__label">
-                  {t.selectApplication}
-                </label>
-                <select
-                  id="app-select"
-                  value={selectedApplication}
-                  onChange={(e) => {
-                    console.log('[FloatingVoiceWidget] Application changed to:', e.target.value);
-                    setSelectedApplication(e.target.value);
-                  }}
-                  className="codex-floating-voice-widget__select"
-                >
-                  {applications.map((app) => (
-                    <option key={app.application_sid} value={app.application_sid}>
-                      {app.name}{app.phoneNumber ? ` (${app.phoneNumber})` : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {(isLive || isBusy) && currentCallTarget && (
-              <div className="codex-floating-voice-widget__call-target">
-                <span className="codex-floating-voice-widget__call-target-label">
-                  {locale === "ru" ? "Звоним:" : "Calling:"}
-                </span>
-                <span className="codex-floating-voice-widget__call-target-name">
-                  {currentCallTarget}
-                </span>
-              </div>
-            )}
-
             <LanguageSelector
               languages={languages}
               selected={selectedLanguage}
@@ -565,7 +355,6 @@ export const FloatingVoiceWidget = ({
                   type="button"
                   className="codex-floating-voice-widget__control-btn codex-floating-voice-widget__control-btn--success"
                   onClick={handleCall}
-                  disabled={!selectedApplication}
                 >
                   <svg viewBox="0 0 24 24" fill="none">
                     <path
