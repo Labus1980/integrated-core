@@ -394,17 +394,23 @@ export class CodexSipClient {
       });
     }
 
-    const target = this.resolveTargetUri(options?.targetUri || this.config.targetUri);
+    // Generate a unique call ID for this session with okta prefix BEFORE creating target URI
+    this.activeCallId = generateSessionId();
+
+    // Add session ID as URI parameter for Jambonz to capture (using semicolon for SIP params)
+    const targetUriString = options?.targetUri || this.config.targetUri;
+    const targetWithSessionId = `${targetUriString};x-okta-session=${this.activeCallId}`;
+
+    const target = this.resolveTargetUri(targetWithSessionId);
     if (!target) {
       throw new Error("Unable to parse target SIP URI");
     }
 
-    // Generate a unique call ID for this session with okta prefix
-    this.activeCallId = generateSessionId();
-
     const inviteHeaders = [...(this.config.extraHeaders || [])];
     inviteHeaders.push(`${this.languageHeader}: ${lang}`);
     inviteHeaders.push(`X-Session-Id: ${this.activeCallId}`);
+    // Add session ID to User-Agent for Jambonz to capture
+    inviteHeaders.push(`User-Agent: CodexSIP/1.0 (SessionId: ${this.activeCallId})`);
     if (options?.extraHeaders) {
       inviteHeaders.push(...options.extraHeaders);
     }
