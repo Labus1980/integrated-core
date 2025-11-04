@@ -10,6 +10,7 @@ import {
 import { FloatingButton } from "./FloatingButton";
 import { AudioVisualizer } from "./AudioVisualizer";
 import { LanguageSelector, LanguageOption } from "./LanguageSelector";
+import { DTMFKeypad } from "./DTMFKeypad";
 
 const defaultLanguages: LanguageOption[] = [
   { code: "en", label: "English", flag: "🇬🇧" },
@@ -247,6 +248,15 @@ export const FloatingVoiceWidget = ({
     }
   };
 
+  const handleDtmfKeyPress = async (tone: string) => {
+    try {
+      await client.sendDtmf(tone);
+      console.log(`Sent DTMF tone: ${tone}`);
+    } catch (error) {
+      console.error("Failed to send DTMF:", error);
+    }
+  };
+
   const handleAcceptCall = async () => {
     try {
       await client.acceptIncomingCall({ language: selectedLanguage });
@@ -341,6 +351,14 @@ export const FloatingVoiceWidget = ({
             )}
 
             <AudioVisualizer isActive={isLive} />
+
+            {isLive && (
+              <DTMFKeypad
+                onKeyPress={handleDtmfKeyPress}
+                theme={theme}
+                disabled={false}
+              />
+            )}
 
             <LanguageSelector
               languages={languages}
