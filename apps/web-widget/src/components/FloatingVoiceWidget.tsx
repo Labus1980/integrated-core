@@ -75,7 +75,7 @@ const translations = {
     accept: "Принять",
     reject: "Отклонить",
     incomingFrom: "Входящий звонок от",
-    selectApplication: "Выбрать приложение",
+    selectApplication: "Выбор Оператора",
     noApplications: "Нет доступных приложений",
   },
 };
