@@ -13,23 +13,14 @@ import {
 import { TinyEmitter } from "tiny-emitter";
 
 /**
- * Generates a unique session identifier with 'okta-' prefix.
- * Format: okta-YYYYMMDD-HHMMSS-XXXXX
- * Where XXXXX is a random 5-character alphanumeric string.
+ * Generates a unique UUID v4 identifier.
  */
-function generateSessionId(): string {
-  const now = new Date();
-  const date = now.toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
-  const time = now.toISOString().slice(11, 19).replace(/:/g, ''); // HHMMSS
-
-  // Generate random 5-character string
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let random = '';
-  for (let i = 0; i < 5; i++) {
-    random += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-
-  return `okta-${date}-${time}-${random}`;
+function generateUUID(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
 }
 
 export type LogLevel = "debug" | "info" | "warn" | "error";
@@ -394,23 +385,13 @@ export class CodexSipClient {
       });
     }
 
-    // Generate a unique call ID for this session with okta prefix BEFORE creating target URI
-    this.activeCallId = generateSessionId();
-
-    // Add session ID as URI parameter for Jambonz to capture (using semicolon for SIP params)
-    const targetUriString = options?.targetUri || this.config.targetUri;
-    const targetWithSessionId = `${targetUriString};x-okta-session=${this.activeCallId}`;
-
-    const target = this.resolveTargetUri(targetWithSessionId);
+    const target = this.resolveTargetUri(options?.targetUri || this.config.targetUri);
     if (!target) {
       throw new Error("Unable to parse target SIP URI");
     }
 
     const inviteHeaders = [...(this.config.extraHeaders || [])];
     inviteHeaders.push(`${this.languageHeader}: ${lang}`);
-    inviteHeaders.push(`X-Session-Id: ${this.activeCallId}`);
-    // Add session ID to User-Agent for Jambonz to capture
-    inviteHeaders.push(`User-Agent: CodexSIP/1.0 (SessionId: ${this.activeCallId})`);
     if (options?.extraHeaders) {
       inviteHeaders.push(...options.extraHeaders);
     }
@@ -425,13 +406,15 @@ export class CodexSipClient {
     this.currentSession.stateChange.addListener((state: SessionState) => this.handleSessionStateChange(state));
     this.hookSessionDelegates(this.currentSession);
     this.setState("connecting");
-    this.emit("log", { level: "info", message: "Outbound INVITE sent", context: { target: target.toString(), sessionId: this.activeCallId } });
+    this.emit("log", { level: "info", message: "Outbound INVITE sent", context: { target: target.toString() } });
 
     try {
+      // Generate a unique call ID for this session
+      this.activeCallId = generateUUID();
       const response = await inviter.invite();
       this.emit("log", {
         level: "info",
-        message: "Call initiated with unique session ID from okta website",
+        message: "Call initiated with unique ID",
         context: { callId: this.activeCallId, target: target.toString() }
       });
       if (response && "statusCode" in response && response.statusCode === 180) {
@@ -641,8 +624,8 @@ export class CodexSipClient {
       onInvite: (invitation: Invitation) => {
         // Store pending invitation for user to accept/reject
         this.pendingInvitation = invitation;
-        // Generate a unique call ID for this incoming session with okta prefix
-        this.activeCallId = generateSessionId();
+        // Generate a unique call ID for this incoming session
+        this.activeCallId = generateUUID();
 
         const from = invitation.remoteIdentity?.displayName || invitation.remoteIdentity?.uri?.user || "Unknown";
         const to = invitation.request.to?.uri?.user || "";
@@ -655,7 +638,7 @@ export class CodexSipClient {
         });
         this.emit("log", {
           level: "info",
-          message: "Incoming call received with unique session ID",
+          message: "Incoming call received",
           context: { from, to, callId: this.activeCallId }
         });
       },
