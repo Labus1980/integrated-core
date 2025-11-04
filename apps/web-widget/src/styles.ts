@@ -495,10 +495,11 @@ export const floatingWidgetStyles = `
   .dtmf-keypad {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    padding: 12px;
+    gap: clamp(6px, 1.5vw, 10px);
+    padding: clamp(10px, 2.5vw, 16px);
     background: var(--codex-surface-elevated);
     border-radius: 12px;
+    animation: codex-fade-in 0.3s ease-out;
   }
 
   .dtmf-key {
@@ -510,40 +511,50 @@ export const floatingWidgetStyles = `
     gap: 2px;
     width: 100%;
     aspect-ratio: 1;
-    max-width: 64px;
-    max-height: 64px;
-    padding: 8px 4px;
-    background: var(--codex-surface);
-    border: 2px solid var(--codex-border);
+    max-width: clamp(52px, 15vw, 68px);
+    max-height: clamp(52px, 15vw, 68px);
+    padding: clamp(6px, 1.5vw, 10px);
+    background: linear-gradient(145deg, var(--codex-surface-elevated), var(--codex-surface));
+    border: 1.5px solid var(--codex-border);
     border-radius: 50%;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
     margin: 0 auto;
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.1),
+      inset 0 1px 2px rgba(255, 255, 255, 0.1);
   }
 
   .dtmf-key:hover:not(.dtmf-key--disabled) {
-    background: var(--codex-primary);
-    border-color: var(--codex-primary);
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    background: linear-gradient(145deg, var(--codex-primary), var(--codex-primary-light));
+    border-color: var(--codex-primary-light);
+    transform: scale(1.08) translateY(-1px);
+    box-shadow:
+      0 6px 16px rgba(102, 126, 234, 0.4),
+      0 2px 6px rgba(102, 126, 234, 0.2),
+      inset 0 1px 3px rgba(255, 255, 255, 0.2);
   }
 
   .dtmf-key:active:not(.dtmf-key--disabled),
   .dtmf-key--active {
-    transform: scale(0.95);
-    background: var(--codex-primary-light);
-    border-color: var(--codex-primary-light);
+    transform: scale(0.92) translateY(0);
+    background: linear-gradient(145deg, var(--codex-primary-light), var(--codex-primary));
+    border-color: var(--codex-primary);
+    box-shadow:
+      0 2px 8px rgba(102, 126, 234, 0.3),
+      inset 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
   .dtmf-key--active::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, transparent 70%);
-    animation: dtmf-ripple 0.6s ease-out;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.5) 0%, transparent 65%);
+    animation: dtmf-ripple 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
   }
 
   @keyframes dtmf-ripple {
@@ -552,7 +563,7 @@ export const floatingWidgetStyles = `
       opacity: 1;
     }
     100% {
-      transform: scale(2.5);
+      transform: scale(2.8);
       opacity: 0;
     }
   }
@@ -563,38 +574,62 @@ export const floatingWidgetStyles = `
   }
 
   .dtmf-key__digit {
-    font-size: 18px;
+    font-size: clamp(16px, 4vw, 20px);
     font-weight: 700;
     color: var(--codex-text);
     line-height: 1;
+    transition: all 0.2s ease;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 
   .dtmf-key:hover:not(.dtmf-key--disabled) .dtmf-key__digit,
   .dtmf-key--active .dtmf-key__digit {
     color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
 
   .dtmf-key__letters {
-    font-size: 8px;
+    font-size: clamp(7px, 1.8vw, 9px);
     font-weight: 600;
     color: var(--codex-text-muted);
     letter-spacing: 0.08em;
     line-height: 1;
     text-transform: uppercase;
+    transition: all 0.2s ease;
   }
 
   .dtmf-key:hover:not(.dtmf-key--disabled) .dtmf-key__letters,
   .dtmf-key--active .dtmf-key__letters {
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.85);
   }
 
   /* DTMF Keypad Theme Variants */
   .dtmf-keypad--light .dtmf-key {
-    box-shadow: 0 2px 4px var(--codex-shadow);
+    background: linear-gradient(145deg, #ffffff, #f8f9fa);
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.08),
+      inset 0 1px 2px rgba(255, 255, 255, 0.8);
+  }
+
+  .dtmf-keypad--light .dtmf-key:hover:not(.dtmf-key--disabled) {
+    box-shadow:
+      0 6px 16px rgba(14, 165, 233, 0.3),
+      0 2px 6px rgba(14, 165, 233, 0.15),
+      inset 0 1px 3px rgba(255, 255, 255, 0.3);
   }
 
   .dtmf-keypad--dark .dtmf-key {
-    box-shadow: 0 2px 8px var(--codex-shadow);
+    background: linear-gradient(145deg, #16213e, #1a1a2e);
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.3),
+      inset 0 1px 2px rgba(255, 255, 255, 0.05);
+  }
+
+  .dtmf-keypad--dark .dtmf-key:hover:not(.dtmf-key--disabled) {
+    box-shadow:
+      0 6px 16px rgba(102, 126, 234, 0.5),
+      0 2px 6px rgba(102, 126, 234, 0.3),
+      inset 0 1px 3px rgba(255, 255, 255, 0.15);
   }
 
   /* ===== Mobile Responsive ===== */
@@ -630,22 +665,13 @@ export const floatingWidgetStyles = `
     }
 
     .dtmf-keypad {
-      gap: 6px;
-      padding: 10px;
+      gap: clamp(4px, 1vw, 8px);
+      padding: clamp(8px, 2vw, 12px);
     }
 
     .dtmf-key {
-      padding: 6px 4px;
-      max-width: 56px;
-      max-height: 56px;
-    }
-
-    .dtmf-key__digit {
-      font-size: 16px;
-    }
-
-    .dtmf-key__letters {
-      font-size: 7px;
+      max-width: clamp(48px, 12vw, 60px);
+      max-height: clamp(48px, 12vw, 60px);
     }
   }
 
