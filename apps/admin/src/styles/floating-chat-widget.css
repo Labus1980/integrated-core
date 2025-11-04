@@ -212,6 +212,140 @@
   }
 }
 
+/* Force Light Theme for Zammad Chat in all modes */
+.zammad-chat {
+  color: black !important;
+  background: white !important;
+}
+
+.zammad-chat * {
+  color: inherit !important;
+}
+
+.zammad-chat-body {
+  background: white !important;
+}
+
+.zammad-chat-modal {
+  background: white !important;
+  color: black !important;
+}
+
+.zammad-chat-modal-text {
+  color: black !important;
+}
+
+.zammad-chat-timestamp {
+  color: hsl(0deg, 0%, 60%) !important;
+}
+
+.zammad-chat-message {
+  color: black !important;
+}
+
+.zammad-chat-message--customer .zammad-chat-message-body {
+  background: hsl(210deg, 8%, 98%) !important;
+  color: black !important;
+}
+
+.zammad-chat-message--agent .zammad-chat-message-body {
+  background: hsl(203deg, 67%, 53%) !important;
+  color: white !important;
+}
+
+.zammad-chat-input {
+  background: white !important;
+  color: black !important;
+  border-color: hsl(0deg, 0%, 90%) !important;
+}
+
+.zammad-chat-input::placeholder {
+  color: hsl(0deg, 0%, 60%) !important;
+}
+
+.zammad-chat-controls {
+  background: white !important;
+  border-top-color: hsl(0deg, 0%, 90%) !important;
+}
+
+.zammad-chat form input,
+.zammad-chat form textarea {
+  background: white !important;
+  color: black !important;
+  border-color: hsl(0deg, 0%, 90%) !important;
+}
+
+.zammad-chat form label {
+  color: black !important;
+}
+
+/* Dark mode overrides - force light theme */
+.dark .zammad-chat {
+  color: black !important;
+  background: white !important;
+}
+
+.dark .zammad-chat * {
+  color: inherit !important;
+}
+
+.dark .zammad-chat-body {
+  background: white !important;
+}
+
+.dark .zammad-chat-modal {
+  background: white !important;
+  color: black !important;
+}
+
+.dark .zammad-chat-modal-text {
+  color: black !important;
+}
+
+.dark .zammad-chat-timestamp {
+  color: hsl(0deg, 0%, 60%) !important;
+}
+
+.dark .zammad-chat-message {
+  color: black !important;
+}
+
+.dark .zammad-chat-message--customer .zammad-chat-message-body {
+  background: hsl(210deg, 8%, 98%) !important;
+  color: black !important;
+}
+
+.dark .zammad-chat-message--agent .zammad-chat-message-body {
+  background: hsl(203deg, 67%, 53%) !important;
+  color: white !important;
+}
+
+.dark .zammad-chat-input {
+  background: white !important;
+  color: black !important;
+  border-color: hsl(0deg, 0%, 90%) !important;
+}
+
+.dark .zammad-chat-input::placeholder {
+  color: hsl(0deg, 0%, 60%) !important;
+}
+
+.dark .zammad-chat-controls {
+  background: white !important;
+  border-top-color: hsl(0deg, 0%, 90%) !important;
+}
+
+.dark .zammad-chat form input,
+.dark .zammad-chat form textarea {
+  background: white !important;
+  color: black !important;
+  border-color: hsl(0deg, 0%, 90%) !important;
+}
+
+.dark .zammad-chat form label {
+  color: black !important;
+}
+
 /* Floating Zammad Chat Button (Right Side) */
 .floating-zammad-button {
   position: fixed;
