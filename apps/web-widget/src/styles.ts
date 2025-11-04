@@ -491,6 +491,109 @@ export const floatingWidgetStyles = `
     line-height: 1.3;
   }
 
+  /* ===== DTMF Keypad ===== */
+  .dtmf-keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 16px;
+    background: var(--codex-surface-elevated);
+    border-radius: 12px;
+  }
+
+  .dtmf-key {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+    aspect-ratio: 1;
+    padding: 16px 8px;
+    background: var(--codex-surface);
+    border: 2px solid var(--codex-border);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .dtmf-key:hover:not(.dtmf-key--disabled) {
+    background: var(--codex-primary);
+    border-color: var(--codex-primary);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
+
+  .dtmf-key:active:not(.dtmf-key--disabled),
+  .dtmf-key--active {
+    transform: scale(0.95);
+    background: var(--codex-primary-light);
+    border-color: var(--codex-primary-light);
+  }
+
+  .dtmf-key--active::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, transparent 70%);
+    animation: dtmf-ripple 0.6s ease-out;
+  }
+
+  @keyframes dtmf-ripple {
+    0% {
+      transform: scale(0);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(2.5);
+      opacity: 0;
+    }
+  }
+
+  .dtmf-key--disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .dtmf-key__digit {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--codex-text);
+    line-height: 1;
+  }
+
+  .dtmf-key:hover:not(.dtmf-key--disabled) .dtmf-key__digit,
+  .dtmf-key--active .dtmf-key__digit {
+    color: white;
+  }
+
+  .dtmf-key__letters {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--codex-text-muted);
+    letter-spacing: 0.1em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .dtmf-key:hover:not(.dtmf-key--disabled) .dtmf-key__letters,
+  .dtmf-key--active .dtmf-key__letters {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  /* DTMF Keypad Theme Variants */
+  .dtmf-keypad--light .dtmf-key {
+    box-shadow: 0 2px 4px var(--codex-shadow);
+  }
+
+  .dtmf-keypad--dark .dtmf-key {
+    box-shadow: 0 2px 8px var(--codex-shadow);
+  }
+
   /* ===== Mobile Responsive ===== */
   @media (max-width: 768px) {
     .codex-floating-voice-widget--bottom-right,
@@ -521,6 +624,23 @@ export const floatingWidgetStyles = `
     .codex-floating-voice-widget--top-left .codex-floating-voice-widget__panel {
       top: 0;
       border-radius: 0 0 20px 20px;
+    }
+
+    .dtmf-keypad {
+      gap: 8px;
+      padding: 12px;
+    }
+
+    .dtmf-key {
+      padding: 12px 6px;
+    }
+
+    .dtmf-key__digit {
+      font-size: 20px;
+    }
+
+    .dtmf-key__letters {
+      font-size: 9px;
     }
   }
 
