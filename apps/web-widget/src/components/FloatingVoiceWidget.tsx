@@ -11,8 +11,6 @@ import { FloatingButton } from "./FloatingButton";
 import { AudioVisualizer } from "./AudioVisualizer";
 import { LanguageSelector, LanguageOption } from "./LanguageSelector";
 
-// Interfaces removed - no longer needed without operator selection
-
 const defaultLanguages: LanguageOption[] = [
   { code: "en", label: "English", flag: "🇬🇧" },
   { code: "ru", label: "Русский", flag: "🇷🇺" },
