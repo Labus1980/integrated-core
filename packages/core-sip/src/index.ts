@@ -537,29 +537,45 @@ export class CodexSipClient {
       // Find the audio sender
       const audioSender = peer.getSenders().find(sender => sender.track?.kind === 'audio');
 
-      if (!audioSender) {
-        throw new Error("No audio sender available for DTMF");
-      }
+      // Try insertDTMF first (standard WebRTC method)
+      if (audioSender?.dtmf?.canInsertDTMF) {
+        // Use WebRTC standard method
+        // Duration: 100ms (recommended), gap: 70ms (recommended)
+        audioSender.dtmf.insertDTMF(tone, 100, 70);
 
-      // Check if DTMF is supported
-      if (!audioSender.dtmf) {
+        this.emit("dtmf", { tone });
         this.emit("log", {
-          level: "warn",
-          message: "DTMF not supported by this browser/connection",
+          level: "info",
+          message: "DTMF sent via insertDTMF",
+          context: { tone, method: "insertDTMF" },
         });
-        throw new Error("DTMF not supported");
+        return;
       }
 
-      // Send DTMF using WebRTC standard method
-      // Duration: 100ms (recommended), gap: 70ms (recommended)
-      audioSender.dtmf.insertDTMF(tone, 100, 70);
+      // Fallback to SIP INFO method (for PSTN/Jambonz compatibility)
+      this.emit("log", {
+        level: "info",
+        message: "insertDTMF not available, falling back to SIP INFO",
+        context: { tone },
+      });
+
+      await this.currentSession.info({
+        requestOptions: {
+          body: {
+            contentDisposition: "render",
+            contentType: "application/dtmf-relay",
+            content: `Signal=${tone}\r\nDuration=160`
+          },
+        },
+      });
 
       this.emit("dtmf", { tone });
       this.emit("log", {
         level: "info",
-        message: "DTMF sent successfully",
-        context: { tone, method: "insertDTMF" },
+        message: "DTMF sent via SIP INFO",
+        context: { tone, method: "SIP INFO" },
       });
+
     } catch (error) {
       this.emit("log", {
         level: "warn",
