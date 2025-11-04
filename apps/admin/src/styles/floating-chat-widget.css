@@ -210,6 +210,183 @@
   .floating-chat-panel {
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
   }
+
+  /* Zammad Chat Dark Theme Overrides */
+  .zammad-chat {
+    color: #e5e7eb !important;
+  }
+
+  .zammad-chat-body {
+    background: #1f2937 !important;
+  }
+
+  .zammad-chat-modal {
+    background: #1f2937 !important;
+    color: #e5e7eb !important;
+  }
+
+  .zammad-chat-modal-text {
+    color: #e5e7eb !important;
+  }
+
+  .zammad-chat-timestamp {
+    color: #9ca3af !important;
+  }
+
+  .zammad-chat-message {
+    color: #e5e7eb !important;
+  }
+
+  .zammad-chat-message--customer {
+    background: #374151 !important;
+    color: #e5e7eb !important;
+  }
+
+  .zammad-chat-message--agent {
+    background: #1e40af !important;
+    color: #ffffff !important;
+  }
+
+  .zammad-chat-message-body {
+    color: inherit !important;
+  }
+
+  .zammad-chat-input {
+    background: #374151 !important;
+    color: #e5e7eb !important;
+    border-color: #4b5563 !important;
+  }
+
+  .zammad-chat-input::placeholder {
+    color: #9ca3af !important;
+  }
+
+  .zammad-chat-controls {
+    background: #1f2937 !important;
+    border-top-color: #374151 !important;
+  }
+
+  .zammad-chat-header {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+  }
+
+  .zammad-chat-loading-animation span {
+    background: #9ca3af !important;
+  }
+
+  .zammad-chat-scrollhint {
+    background: #374151 !important;
+    color: #e5e7eb !important;
+  }
+
+  /* Form elements in dark mode */
+  .zammad-chat form input,
+  .zammad-chat form textarea {
+    background: #374151 !important;
+    color: #e5e7eb !important;
+    border-color: #4b5563 !important;
+  }
+
+  .zammad-chat form label {
+    color: #e5e7eb !important;
+  }
+
+  /* Remove white stripes and improve backgrounds */
+  .zammad-chat * {
+    border-color: #4b5563 !important;
+  }
+
+  /* Status indicators */
+  .zammad-chat-agent-status {
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+}
+
+/* Dark Mode for .dark class (Tailwind CSS) */
+.dark .zammad-chat {
+  color: #e5e7eb !important;
+}
+
+.dark .zammad-chat-body {
+  background: #1f2937 !important;
+}
+
+.dark .zammad-chat-modal {
+  background: #1f2937 !important;
+  color: #e5e7eb !important;
+}
+
+.dark .zammad-chat-modal-text {
+  color: #e5e7eb !important;
+}
+
+.dark .zammad-chat-timestamp {
+  color: #9ca3af !important;
+}
+
+.dark .zammad-chat-message {
+  color: #e5e7eb !important;
+}
+
+.dark .zammad-chat-message--customer {
+  background: #374151 !important;
+  color: #e5e7eb !important;
+}
+
+.dark .zammad-chat-message--agent {
+  background: #1e40af !important;
+  color: #ffffff !important;
+}
+
+.dark .zammad-chat-message-body {
+  color: inherit !important;
+}
+
+.dark .zammad-chat-input {
+  background: #374151 !important;
+  color: #e5e7eb !important;
+  border-color: #4b5563 !important;
+}
+
+.dark .zammad-chat-input::placeholder {
+  color: #9ca3af !important;
+}
+
+.dark .zammad-chat-controls {
+  background: #1f2937 !important;
+  border-top-color: #374151 !important;
+}
+
+.dark .zammad-chat-header {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+}
+
+.dark .zammad-chat-loading-animation span {
+  background: #9ca3af !important;
+}
+
+.dark .zammad-chat-scrollhint {
+  background: #374151 !important;
+  color: #e5e7eb !important;
+}
+
+.dark .zammad-chat form input,
+.dark .zammad-chat form textarea {
+  background: #374151 !important;
+  color: #e5e7eb !important;
+  border-color: #4b5563 !important;
+}
+
+.dark .zammad-chat form label {
+  color: #e5e7eb !important;
+}
+
+.dark .zammad-chat * {
+  border-color: #4b5563 !important;
+}
+
+.dark .zammad-chat-agent-status {
+  background: rgba(255, 255, 255, 0.1) !important;
 }
 
 /* Floating Zammad Chat Button (Right Side) */
