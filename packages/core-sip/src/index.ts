@@ -520,6 +520,44 @@ export class CodexSipClient {
     }
   }
 
+  /**
+   * Gets the local MediaStream from the current session
+   * Used for in-band DTMF generation
+   */
+  getLocalMediaStream(): MediaStream | null {
+    if (!this.currentSession) {
+      return null;
+    }
+
+    try {
+      const handler = this.currentSession.sessionDescriptionHandler as unknown as {
+        peerConnection?: RTCPeerConnection;
+      } | undefined;
+
+      const peer = handler?.peerConnection;
+      if (!peer) {
+        return null;
+      }
+
+      // Get the local stream from senders
+      const audioSender = peer.getSenders().find(sender => sender.track?.kind === 'audio');
+      if (!audioSender || !audioSender.track) {
+        return null;
+      }
+
+      // Create a MediaStream with the local audio track
+      const stream = new MediaStream([audioSender.track]);
+      return stream;
+    } catch (error) {
+      this.emit("log", {
+        level: "warn",
+        message: "Failed to get local MediaStream",
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
+      return null;
+    }
+  }
+
   async sendDtmf(tone: string) {
     if (!this.currentSession) {
       throw new Error("No active session to send DTMF");
@@ -588,9 +626,10 @@ export class CodexSipClient {
       }
 
       // Use SIP INFO method (for Jambonz/PSTN compatibility)
+      // Note: Jambonz may ignore SIP INFO - use in-band audio instead
       this.emit("log", {
         level: "info",
-        message: "Using SIP INFO method for DTMF",
+        message: "Using SIP INFO method for DTMF (may not work with Jambonz)",
         context: { tone },
       });
 

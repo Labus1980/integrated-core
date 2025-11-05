@@ -1,6 +1,6 @@
 /**
  * DTMF (Dual-Tone Multi-Frequency) Audio Generator
- * Generates authentic DTMF tones for keypad feedback
+ * Generates authentic DTMF tones for keypad feedback and in-band transmission
  */
 
 // DTMF frequency map (4x4 matrix)
@@ -25,7 +25,7 @@ const DTMF_FREQUENCIES: Record<string, [number, number]> = {
 };
 
 /**
- * Plays a DTMF tone for the given digit
+ * Plays a DTMF tone locally (for user feedback)
  * @param tone - The DTMF digit to play ('0'-'9', '*', '#', 'A'-'D')
  * @param duration - Duration in milliseconds (default: 100ms)
  * @param volume - Volume level 0-1 (default: 0.3)
@@ -98,6 +98,115 @@ export function playDtmfTone(
 
   } catch (error) {
     console.error('Failed to play DTMF tone:', error);
+  }
+}
+
+/**
+ * Generates DTMF tone and injects it into a MediaStream (for in-band transmission)
+ * This is required for Jambonz which expects DTMF as audio tones, not RFC 2833
+ *
+ * @param tone - The DTMF digit to send
+ * @param stream - The MediaStream to inject the tone into
+ * @param duration - Duration in milliseconds (default: 250ms for better detection)
+ * @returns Promise that resolves when tone is sent
+ */
+export async function sendDtmfInBand(
+  tone: string,
+  stream: MediaStream,
+  duration: number = 250
+): Promise<void> {
+  const frequencies = DTMF_FREQUENCIES[tone.toUpperCase()];
+
+  if (!frequencies) {
+    console.warn(`Invalid DTMF tone: ${tone}`);
+    return;
+  }
+
+  try {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const [lowFreq, highFreq] = frequencies;
+
+    // Create media stream source from the original stream
+    const streamSource = audioContext.createMediaStreamSource(stream);
+
+    // Create DTMF oscillators
+    const oscillator1 = audioContext.createOscillator();
+    const oscillator2 = audioContext.createOscillator();
+
+    // Create gain nodes
+    const dtmfGain = audioContext.createGain();
+    const streamGain = audioContext.createGain();
+    const mixerGain = audioContext.createGain();
+
+    // Configure DTMF oscillators
+    oscillator1.frequency.value = lowFreq;
+    oscillator2.frequency.value = highFreq;
+    oscillator1.type = 'sine';
+    oscillator2.type = 'sine';
+
+    // Create destination for mixed audio
+    const destination = audioContext.createMediaStreamDestination();
+
+    // Connect DTMF tones
+    oscillator1.connect(dtmfGain);
+    oscillator2.connect(dtmfGain);
+
+    // Connect original stream
+    streamSource.connect(streamGain);
+
+    // Mix both to destination
+    dtmfGain.connect(mixerGain);
+    streamGain.connect(mixerGain);
+    mixerGain.connect(destination);
+
+    // Set gains (DTMF louder than speech for detection)
+    const currentTime = audioContext.currentTime;
+    const durationSec = duration / 1000;
+
+    // DTMF tone with envelope
+    dtmfGain.gain.setValueAtTime(0, currentTime);
+    dtmfGain.gain.linearRampToValueAtTime(0.7, currentTime + 0.01); // 10ms fade in
+    dtmfGain.gain.setValueAtTime(0.7, currentTime + durationSec - 0.01);
+    dtmfGain.gain.linearRampToValueAtTime(0, currentTime + durationSec); // 10ms fade out
+
+    // Reduce stream volume during DTMF (ducking)
+    streamGain.gain.setValueAtTime(0.3, currentTime);
+    streamGain.gain.setValueAtTime(0.3, currentTime + durationSec);
+    streamGain.gain.linearRampToValueAtTime(1.0, currentTime + durationSec + 0.05);
+
+    mixerGain.gain.setValueAtTime(1.0, currentTime);
+
+    // Start DTMF tones
+    oscillator1.start(currentTime);
+    oscillator2.start(currentTime);
+    oscillator1.stop(currentTime + durationSec);
+    oscillator2.stop(currentTime + durationSec);
+
+    // Replace track in original stream
+    const audioTrack = destination.stream.getAudioTracks()[0];
+    if (audioTrack) {
+      const oldTrack = stream.getAudioTracks()[0];
+      if (oldTrack) {
+        stream.removeTrack(oldTrack);
+      }
+      stream.addTrack(audioTrack);
+
+      // Restore original track after DTMF
+      setTimeout(() => {
+        stream.removeTrack(audioTrack);
+        if (oldTrack && oldTrack.readyState === 'live') {
+          stream.addTrack(oldTrack);
+        }
+        audioContext.close();
+      }, duration + 100);
+    }
+
+    // Wait for tone to complete
+    await new Promise(resolve => setTimeout(resolve, duration));
+
+  } catch (error) {
+    console.error('Failed to send in-band DTMF:', error);
+    throw error;
   }
 }
 
