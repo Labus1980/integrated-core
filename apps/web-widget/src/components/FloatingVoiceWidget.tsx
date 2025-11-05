@@ -11,6 +11,7 @@ import { FloatingButton } from "./FloatingButton";
 import { AudioVisualizer } from "./AudioVisualizer";
 import { LanguageSelector, LanguageOption } from "./LanguageSelector";
 import { DTMFKeypad } from "./DTMFKeypad";
+import { sendDtmfInBand } from "../utils/dtmfAudio";
 
 const defaultLanguages: LanguageOption[] = [
   { code: "en", label: "English", flag: "🇬🇧" },
@@ -255,8 +256,19 @@ export const FloatingVoiceWidget = ({
 
   const handleDtmfKeyPress = async (tone: string) => {
     try {
-      await client.sendDtmf(tone);
-      console.log(`Sent DTMF tone: ${tone}`);
+      // Get local media stream from SIP client
+      const stream = client.getLocalMediaStream();
+
+      if (stream) {
+        // Send in-band DTMF (for Jambonz which expects DTMF as audio tones)
+        await sendDtmfInBand(tone, stream, 250);
+        console.log(`Sent in-band DTMF tone: ${tone}`);
+      } else {
+        // Fallback to SIP INFO (may not work with Jambonz)
+        console.warn("No local media stream available, falling back to SIP INFO");
+        await client.sendDtmf(tone);
+        console.log(`Sent DTMF via SIP INFO: ${tone}`);
+      }
     } catch (error) {
       console.error("Failed to send DTMF:", error);
     }
