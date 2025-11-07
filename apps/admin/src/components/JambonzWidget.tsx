@@ -55,6 +55,28 @@ export const JambonzWidget: React.FC<JambonzWidgetProps> = ({ embedded = false }
     };
   }, []);
 
+  // Handle visibility change - reconnect when tab becomes visible
+  useEffect(() => {
+    if (!sipClient) return;
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('[JambonzWidget] Tab became visible, checking connection...');
+        // Check and reconnect if needed after tab becomes visible
+        sipClient.checkConnection().catch((error) => {
+          console.error('[JambonzWidget] Failed to check connection:', error);
+        });
+      } else {
+        console.log('[JambonzWidget] Tab became hidden');
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [sipClient]);
+
   // Don't render if there's an error or no client
   if (error) {
     return null;
