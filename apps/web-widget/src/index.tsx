@@ -710,6 +710,16 @@ export interface VoiceWidgetEnvConfig {
   STUN_URLS: string;
   TURN_URLS?: string;
   MAX_REGISTER_RETRIES?: string;
+  /**
+   * Enable infinite reconnection attempts (default: true)
+   * When true, the client will keep trying to reconnect indefinitely
+   */
+  INFINITE_RECONNECT?: string;
+  /**
+   * Keep-alive interval in milliseconds (default: 30000)
+   * Set to '0' to disable keep-alive
+   */
+  KEEP_ALIVE_INTERVAL?: string;
 }
 
 export function parseIceServers(stunUrls: string, turnUrls?: string): RTCIceServer[] {
@@ -749,6 +759,10 @@ export function createClient(config: VoiceWidgetEnvConfig & { JAMBONZ_WSS_ADDRES
     defaultLanguage: config.DEFAULT_LANG,
     fallbackLanguage: config.FALLBACK_LANG,
     maxRegisterRetries: config.MAX_REGISTER_RETRIES ? Number(config.MAX_REGISTER_RETRIES) : undefined,
+    // Enable infinite reconnect by default for better reliability
+    infiniteReconnect: config.INFINITE_RECONNECT !== undefined ? config.INFINITE_RECONNECT === 'true' : true,
+    // Keep-alive interval (default: 30 seconds)
+    keepAliveInterval: config.KEEP_ALIVE_INTERVAL ? Number(config.KEEP_ALIVE_INTERVAL) : 30000,
   };
 
   return new CodexSipClient(sipConfig);
