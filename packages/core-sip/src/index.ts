@@ -53,8 +53,21 @@ export interface SipClientConfig {
   /**
    * Maximum number of registration retry attempts before giving up.
    * Defaults to 5 attempts.
+   * Ignored if infiniteReconnect is enabled.
    */
   maxRegisterRetries?: number;
+  /**
+   * Enable infinite reconnection attempts.
+   * When enabled, the client will keep trying to reconnect indefinitely.
+   * Defaults to true for better connection reliability.
+   */
+  infiniteReconnect?: boolean;
+  /**
+   * Keep-alive interval in milliseconds for maintaining the connection.
+   * Sends periodic keep-alive messages to prevent connection timeout.
+   * Defaults to 30000ms (30 seconds). Set to 0 to disable.
+   */
+  keepAliveInterval?: number;
   /**
    * Optional metrics reporter invoked with every metrics payload.
    */
@@ -182,6 +195,7 @@ export class CodexSipClient {
   private registerRetryTimer?: ReturnType<typeof setTimeout>;
   private registerBackoffMs = 1_000;
   private metricsTimer?: ReturnType<typeof setInterval>;
+  private keepAliveTimer?: ReturnType<typeof setInterval>;
   private activeCallId?: string;
   private muted = false;
   private speakerMuted = false;
@@ -197,6 +211,12 @@ export class CodexSipClient {
     }
     if (config.onMetrics) {
       this.on("metrics", config.onMetrics);
+    }
+
+    // Start keep-alive timer if enabled (default: 30 seconds)
+    const keepAliveInterval = config.keepAliveInterval ?? 30_000;
+    if (keepAliveInterval > 0) {
+      this.startKeepAlive(keepAliveInterval);
     }
   }
 
@@ -664,9 +684,67 @@ export class CodexSipClient {
     }
   }
 
+  /**
+   * Check the current connection state and force reconnect if needed.
+   * Useful for checking connection after page visibility changes.
+   */
+  async checkConnection(): Promise<boolean> {
+    if (!this.userAgent) {
+      this.emit("log", {
+        level: "debug",
+        message: "No user agent exists, attempting to register",
+      });
+      try {
+        await this.register();
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    const isConnected = this.userAgent.isConnected();
+    const isRegistered = this.registerer?.state === RegistererState.Registered;
+
+    this.emit("log", {
+      level: "debug",
+      message: "Connection check",
+      context: {
+        isConnected,
+        isRegistered,
+        transportState: this.userAgent.transport?.state,
+      },
+    });
+
+    if (!isConnected || !isRegistered) {
+      this.emit("log", {
+        level: "info",
+        message: "Connection lost, attempting to reconnect",
+      });
+      try {
+        if (!isConnected && this.userAgent) {
+          await this.userAgent.start();
+        }
+        if (!isRegistered) {
+          await this.register();
+        }
+        return true;
+      } catch (error) {
+        this.emit("log", {
+          level: "error",
+          message: "Failed to reconnect",
+          error: error instanceof Error ? error : new Error(String(error)),
+        });
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   destroy() {
     this.clearMetricsTimer();
     this.clearRegisterTimer();
+    this.clearKeepAliveTimer();
     const registererStateChange = this.registerer?.stateChange as unknown as { removeAllListeners?: () => void } | undefined;
     registererStateChange?.removeAllListeners?.();
     const sessionStateChange = this.currentSession?.stateChange as unknown as { removeAllListeners?: () => void } | undefined;
@@ -724,17 +802,29 @@ export class CodexSipClient {
         // Mark as not registering to allow retry
         this.isRegistering = false;
 
-        // Only schedule retry if we haven't exceeded max attempts
-        if (this.registerAttempt < (this.config.maxRegisterRetries ?? DEFAULT_MAX_REGISTER_RETRIES)) {
+        // Check if infinite reconnect is enabled (default: true)
+        const infiniteReconnect = this.config.infiniteReconnect ?? true;
+        const maxRetries = this.config.maxRegisterRetries ?? DEFAULT_MAX_REGISTER_RETRIES;
+
+        // Schedule retry based on configuration
+        if (infiniteReconnect || this.registerAttempt < maxRetries) {
           this.emit("log", {
             level: "debug",
             message: "Scheduling registration retry after disconnect",
+            context: {
+              infiniteReconnect,
+              currentAttempt: this.registerAttempt
+            }
           });
           this.scheduleRegisterRetry();
         } else {
           this.emit("log", {
             level: "error",
             message: "Max registration retries exceeded, not scheduling retry",
+            context: {
+              maxRetries,
+              currentAttempt: this.registerAttempt
+            }
           });
         }
       },
@@ -1011,12 +1101,24 @@ export class CodexSipClient {
   }
 
   private scheduleRegisterRetry(delayMs?: number) {
+    // Enable infinite reconnect by default (can be disabled via config)
+    const infiniteReconnect = this.config.infiniteReconnect ?? true;
     const maxRetries = this.config.maxRegisterRetries ?? DEFAULT_MAX_REGISTER_RETRIES;
-    if (this.registerAttempt >= maxRetries) {
+
+    // Only check max retries if infinite reconnect is disabled
+    if (!infiniteReconnect && this.registerAttempt >= maxRetries) {
       this.emit("registration", {
         state: "failed",
         attempt: this.registerAttempt,
         reason: "max retry reached",
+      });
+      this.emit("log", {
+        level: "error",
+        message: "Max registration retries reached, reconnection stopped",
+        context: {
+          maxRetries,
+          attempt: this.registerAttempt
+        },
       });
       return;
     }
@@ -1027,6 +1129,18 @@ export class CodexSipClient {
     this.emit("reconnecting", {
       attempt: this.registerAttempt + 1,
       delayMs: delay,
+    });
+
+    this.emit("log", {
+      level: "info",
+      message: infiniteReconnect
+        ? "Scheduling reconnection attempt (infinite mode)"
+        : `Scheduling reconnection attempt ${this.registerAttempt + 1}/${maxRetries}`,
+      context: {
+        attempt: this.registerAttempt + 1,
+        delayMs: delay,
+        infiniteReconnect
+      },
     });
 
     this.clearRegisterTimer();
@@ -1046,6 +1160,36 @@ export class CodexSipClient {
     if (this.metricsTimer) {
       clearInterval(this.metricsTimer);
       this.metricsTimer = undefined;
+    }
+  }
+
+  /**
+   * Start keep-alive mechanism to maintain WebSocket connection
+   */
+  private startKeepAlive(interval: number) {
+    this.clearKeepAliveTimer();
+
+    this.emit("log", {
+      level: "debug",
+      message: "Starting keep-alive mechanism",
+      context: { intervalMs: interval },
+    });
+
+    this.keepAliveTimer = setInterval(() => {
+      void this.checkConnection().catch((error) => {
+        this.emit("log", {
+          level: "warn",
+          message: "Keep-alive check failed",
+          error: error instanceof Error ? error : new Error(String(error)),
+        });
+      });
+    }, interval);
+  }
+
+  private clearKeepAliveTimer() {
+    if (this.keepAliveTimer) {
+      clearInterval(this.keepAliveTimer);
+      this.keepAliveTimer = undefined;
     }
   }
 
