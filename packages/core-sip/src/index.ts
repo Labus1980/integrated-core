@@ -289,13 +289,18 @@ export class CodexSipClient {
       // Start user agent if not connected
       if (!ua.isConnected()) {
         this.emit("log", {
-          level: "debug",
+          level: "info",
           message: "Transport not connected, starting user agent",
+          context: { transportState: ua.transport?.state },
         });
         await ua.start();
 
-        // Wait for transport to connect (with timeout)
-        await this.waitForTransportConnection(ua, 5000);
+        // Wait for transport to connect (with increased timeout)
+        await this.waitForTransportConnection(ua, 10000);
+        this.emit("log", {
+          level: "info",
+          message: "Transport connected, proceeding with registration",
+        });
       }
 
       await this.registerer.register();
@@ -349,17 +354,26 @@ export class CodexSipClient {
     // Ensure transport is connected before attempting call
     if (!ua.isConnected()) {
       this.emit("log", {
-        level: "debug",
+        level: "info",
         message: "Transport not connected, starting user agent before call",
+        context: { transportState: ua.transport?.state },
       });
 
       try {
         await ua.start();
-        await this.waitForTransportConnection(ua, 5000);
+        await this.waitForTransportConnection(ua, 15000); // Increased timeout to 15 seconds
+        this.emit("log", {
+          level: "info",
+          message: "Transport connected successfully",
+        });
       } catch (error) {
         this.emit("log", {
           level: "error",
           message: "Failed to establish transport connection",
+          context: {
+            error: error instanceof Error ? error.message : String(error),
+            transportState: ua.transport?.state,
+          },
           error: error instanceof Error ? error : new Error(String(error)),
         });
         throw new Error("Cannot start call: transport connection failed");
@@ -368,17 +382,27 @@ export class CodexSipClient {
 
     // Ensure we're registered before making a call
     if (!this.registerer || this.registerer.state !== RegistererState.Registered) {
+      this.emit("log", {
+        level: "info",
+        message: "Not registered, attempting registration before call",
+        context: { registererState: this.registerer?.state },
+      });
+
       await this.register();
 
       // Wait for registration to complete
       await new Promise<void>((resolve, reject) => {
         const timeout = setTimeout(() => {
           reject(new Error("Registration timeout"));
-        }, 10000); // 10 second timeout
+        }, 15000); // Increased to 15 seconds
 
         const checkRegistration = () => {
           if (this.registerer?.state === RegistererState.Registered) {
             clearTimeout(timeout);
+            this.emit("log", {
+              level: "info",
+              message: "Registration completed successfully",
+            });
             resolve();
           } else if (this.registerer?.state === RegistererState.Terminated) {
             clearTimeout(timeout);
@@ -395,7 +419,7 @@ export class CodexSipClient {
 
         // Clean up listener when done
         Promise.race([
-          new Promise((r) => setTimeout(r, 10000)),
+          new Promise((r) => setTimeout(r, 15000)),
           new Promise((r) => {
             if (this.registerer?.state === RegistererState.Registered) r(undefined);
           }),
@@ -689,6 +713,15 @@ export class CodexSipClient {
    * Useful for checking connection after page visibility changes.
    */
   async checkConnection(): Promise<boolean> {
+    // Skip check if already registering to avoid conflicts
+    if (this.isRegistering) {
+      this.emit("log", {
+        level: "debug",
+        message: "Registration already in progress, skipping connection check",
+      });
+      return true;
+    }
+
     if (!this.userAgent) {
       this.emit("log", {
         level: "debug",
@@ -704,6 +737,7 @@ export class CodexSipClient {
 
     const isConnected = this.userAgent.isConnected();
     const isRegistered = this.registerer?.state === RegistererState.Registered;
+    const isRegistering = this.registerer?.state === RegistererState.Registered;
 
     this.emit("log", {
       level: "debug",
@@ -711,27 +745,36 @@ export class CodexSipClient {
       context: {
         isConnected,
         isRegistered,
+        isRegistering: this.isRegistering,
+        registererState: this.registerer?.state,
         transportState: this.userAgent.transport?.state,
       },
     });
 
-    if (!isConnected || !isRegistered) {
+    // Only attempt reconnection if we're truly disconnected and not in the middle of registering
+    if ((!isConnected || !isRegistered) && !this.isRegistering) {
       this.emit("log", {
         level: "info",
         message: "Connection lost, attempting to reconnect",
+        context: {
+          isConnected,
+          isRegistered,
+        }
       });
       try {
         if (!isConnected && this.userAgent) {
           await this.userAgent.start();
+          // Wait for transport to connect
+          await this.waitForTransportConnection(this.userAgent, 10000);
         }
-        if (!isRegistered) {
+        if (!isRegistered && !this.isRegistering) {
           await this.register();
         }
         return true;
       } catch (error) {
         this.emit("log", {
           level: "error",
-          message: "Failed to reconnect",
+          message: "Failed to reconnect during connection check",
           error: error instanceof Error ? error : new Error(String(error)),
         });
         return false;
