@@ -33,11 +33,11 @@ import { FloatingVoiceWidget, createClient } from "@codex/web-widget";
 function App() {
   // Создаем SIP клиент
   const client = createClient({
-    JAMBONZ_SIP_DOMAIN: "your-domain.com",
-    JAMBONZ_WSS_ADDRESS: "ws://sip.your-domain.com",
+    JAMBONZ_SIP_DOMAIN: "jambonzlab.ru",
+    JAMBONZ_WSS_ADDRESS: "ws://sip.jambonzlab.ru",
     JAMBONZ_SIP_USERNAME: "username",
     JAMBONZ_SIP_PASSWORD: "password",
-    TARGET_SIP_URI: "sip:assistant@your-domain.com",
+    TARGET_SIP_URI: "sip:assistant@jambonzlab.ru",
     DEFAULT_LANG: "ru",
     FALLBACK_LANG: "en",
     STUN_URLS: "stun:fs-tun.okta-solutions.com:3478",
@@ -66,11 +66,11 @@ import { VoiceChatWidget, CodexSipClient } from "@codex/web-widget";
 import type { CodexSipConfig } from "@codex/core-sip";
 
 const sipConfig: CodexSipConfig = {
-  domain: "your-domain.com",
-  wssServer: "ws://sip.your-domain.com",
+  domain: "jambonzlab.ru",
+  wssServer: "ws://sip.jambonzlab.ru",
   username: "username",
   password: "password",
-  targetUri: "sip:assistant@your-domain.com",
+  targetUri: "sip:assistant@jambonzlab.ru",
   iceServers: [{ urls: "stun:fs-tun.okta-solutions.com:3478" }],
   defaultLanguage: "ru",
   fallbackLanguage: "en",
@@ -157,11 +157,11 @@ const languages = [
 Создайте файл `.env`:
 
 ```env
-VITE_JAMBONZ_SIP_DOMAIN=your-domain.com
-VITE_JAMBONZ_WSS_ADDRESS=ws://sip.your-domain.com
+VITE_JAMBONZ_SIP_DOMAIN=jambonzlab.ru
+VITE_JAMBONZ_WSS_ADDRESS=ws://sip.jambonzlab.ru
 VITE_JAMBONZ_SIP_USERNAME=username
 VITE_JAMBONZ_SIP_PASSWORD=password
-VITE_TARGET_SIP_URI=sip:assistant@your-domain.com
+VITE_TARGET_SIP_URI=sip:assistant@jambonzlab.ru
 VITE_DEFAULT_LANG=ru
 VITE_FALLBACK_LANG=en
 VITE_STUN_URLS=stun:fs-tun.okta-solutions.com:3478

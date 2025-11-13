@@ -17,11 +17,11 @@ const languages: LanguageOption[] = [
 export function App() {
   const [client] = useState(() =>
     createClient({
-      JAMBONZ_SIP_DOMAIN: import.meta.env.VITE_JAMBONZ_SIP_DOMAIN,
-      JAMBONZ_WSS_ADDRESS: import.meta.env.VITE_JAMBONZ_WSS_ADDRESS,
-      JAMBONZ_SIP_USERNAME: import.meta.env.VITE_JAMBONZ_SIP_USERNAME,
-      JAMBONZ_SIP_PASSWORD: import.meta.env.VITE_JAMBONZ_SIP_PASSWORD,
-      TARGET_SIP_URI: import.meta.env.VITE_TARGET_SIP_URI,
+      JAMBONZ_SIP_DOMAIN: "jambonzlab.ru",
+      JAMBONZ_WSS_ADDRESS: "ws://jambonz-sipws.okta-solutions.com/ws",
+      JAMBONZ_SIP_USERNAME: "3500",
+      JAMBONZ_SIP_PASSWORD: "your-password",
+      TARGET_SIP_URI: "sip:voicebot@jambonzlab.ru",
       DEFAULT_LANG: "ru",
       FALLBACK_LANG: "en",
       STUN_URLS: "stun:fs-tun.okta-solutions.com:3478",
@@ -96,11 +96,11 @@ export function VoiceWidget() {
   useEffect(() => {
     // Создаем клиент только на клиенте
     const sipClient = createClient({
-      JAMBONZ_SIP_DOMAIN: process.env.NEXT_PUBLIC_SIP_DOMAIN!,
-      JAMBONZ_WSS_ADDRESS: process.env.NEXT_PUBLIC_SIP_WSS!,
-      JAMBONZ_SIP_USERNAME: process.env.NEXT_PUBLIC_SIP_USERNAME!,
-      JAMBONZ_SIP_PASSWORD: process.env.NEXT_PUBLIC_SIP_PASSWORD!,
-      TARGET_SIP_URI: process.env.NEXT_PUBLIC_TARGET_SIP_URI!,
+      JAMBONZ_SIP_DOMAIN: "jambonzlab.ru",
+      JAMBONZ_WSS_ADDRESS: "ws://jambonz-sipws.okta-solutions.com/ws",
+      JAMBONZ_SIP_USERNAME: "3500",
+      JAMBONZ_SIP_PASSWORD: "your-password",
+      TARGET_SIP_URI: "sip:voicebot@jambonzlab.ru",
       DEFAULT_LANG: "ru",
       FALLBACK_LANG: "en",
       STUN_URLS: "stun:fs-tun.okta-solutions.com:3478",
@@ -159,14 +159,14 @@ interface AppConfig {
 
 function createVoiceClient(config: AppConfig): CodexSipClient {
   return createClient({
-    JAMBONZ_SIP_DOMAIN: config.sipDomain,
-    JAMBONZ_WSS_ADDRESS: config.sipWss,
-    JAMBONZ_SIP_USERNAME: config.sipUsername,
-    JAMBONZ_SIP_PASSWORD: config.sipPassword,
-    TARGET_SIP_URI: config.targetUri,
+    JAMBONZ_SIP_DOMAIN: "jambonzlab.ru",
+    JAMBONZ_WSS_ADDRESS: "ws://jambonz-sipws.okta-solutions.com/ws",
+    JAMBONZ_SIP_USERNAME: "3500",
+    JAMBONZ_SIP_PASSWORD: "your-password",
+    TARGET_SIP_URI: "sip:voicebot@jambonzlab.ru",
     DEFAULT_LANG: "ru",
     FALLBACK_LANG: "en",
-    STUN_URLS: "stun:stun.l.google.com:19302",
+    STUN_URLS: "stun:fs-tun.okta-solutions.com:3478",
   });
 }
 ```
@@ -229,11 +229,11 @@ export function App() {
       );
 
       const sipClient = new CodexSipClient({
-        domain: credentials.domain,
-        wssServer: credentials.wssServer,
-        username: credentials.username,
-        password: credentials.password,
-        targetUri: credentials.targetUri,
+        domain: "jambonzlab.ru",
+        wssServer: "ws://jambonz-sipws.okta-solutions.com/ws",
+        username: "3500",
+        password: "your-password",
+        targetUri: "sip:voicebot@jambonzlab.ru",
         iceServers: [{ urls: "stun:fs-tun.okta-solutions.com:3478" }],
         defaultLanguage: "ru",
         fallbackLanguage: "en",
