@@ -27,7 +27,7 @@ export interface SipConfig {
 
 const DEFAULT_SIP_CONFIG: SipConfig = {
   displayName: 'Boris',
-  sipDomain: 'avayalab.ru',
+  sipDomain: 'jambonzlab.ru',
   serverAddress: 'ws://jambonz-sipws.okta-solutions.com',
   username: '170',
   password: 'QApassw3',
@@ -124,7 +124,7 @@ const SipSettingsDialog: React.FC = () => {
               id="sipDomain"
               value={config.sipDomain}
               onChange={(e) => setConfig({ ...config, sipDomain: e.target.value })}
-              placeholder="avayalab.ru"
+              placeholder="jambonzlab.ru"
               required
             />
           </div>
