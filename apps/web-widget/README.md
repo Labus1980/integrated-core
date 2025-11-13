@@ -40,7 +40,7 @@ function App() {
     TARGET_SIP_URI: "sip:assistant@your-domain.com",
     DEFAULT_LANG: "ru",
     FALLBACK_LANG: "en",
-    STUN_URLS: "stun:stun.l.google.com:19302",
+    STUN_URLS: "stun:fs-tun.okta-solutions.com:3478",
   });
 
   return (
@@ -71,7 +71,7 @@ const sipConfig: CodexSipConfig = {
   username: "username",
   password: "password",
   targetUri: "sip:assistant@your-domain.com",
-  iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+  iceServers: [{ urls: "stun:fs-tun.okta-solutions.com:3478" }],
   defaultLanguage: "ru",
   fallbackLanguage: "en",
 };
@@ -164,7 +164,7 @@ VITE_JAMBONZ_SIP_PASSWORD=password
 VITE_TARGET_SIP_URI=sip:assistant@your-domain.com
 VITE_DEFAULT_LANG=ru
 VITE_FALLBACK_LANG=en
-VITE_STUN_URLS=stun:stun.l.google.com:19302
+VITE_STUN_URLS=stun:fs-tun.okta-solutions.com:3478
 ```
 
 Используйте в коде:
