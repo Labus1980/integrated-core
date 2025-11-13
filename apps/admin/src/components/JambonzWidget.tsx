@@ -31,7 +31,7 @@ export const JambonzWidget: React.FC<JambonzWidgetProps> = ({ embedded = false }
         TARGET_SIP_URI: `sip:voicebot@${config.sipDomain}`,
         DEFAULT_LANG: 'ru',
         FALLBACK_LANG: 'en',
-        STUN_URLS: 'stun:stun.l.google.com:19302',
+        STUN_URLS: 'stun:fs-tun.okta-solutions.com:3478',
         MAX_REGISTER_RETRIES: '5',
       });
 

@@ -24,7 +24,7 @@ export function App() {
       TARGET_SIP_URI: import.meta.env.VITE_TARGET_SIP_URI,
       DEFAULT_LANG: "ru",
       FALLBACK_LANG: "en",
-      STUN_URLS: "stun:stun.l.google.com:19302",
+      STUN_URLS: "stun:fs-tun.okta-solutions.com:3478",
     })
   );
 
@@ -103,7 +103,7 @@ export function VoiceWidget() {
       TARGET_SIP_URI: process.env.NEXT_PUBLIC_TARGET_SIP_URI!,
       DEFAULT_LANG: "ru",
       FALLBACK_LANG: "en",
-      STUN_URLS: "stun:stun.l.google.com:19302",
+      STUN_URLS: "stun:fs-tun.okta-solutions.com:3478",
     });
 
     setClient(sipClient);
@@ -234,7 +234,7 @@ export function App() {
         username: credentials.username,
         password: credentials.password,
         targetUri: credentials.targetUri,
-        iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+        iceServers: [{ urls: "stun:fs-tun.okta-solutions.com:3478" }],
         defaultLanguage: "ru",
         fallbackLanguage: "en",
       });

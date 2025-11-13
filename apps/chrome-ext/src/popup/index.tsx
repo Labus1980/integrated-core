@@ -21,7 +21,7 @@ interface ExtensionConfig extends Partial<VoiceWidgetEnvConfig> {
 const defaultConfig: Partial<VoiceWidgetEnvConfig> = {
   DEFAULT_LANG: "en",
   FALLBACK_LANG: "ru",
-  STUN_URLS: "stun:stun.l.google.com:19302",
+  STUN_URLS: "stun:fs-tun.okta-solutions.com:3478",
 };
 
 const useExtensionConfig = () => {
