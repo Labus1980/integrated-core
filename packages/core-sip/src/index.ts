@@ -539,7 +539,26 @@ export class CodexSipClient {
     if (customerData) {
       try {
         const customerDataJson = JSON.stringify(customerData);
+
+        // User-to-User header - automatically forwarded by Jambonz to webhooks
+        // Encode as base64 for safe transport
+        const base64Data = typeof btoa !== 'undefined'
+          ? btoa(customerDataJson)
+          : Buffer.from(customerDataJson).toString('base64');
+        inviteHeaders.push(`User-to-User: ${base64Data};encoding=base64`);
+
+        // Also keep X-Customer-Data for compatibility and debugging
         inviteHeaders.push(`X-Customer-Data: ${customerDataJson}`);
+
+        this.emit("log", {
+          level: "debug",
+          message: "Customer data added to INVITE headers",
+          context: {
+            hasUserToUser: true,
+            hasXCustomerData: true,
+            dataSize: customerDataJson.length
+          },
+        });
       } catch (error) {
         this.emit("log", {
           level: "warn",
