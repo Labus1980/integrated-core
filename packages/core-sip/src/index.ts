@@ -469,8 +469,20 @@ export class CodexSipClient {
       throw new Error("Unable to parse target SIP URI");
     }
 
+    // Generate a unique call ID for this session
+    this.activeCallId = generateUUID();
+    const tag = this.activeCallId.substring(0, 8);
+
     const inviteHeaders = [...(this.config.extraHeaders || [])];
     inviteHeaders.push(`${this.languageHeader}: ${lang}`);
+
+    // Add display names for external logging (CTI/Zammad)
+    const displayFrom = formatCallPartyName(this.config.username, tag);
+    const displayTo = formatCallPartyName(target.user, tag);
+    inviteHeaders.push(`X-Display-From: ${displayFrom}`);
+    inviteHeaders.push(`X-Display-To: ${displayTo}`);
+    inviteHeaders.push(`X-Call-Tag: ${tag}`);
+
     if (options?.extraHeaders) {
       inviteHeaders.push(...options.extraHeaders);
     }
@@ -486,22 +498,18 @@ export class CodexSipClient {
     this.hookSessionDelegates(this.currentSession);
     this.setState("connecting");
 
-    // Format target name for better readability
-    const targetName = formatCallPartyName(target.user);
     this.emit("log", {
       level: "info",
-      message: `Outbound call to ${targetName}`,
-      context: { target: targetName }
+      message: `Outbound call from ${displayFrom} to ${displayTo}`,
+      context: { from: displayFrom, to: displayTo, tag, callId: this.activeCallId }
     });
 
     try {
-      // Generate a unique call ID for this session
-      this.activeCallId = generateUUID();
       const response = await inviter.invite();
       this.emit("log", {
         level: "info",
-        message: `Call initiated to ${targetName}`,
-        context: { callId: this.activeCallId, target: targetName }
+        message: `Call initiated from ${displayFrom} to ${displayTo}`,
+        context: { callId: this.activeCallId, from: displayFrom, to: displayTo, tag }
       });
       if (response && "statusCode" in response && response.statusCode === 180) {
         this.setState("ringing");
@@ -510,8 +518,8 @@ export class CodexSipClient {
       this.setState("error", error instanceof Error ? error.message : "INVITE failed");
       this.emit("log", {
         level: "error",
-        message: `Call to ${targetName} failed`,
-        context: { target: targetName },
+        message: `Call from ${displayFrom} to ${displayTo} failed`,
+        context: { from: displayFrom, to: displayTo, tag },
         error: error instanceof Error ? error : new Error(String(error)),
       });
       throw error;
