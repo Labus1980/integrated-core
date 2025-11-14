@@ -13,6 +13,32 @@ import {
 import { TinyEmitter } from "tiny-emitter";
 
 /**
+ * Customer data attached to calls for tracking and analytics
+ */
+export interface CustomerData {
+  /** Unique identifier for the client/customer */
+  clientId?: string;
+  /** Display name of the client/customer */
+  clientName?: string;
+  /** Type of call (e.g., 'webcall', 'mobile', 'desktop') */
+  callType: string;
+  /** Session ID for tracking */
+  sessionId?: string;
+  /** Timestamp when call was initiated */
+  timestamp?: string;
+  /** User agent string (browser/app info) */
+  userAgent?: string;
+  /** Geographic location data */
+  location?: {
+    country?: string;
+    city?: string;
+    region?: string;
+  };
+  /** Custom fields for additional metadata */
+  customFields?: Record<string, unknown>;
+}
+
+/**
  * Generates a unique UUID v4 identifier.
  */
 function generateUUID(): string {
@@ -28,19 +54,21 @@ function generateUUID(): string {
  * Replaces known values with human-readable names.
  * @param value - The original identifier (e.g., "170", GUID)
  * @param tag - Optional tag to append for unique identification (e.g., callId prefix)
+ * @param applicationName - Optional application name to display instead of GUID
  */
-function formatCallPartyName(value: string | undefined, tag?: string): string {
+function formatCallPartyName(value: string | undefined, tag?: string, applicationName?: string): string {
   if (!value) return 'Unknown';
 
   // Replace application GUID with friendly name
   if (value.includes('0397dc5f-2f8f-4778-8499-0af934dd1196')) {
-    return 'voicebot';
+    return applicationName || 'voicebot';
   }
 
   // Replace extension number with friendly name
   if (value === '170') {
-    // Add tag if provided for unique identification and call matching
-    return tag ? `webcall:${tag}` : 'webcall';
+    const base = tag ? `webcall:${tag}` : 'webcall';
+    // Add application name if provided for better tracking in logs
+    return applicationName ? `${base} → ${applicationName}` : base;
   }
 
   return value;
@@ -92,6 +120,16 @@ export interface SipClientConfig {
    */
   keepAliveInterval?: number;
   /**
+   * Optional customer data attached to calls for tracking and analytics.
+   * This data will be sent in the X-Customer-Data header.
+   */
+  customerData?: CustomerData;
+  /**
+   * Optional target application name for better call logging.
+   * If provided, will be used instead of GUID in call logs.
+   */
+  targetApplicationName?: string;
+  /**
    * Optional metrics reporter invoked with every metrics payload.
    */
   onMetrics?: (metrics: MetricsEvent) => void | Promise<void>;
@@ -118,6 +156,10 @@ export interface CallStateEvent {
   callId?: string;
   /** Short tag for call matching (first 8 chars of callId) */
   tag?: string;
+  /** Target application name for better logging */
+  applicationName?: string;
+  /** Customer data attached to the call */
+  customerData?: CustomerData;
 }
 
 export interface MetricsEvent {
@@ -134,6 +176,8 @@ export interface MetricsEvent {
   bytesReceived?: number;
   /** Active preferred language for the call. */
   language?: string;
+  /** Target application name for better logging */
+  applicationName?: string;
 }
 
 export interface IceEvent {
@@ -172,6 +216,10 @@ export interface IncomingCallEvent {
   displayTo?: string;
   /** Unique tag for call matching */
   tag?: string;
+  /** Target application name for better logging */
+  applicationName?: string;
+  /** Customer data attached to the call */
+  customerData?: CustomerData;
 }
 
 type EventMap = {
@@ -379,7 +427,7 @@ export class CodexSipClient {
     this.emit("registration", { state: "unregistered" });
   }
 
-  async startCall(options?: { language?: string; extraHeaders?: string[]; targetUri?: string }) {
+  async startCall(options?: { language?: string; extraHeaders?: string[]; targetUri?: string; customerData?: CustomerData }) {
     const lang = options?.language || this.preferredLanguage || this.config.defaultLanguage;
     this.preferredLanguage = lang;
     this.emit("language", { language: this.preferredLanguage });
@@ -473,15 +521,33 @@ export class CodexSipClient {
     this.activeCallId = generateUUID();
     const tag = this.activeCallId.substring(0, 8);
 
+    // Merge customer data from config and options
+    const customerData = options?.customerData || this.config.customerData;
+    const applicationName = this.config.targetApplicationName;
+
     const inviteHeaders = [...(this.config.extraHeaders || [])];
     inviteHeaders.push(`${this.languageHeader}: ${lang}`);
 
-    // Add display names for external logging (CTI/Zammad)
-    const displayFrom = formatCallPartyName(this.config.username, tag);
-    const displayTo = formatCallPartyName(target.user, tag);
+    // Add display names for external logging (CTI/Zammad) with application name
+    const displayFrom = formatCallPartyName(this.config.username, tag, applicationName);
+    const displayTo = formatCallPartyName(target.user, tag, applicationName);
     inviteHeaders.push(`X-Display-From: ${displayFrom}`);
     inviteHeaders.push(`X-Display-To: ${displayTo}`);
     inviteHeaders.push(`X-Call-Tag: ${tag}`);
+
+    // Add customer data header if provided
+    if (customerData) {
+      try {
+        const customerDataJson = JSON.stringify(customerData);
+        inviteHeaders.push(`X-Customer-Data: ${customerDataJson}`);
+      } catch (error) {
+        this.emit("log", {
+          level: "warn",
+          message: "Failed to serialize customer data",
+          error: error instanceof Error ? error : new Error(String(error)),
+        });
+      }
+    }
 
     if (options?.extraHeaders) {
       inviteHeaders.push(...options.extraHeaders);
@@ -496,12 +562,12 @@ export class CodexSipClient {
     this.currentSession = inviter as SessionWithPeer;
     this.currentSession.stateChange.addListener((state: SessionState) => this.handleSessionStateChange(state));
     this.hookSessionDelegates(this.currentSession);
-    this.setState("connecting");
+    this.setState("connecting", undefined, applicationName, customerData);
 
     this.emit("log", {
       level: "info",
       message: `Outbound call from ${displayFrom} to ${displayTo}`,
-      context: { from: displayFrom, to: displayTo, tag, callId: this.activeCallId }
+      context: { from: displayFrom, to: displayTo, tag, callId: this.activeCallId, applicationName, customerData }
     });
 
     try {
@@ -509,17 +575,17 @@ export class CodexSipClient {
       this.emit("log", {
         level: "info",
         message: `Call initiated from ${displayFrom} to ${displayTo}`,
-        context: { callId: this.activeCallId, from: displayFrom, to: displayTo, tag }
+        context: { callId: this.activeCallId, from: displayFrom, to: displayTo, tag, applicationName, customerData }
       });
       if (response && "statusCode" in response && response.statusCode === 180) {
-        this.setState("ringing");
+        this.setState("ringing", undefined, applicationName, customerData);
       }
     } catch (error) {
-      this.setState("error", error instanceof Error ? error.message : "INVITE failed");
+      this.setState("error", error instanceof Error ? error.message : "INVITE failed", applicationName, customerData);
       this.emit("log", {
         level: "error",
         message: `Call from ${displayFrom} to ${displayTo} failed`,
-        context: { from: displayFrom, to: displayTo, tag },
+        context: { from: displayFrom, to: displayTo, tag, applicationName, customerData },
         error: error instanceof Error ? error : new Error(String(error)),
       });
       throw error;
@@ -932,24 +998,27 @@ export class CodexSipClient {
 
         const fromRaw = invitation.remoteIdentity?.displayName || invitation.remoteIdentity?.uri?.user || "Unknown";
         const toRaw = invitation.request.to?.uri?.user || "";
+        const applicationName = this.config.targetApplicationName;
 
-        // Format names for better readability with tag for webcall
-        const displayFrom = formatCallPartyName(fromRaw, tag);
-        const displayTo = formatCallPartyName(toRaw, tag);
+        // Format names for better readability with tag for webcall and application name
+        const displayFrom = formatCallPartyName(fromRaw, tag, applicationName);
+        const displayTo = formatCallPartyName(toRaw, tag, applicationName);
 
-        this.setState("incoming");
+        this.setState("incoming", undefined, applicationName, this.config.customerData);
         this.emit("incomingCall", {
           callId: this.activeCallId,
           from: fromRaw,          // Original values for internal use
           to: toRaw,              // Original values for internal use
-          displayFrom,            // Formatted name for external display (e.g., "webcall:abc12345")
+          displayFrom,            // Formatted name for external display (e.g., "webcall:abc12345 → voicebot")
           displayTo,              // Formatted name for external display (e.g., "voicebot")
           tag,                    // Short tag for call matching
+          applicationName,        // Application name for logging
+          customerData: this.config.customerData, // Customer data attached to call
         });
         this.emit("log", {
           level: "info",
           message: `Incoming call from ${displayFrom} to ${displayTo}`,
-          context: { from: fromRaw, to: toRaw, displayFrom, displayTo, tag, callId: this.activeCallId }
+          context: { from: fromRaw, to: toRaw, displayFrom, displayTo, tag, callId: this.activeCallId, applicationName }
         });
       },
     };
@@ -1106,6 +1175,7 @@ export class CodexSipClient {
         tag,
         iceState: state,
         language: this.preferredLanguage,
+        applicationName: this.config.targetApplicationName,
       });
       if (state === "failed" || state === "disconnected") {
         this.emit("log", {
@@ -1154,6 +1224,7 @@ export class CodexSipClient {
           bytesSent,
           bytesReceived,
           language: this.preferredLanguage,
+          applicationName: this.config.targetApplicationName,
         });
       } catch (error) {
         this.emit("log", {
@@ -1198,7 +1269,7 @@ export class CodexSipClient {
     this.setState(reason === "remote hangup" ? "ended" : "idle", reason);
   }
 
-  private setState(state: CallState, reason?: string) {
+  private setState(state: CallState, reason?: string, applicationName?: string, customerData?: CustomerData) {
     this.currentState = state;
     // Generate short tag if callId exists
     const tag = this.activeCallId ? this.activeCallId.substring(0, 8) : undefined;
@@ -1207,6 +1278,8 @@ export class CodexSipClient {
       reason,
       callId: this.activeCallId,
       tag,
+      applicationName,
+      customerData,
     });
   }
 
