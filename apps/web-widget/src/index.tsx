@@ -720,6 +720,15 @@ export interface VoiceWidgetEnvConfig {
    * Set to '0' to disable keep-alive
    */
   KEEP_ALIVE_INTERVAL?: string;
+  /**
+   * Optional target application name for better call logging
+   * If provided, will be used instead of GUID in call logs
+   */
+  TARGET_APPLICATION_NAME?: string;
+  /**
+   * Optional customer data (JSON string) attached to calls
+   */
+  CUSTOMER_DATA?: string;
 }
 
 export function parseIceServers(stunUrls: string, turnUrls?: string): RTCIceServer[] {
@@ -749,6 +758,16 @@ export function parseIceServers(stunUrls: string, turnUrls?: string): RTCIceServ
 export function createClient(config: VoiceWidgetEnvConfig & { JAMBONZ_WSS_ADDRESS: string; JAMBONZ_API_BASE_URL?: string }) {
   const iceServers = parseIceServers(config.STUN_URLS, config.TURN_URLS);
 
+  // Parse customer data if provided
+  let customerData;
+  if (config.CUSTOMER_DATA) {
+    try {
+      customerData = JSON.parse(config.CUSTOMER_DATA);
+    } catch (error) {
+      console.error('Failed to parse CUSTOMER_DATA:', error);
+    }
+  }
+
   const sipConfig: CodexSipConfig = {
     domain: config.JAMBONZ_SIP_DOMAIN,
     wssServer: config.JAMBONZ_WSS_ADDRESS,
@@ -763,6 +782,9 @@ export function createClient(config: VoiceWidgetEnvConfig & { JAMBONZ_WSS_ADDRES
     infiniteReconnect: config.INFINITE_RECONNECT !== undefined ? config.INFINITE_RECONNECT === 'true' : true,
     // Keep-alive interval (default: 30 seconds)
     keepAliveInterval: config.KEEP_ALIVE_INTERVAL ? Number(config.KEEP_ALIVE_INTERVAL) : 30000,
+    // Customer data and application name
+    customerData,
+    targetApplicationName: config.TARGET_APPLICATION_NAME,
   };
 
   return new CodexSipClient(sipConfig);
@@ -775,3 +797,6 @@ export type { LanguageOption } from "./components/LanguageSelector";
 
 // Export original card-style widget for backwards compatibility
 export type { CodexSipClient };
+
+// Export CustomerData type for external use
+export type { CustomerData } from "@codex/core-sip";
