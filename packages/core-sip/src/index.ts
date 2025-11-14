@@ -542,9 +542,7 @@ export class CodexSipClient {
 
         // User-to-User header - automatically forwarded by Jambonz to webhooks
         // Encode as base64 for safe transport
-        const base64Data = typeof btoa !== 'undefined'
-          ? btoa(customerDataJson)
-          : Buffer.from(customerDataJson).toString('base64');
+        const base64Data = btoa(customerDataJson);
         inviteHeaders.push(`User-to-User: ${base64Data};encoding=base64`);
 
         // Also keep X-Customer-Data for compatibility and debugging
