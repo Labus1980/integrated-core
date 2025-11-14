@@ -22,6 +22,7 @@ const defaultConfig: Partial<VoiceWidgetEnvConfig> = {
   DEFAULT_LANG: "en",
   FALLBACK_LANG: "ru",
   STUN_URLS: "stun:fs-tun.okta-solutions.com:3478",
+  TARGET_APPLICATION_NAME: "voicebot",
 };
 
 const useExtensionConfig = () => {

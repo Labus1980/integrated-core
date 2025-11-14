@@ -29,6 +29,7 @@ export const JambonzWidget: React.FC<JambonzWidgetProps> = ({ embedded = false }
         JAMBONZ_SIP_USERNAME: config.username,
         JAMBONZ_SIP_PASSWORD: config.password,
         TARGET_SIP_URI: `sip:0397dc5f-2f8f-4778-8499-0af934dd1196@${config.sipDomain}`,
+        TARGET_APPLICATION_NAME: 'voicebot',
         DEFAULT_LANG: 'ru',
         FALLBACK_LANG: 'en',
         STUN_URLS: 'stun:fs-tun.okta-solutions.com:3478',
