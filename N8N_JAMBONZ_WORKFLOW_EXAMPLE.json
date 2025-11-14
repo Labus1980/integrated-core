@@ -1,0 +1,217 @@
+{
+  "name": "Jambonz Call Status with CustomerData",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jb-status",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "name": "Webhook - Jambonz Status",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "your-webhook-id"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Извлечь и декодировать User-to-User header\nconst userToUser = $json.user_to_user;\nconst displayFrom = $json.from;\nconst displayTo = $json.to;\nconst callTag = $json.call_id;\n\nlet customerData = {};\n\n// Декодировать User-to-User header если присутствует\nif (userToUser) {\n  try {\n    // Декодировать base64\n    const decoded = Buffer.from(userToUser, 'base64').toString('utf-8');\n    customerData = JSON.parse(decoded);\n    \n    console.log('✅ CustomerData decoded successfully:', customerData);\n  } catch (e) {\n    console.error('❌ Failed to parse User-to-User header:', e.message);\n    \n    // Fallback: попробовать извлечь из X-Customer-Data если есть\n    const xCustomerData = $json.sip_headers?.['x-customer-data'];\n    if (xCustomerData) {\n      try {\n        customerData = JSON.parse(xCustomerData);\n        console.log('✅ CustomerData extracted from X-Customer-Data');\n      } catch (e2) {\n        console.error('❌ Failed to parse X-Customer-Data:', e2.message);\n      }\n    }\n  }\n}\n\n// Также извлечь display headers если они есть\nconst sipHeaders = $json.sip_headers || {};\nconst xDisplayFrom = sipHeaders['x-display-from'];\nconst xDisplayTo = sipHeaders['x-display-to'];\nconst xCallTag = sipHeaders['x-call-tag'];\n\n// Обогащенные данные для дальнейшей обработки\nreturn {\n  // Основные данные звонка\n  call_sid: $json.call_sid,\n  call_status: $json.call_status,\n  sip_status: $json.sip_status,\n  sip_reason: $json.sip_reason,\n  direction: $json.direction,\n  \n  // Отображаемые данные (используем улучшенный формат если есть)\n  from: xDisplayFrom || displayFrom || $json.from,\n  to: xDisplayTo || displayTo || $json.to,\n  tag: xCallTag || callTag,\n  \n  // Оригинальные данные\n  originalFrom: $json.from,\n  originalTo: $json.to,\n  \n  // Customer data (декодированные)\n  customerData: customerData,\n  \n  // Дополнительная информация\n  trace_id: $json.trace_id,\n  account_sid: $json.account_sid,\n  application_sid: $json.application_sid,\n  call_id: $json.call_id,\n  \n  // Timestamp\n  timestamp: new Date().toISOString(),\n  \n  // Метаданные для аналитики\n  hasCustomerData: Object.keys(customerData).length > 0,\n  hasDisplayHeaders: !!(xDisplayFrom || xDisplayTo)\n};"
+      },
+      "name": "Parse CustomerData",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.hasCustomerData }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Has CustomerData?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Создать красивое сообщение для Zammad\nconst customerData = $json.customerData || {};\nconst from = $json.from || 'Unknown';\nconst to = $json.to || 'Unknown';\nconst tag = $json.tag || '';\nconst callStatus = $json.call_status || 'unknown';\n\n// Определить статус на русском\nconst statusMap = {\n  'trying': '⏳ Инициируется',\n  'ringing': '📞 Звонит',\n  'in-progress': '📞 В процессе',\n  'completed': '✅ Завершен',\n  'failed': '❌ Не удался',\n  'busy': '🔴 Занято',\n  'no-answer': '📵 Не отвечает'\n};\n\nconst statusEmoji = statusMap[callStatus] || `⚪ ${callStatus}`;\n\n// Создать заметку для Zammad\nconst note = `\n${statusEmoji}\n\n**📋 Детали звонка:**\n• От: ${from}\n• Кому: ${to}\n• Тег: ${tag || 'нет'}\n• Статус: ${callStatus}\n\n**👤 Информация о клиенте:**\n• Имя: ${customerData.clientName || 'Не указано'}\n• ID: ${customerData.clientId || 'Не указан'}\n• Тип звонка: ${customerData.callType || 'Не указан'}\n• Сессия: ${customerData.sessionId || 'Не указана'}\n• Время: ${customerData.timestamp || $json.timestamp}\n${customerData.userAgent ? '• User Agent: ' + customerData.userAgent : ''}\n${customerData.location ? '• Локация: ' + (customerData.location.city || '') + ', ' + (customerData.location.country || '') : ''}\n\n**🔧 Техническая информация:**\n• Call SID: ${$json.call_sid}\n• Trace ID: ${$json.trace_id || 'N/A'}\n• Application: ${$json.application_sid}\n• SIP Status: ${$json.sip_status} ${$json.sip_reason || ''}\n`;\n\n// Определить приоритет на основе customerData\nconst priority = customerData.customFields?.priority || 'normal';\n\n// Создать теги\nconst tags = [\n  'webcall',\n  customerData.callType || 'unknown',\n  tag ? `tag:${tag}` : null,\n  callStatus,\n  customerData.customFields?.department || null\n].filter(Boolean);\n\nreturn {\n  // Данные для создания тикета в Zammad\n  title: `${statusEmoji} ${from} → ${to}`,\n  customer: {\n    email: customerData.clientId ? `${customerData.clientId}@system.local` : 'unknown@system.local',\n    firstname: customerData.clientName ? customerData.clientName.split(' ')[0] : 'Unknown',\n    lastname: customerData.clientName ? customerData.clientName.split(' ').slice(1).join(' ') : 'Customer'\n  },\n  article: {\n    subject: `Звонок ${callStatus}: ${from} → ${to}`,\n    body: note,\n    type: 'phone',\n    internal: false,\n    sender: 'Customer'\n  },\n  priority: priority,\n  tags: tags,\n  \n  // Дополнительные поля (если настроены в Zammad)\n  customFields: {\n    call_sid: $json.call_sid,\n    call_tag: tag,\n    customer_id: customerData.clientId,\n    call_type: customerData.callType,\n    session_id: customerData.sessionId\n  },\n  \n  // Оригинальные данные для дальнейшей обработки\n  rawData: $json\n};"
+      },
+      "name": "Prepare Zammad Ticket",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [850, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://zammad.okta-solutions.com/api/v1/tickets",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_ZAMMAD_API_TOKEN"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "={{ $json.title }}"
+            },
+            {
+              "name": "group",
+              "value": "Support"
+            },
+            {
+              "name": "customer",
+              "value": "={{ $json.customer.email }}"
+            },
+            {
+              "name": "article",
+              "value": "={{ JSON.stringify($json.article) }}"
+            },
+            {
+              "name": "priority",
+              "value": "={{ $json.priority }}"
+            },
+            {
+              "name": "tags",
+              "value": "={{ $json.tags.join(',') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Create Zammad Ticket",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1050, 200]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Логирование для звонков без customerData\nconsole.warn('⚠️ Call received without customerData');\nconsole.log('Call details:', {\n  call_sid: $json.call_sid,\n  from: $json.from,\n  to: $json.to,\n  status: $json.call_status\n});\n\n// Создать упрощенную запись\nreturn {\n  title: `📞 ${$json.from} → ${$json.to}`,\n  note: `Звонок от ${$json.from} к ${$json.to}\\n\\nСтатус: ${$json.call_status}\\nCall SID: ${$json.call_sid}\\n\\n⚠️ CustomerData отсутствует`,\n  tags: ['webcall', 'no-customer-data', $json.call_status],\n  rawData: $json\n};"
+      },
+      "name": "Log Without CustomerData",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [850, 400]
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch",
+        "output": "input1"
+      },
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Финальное логирование и статистика\nconst items = $input.all();\n\nconsole.log('✅ Processed calls:', items.length);\nconsole.log('Calls with CustomerData:', items.filter(i => i.json.hasCustomerData).length);\nconsole.log('Calls without CustomerData:', items.filter(i => !i.json.hasCustomerData).length);\n\nreturn items;"
+      },
+      "name": "Final Statistics",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1450, 300]
+    }
+  ],
+  "connections": {
+    "Webhook - Jambonz Status": {
+      "main": [
+        [
+          {
+            "node": "Parse CustomerData",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse CustomerData": {
+      "main": [
+        [
+          {
+            "node": "Has CustomerData?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has CustomerData?": {
+      "main": [
+        [
+          {
+            "node": "Prepare Zammad Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Without CustomerData",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Zammad Ticket": {
+      "main": [
+        [
+          {
+            "node": "Create Zammad Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Zammad Ticket": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Without CustomerData": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Final Statistics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {}
+}
