@@ -23,6 +23,29 @@ function generateUUID(): string {
   });
 }
 
+/**
+ * Formats caller/callee identifiers for better readability in logs.
+ * Replaces known values with human-readable names.
+ * @param value - The original identifier (e.g., "170", GUID)
+ * @param tag - Optional tag to append for unique identification (e.g., callId prefix)
+ */
+function formatCallPartyName(value: string | undefined, tag?: string): string {
+  if (!value) return 'Unknown';
+
+  // Replace application GUID with friendly name
+  if (value.includes('0397dc5f-2f8f-4778-8499-0af934dd1196')) {
+    return 'voicebot';
+  }
+
+  // Replace extension number with friendly name
+  if (value === '170') {
+    // Add tag if provided for unique identification and call matching
+    return tag ? `webcall:${tag}` : 'webcall';
+  }
+
+  return value;
+}
+
 export type LogLevel = "debug" | "info" | "warn" | "error";
 
 export type CallState =
@@ -93,11 +116,15 @@ export interface CallStateEvent {
   reason?: string;
   causeCode?: number;
   callId?: string;
+  /** Short tag for call matching (first 8 chars of callId) */
+  tag?: string;
 }
 
 export interface MetricsEvent {
   ts: number;
   callId?: string;
+  /** Short tag for call matching (first 8 chars of callId) */
+  tag?: string;
   /** Current ICE connection state as reported by RTCPeerConnection. */
   iceState?: RTCIceConnectionState;
   /** Selected candidate pair RTT in milliseconds (when available). */
@@ -135,8 +162,16 @@ export interface LanguageChangeEvent {
 
 export interface IncomingCallEvent {
   callId?: string;
+  /** Original from value (e.g., "170") */
   from?: string;
+  /** Original to value (e.g., GUID) */
   to?: string;
+  /** Display name for from (e.g., "webcall:abc123") */
+  displayFrom?: string;
+  /** Display name for to (e.g., "voicebot") */
+  displayTo?: string;
+  /** Unique tag for call matching */
+  tag?: string;
 }
 
 type EventMap = {
@@ -450,7 +485,14 @@ export class CodexSipClient {
     this.currentSession.stateChange.addListener((state: SessionState) => this.handleSessionStateChange(state));
     this.hookSessionDelegates(this.currentSession);
     this.setState("connecting");
-    this.emit("log", { level: "info", message: "Outbound INVITE sent", context: { target: target.toString() } });
+
+    // Format target name for better readability
+    const targetName = formatCallPartyName(target.user);
+    this.emit("log", {
+      level: "info",
+      message: `Outbound call to ${targetName}`,
+      context: { target: targetName }
+    });
 
     try {
       // Generate a unique call ID for this session
@@ -458,8 +500,8 @@ export class CodexSipClient {
       const response = await inviter.invite();
       this.emit("log", {
         level: "info",
-        message: "Call initiated with unique ID",
-        context: { callId: this.activeCallId, target: target.toString() }
+        message: `Call initiated to ${targetName}`,
+        context: { callId: this.activeCallId, target: targetName }
       });
       if (response && "statusCode" in response && response.statusCode === 180) {
         this.setState("ringing");
@@ -468,8 +510,8 @@ export class CodexSipClient {
       this.setState("error", error instanceof Error ? error.message : "INVITE failed");
       this.emit("log", {
         level: "error",
-        message: "INVITE failed",
-        context: { target: target.toString() },
+        message: `Call to ${targetName} failed`,
+        context: { target: targetName },
         error: error instanceof Error ? error : new Error(String(error)),
       });
       throw error;
@@ -877,19 +919,29 @@ export class CodexSipClient {
         // Generate a unique call ID for this incoming session
         this.activeCallId = generateUUID();
 
-        const from = invitation.remoteIdentity?.displayName || invitation.remoteIdentity?.uri?.user || "Unknown";
-        const to = invitation.request.to?.uri?.user || "";
+        // Create short tag for call matching (first 8 chars of callId)
+        const tag = this.activeCallId.substring(0, 8);
+
+        const fromRaw = invitation.remoteIdentity?.displayName || invitation.remoteIdentity?.uri?.user || "Unknown";
+        const toRaw = invitation.request.to?.uri?.user || "";
+
+        // Format names for better readability with tag for webcall
+        const displayFrom = formatCallPartyName(fromRaw, tag);
+        const displayTo = formatCallPartyName(toRaw, tag);
 
         this.setState("incoming");
         this.emit("incomingCall", {
           callId: this.activeCallId,
-          from,
-          to,
+          from: fromRaw,          // Original values for internal use
+          to: toRaw,              // Original values for internal use
+          displayFrom,            // Formatted name for external display (e.g., "webcall:abc12345")
+          displayTo,              // Formatted name for external display (e.g., "voicebot")
+          tag,                    // Short tag for call matching
         });
         this.emit("log", {
           level: "info",
-          message: "Incoming call received",
-          context: { from, to, callId: this.activeCallId }
+          message: `Incoming call from ${displayFrom} to ${displayTo}`,
+          context: { from: fromRaw, to: toRaw, displayFrom, displayTo, tag, callId: this.activeCallId }
         });
       },
     };
@@ -1039,9 +1091,11 @@ export class CodexSipClient {
     peer.oniceconnectionstatechange = () => {
       const state = peer.iceConnectionState;
       this.emit("ice", { state });
+      const tag = this.activeCallId ? this.activeCallId.substring(0, 8) : undefined;
       this.emit("metrics", {
         ts: Date.now(),
         callId: this.activeCallId,
+        tag,
         iceState: state,
         language: this.preferredLanguage,
       });
@@ -1082,9 +1136,11 @@ export class CodexSipClient {
           }
         });
 
+        const tag = this.activeCallId ? this.activeCallId.substring(0, 8) : undefined;
         this.emit("metrics", {
           ts: Date.now(),
           callId: this.activeCallId,
+          tag,
           iceState: peer.iceConnectionState,
           rttMs: rtt,
           bytesSent,
@@ -1136,10 +1192,13 @@ export class CodexSipClient {
 
   private setState(state: CallState, reason?: string) {
     this.currentState = state;
+    // Generate short tag if callId exists
+    const tag = this.activeCallId ? this.activeCallId.substring(0, 8) : undefined;
     this.emit("call", {
       state,
       reason,
       callId: this.activeCallId,
+      tag,
     });
   }
 
