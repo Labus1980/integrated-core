@@ -23,6 +23,26 @@ function generateUUID(): string {
   });
 }
 
+/**
+ * Formats caller/callee identifiers for better readability in logs.
+ * Replaces known values with human-readable names.
+ */
+function formatCallPartyName(value: string | undefined): string {
+  if (!value) return 'Unknown';
+
+  // Replace application GUID with friendly name
+  if (value.includes('0397dc5f-2f8f-4778-8499-0af934dd1196')) {
+    return 'voicebot';
+  }
+
+  // Replace extension number with friendly name
+  if (value === '170') {
+    return 'webcall';
+  }
+
+  return value;
+}
+
 export type LogLevel = "debug" | "info" | "warn" | "error";
 
 export type CallState =
@@ -450,7 +470,14 @@ export class CodexSipClient {
     this.currentSession.stateChange.addListener((state: SessionState) => this.handleSessionStateChange(state));
     this.hookSessionDelegates(this.currentSession);
     this.setState("connecting");
-    this.emit("log", { level: "info", message: "Outbound INVITE sent", context: { target: target.toString() } });
+
+    // Format target name for better readability
+    const targetName = formatCallPartyName(target.user);
+    this.emit("log", {
+      level: "info",
+      message: `Outbound call to ${targetName}`,
+      context: { target: targetName }
+    });
 
     try {
       // Generate a unique call ID for this session
@@ -458,8 +485,8 @@ export class CodexSipClient {
       const response = await inviter.invite();
       this.emit("log", {
         level: "info",
-        message: "Call initiated with unique ID",
-        context: { callId: this.activeCallId, target: target.toString() }
+        message: `Call initiated to ${targetName}`,
+        context: { callId: this.activeCallId, target: targetName }
       });
       if (response && "statusCode" in response && response.statusCode === 180) {
         this.setState("ringing");
@@ -468,8 +495,8 @@ export class CodexSipClient {
       this.setState("error", error instanceof Error ? error.message : "INVITE failed");
       this.emit("log", {
         level: "error",
-        message: "INVITE failed",
-        context: { target: target.toString() },
+        message: `Call to ${targetName} failed`,
+        context: { target: targetName },
         error: error instanceof Error ? error : new Error(String(error)),
       });
       throw error;
@@ -877,8 +904,12 @@ export class CodexSipClient {
         // Generate a unique call ID for this incoming session
         this.activeCallId = generateUUID();
 
-        const from = invitation.remoteIdentity?.displayName || invitation.remoteIdentity?.uri?.user || "Unknown";
-        const to = invitation.request.to?.uri?.user || "";
+        const fromRaw = invitation.remoteIdentity?.displayName || invitation.remoteIdentity?.uri?.user || "Unknown";
+        const toRaw = invitation.request.to?.uri?.user || "";
+
+        // Format names for better readability
+        const from = formatCallPartyName(fromRaw);
+        const to = formatCallPartyName(toRaw);
 
         this.setState("incoming");
         this.emit("incomingCall", {
@@ -888,7 +919,7 @@ export class CodexSipClient {
         });
         this.emit("log", {
           level: "info",
-          message: "Incoming call received",
+          message: `Incoming call from ${from} to ${to}`,
           context: { from, to, callId: this.activeCallId }
         });
       },
