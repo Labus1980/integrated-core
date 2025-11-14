@@ -512,7 +512,21 @@ export class CodexSipClient {
       });
     }
 
-    const target = this.resolveTargetUri(options?.targetUri || this.config.targetUri);
+    // Merge customer data from config and options
+    const customerData = options?.customerData || this.config.customerData;
+    const applicationName = this.config.targetApplicationName;
+
+    // Replace UUID with application name in target URI if available
+    let targetUriString = options?.targetUri || this.config.targetUri;
+    if (applicationName && targetUriString) {
+      // Replace UUID pattern with application name
+      targetUriString = targetUriString.replace(
+        /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i,
+        applicationName
+      );
+    }
+
+    const target = this.resolveTargetUri(targetUriString);
     if (!target) {
       throw new Error("Unable to parse target SIP URI");
     }
@@ -520,10 +534,6 @@ export class CodexSipClient {
     // Generate a unique call ID for this session
     this.activeCallId = generateUUID();
     const tag = this.activeCallId.substring(0, 8);
-
-    // Merge customer data from config and options
-    const customerData = options?.customerData || this.config.customerData;
-    const applicationName = this.config.targetApplicationName;
 
     const inviteHeaders = [...(this.config.extraHeaders || [])];
     inviteHeaders.push(`${this.languageHeader}: ${lang}`);
@@ -534,6 +544,11 @@ export class CodexSipClient {
     inviteHeaders.push(`X-Display-From: ${displayFrom}`);
     inviteHeaders.push(`X-Display-To: ${displayTo}`);
     inviteHeaders.push(`X-Call-Tag: ${tag}`);
+
+    // Add application name if available (to replace GUID in webhooks)
+    if (applicationName) {
+      inviteHeaders.push(`X-Application-Name: ${applicationName}`);
+    }
 
     // Add customer data header if provided
     if (customerData) {
