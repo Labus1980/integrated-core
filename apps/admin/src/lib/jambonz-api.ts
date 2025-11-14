@@ -10,6 +10,7 @@ export interface JambonzApplication {
   call_hook?: {
     url: string;
     method: string;
+    custom_headers?: string[];
   };
   messaging_hook?: {
     url: string;
@@ -18,6 +19,7 @@ export interface JambonzApplication {
   call_status_hook?: {
     url: string;
     method: string;
+    custom_headers?: string[];
   };
   speech_synthesis_vendor?: string;
   speech_synthesis_language?: string;
@@ -190,6 +192,51 @@ export class JambonzApiClient {
     this.applicationNameCache.clear();
     this.applicationsCache = null;
     this.applicationsCacheTime = 0;
+  }
+
+  /**
+   * Update application webhooks to forward custom headers (customerData, applicationName, etc.)
+   * @param applicationSid - Application SID to update
+   * @param customHeaders - Array of header names to forward (default: customerData and app name headers)
+   */
+  async updateApplicationWebhooks(
+    applicationSid: string,
+    customHeaders: string[] = ['X-Customer-Data', 'X-Application-Name', 'X-Display-From', 'X-Display-To', 'X-Call-Tag']
+  ): Promise<void> {
+    try {
+      // Get current application config
+      const app = await this.getApplication(applicationSid);
+
+      // Update with custom headers
+      const url = `${this.config.apiBaseUrl}/Accounts/${this.config.accountSid}/Applications/${applicationSid}`;
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${this.config.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...app,
+          call_hook: app.call_hook ? {
+            ...app.call_hook,
+            custom_headers: customHeaders,
+          } : undefined,
+          call_status_hook: app.call_status_hook ? {
+            ...app.call_status_hook,
+            custom_headers: customHeaders,
+          } : undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update application webhooks: ${response.status} ${response.statusText}`);
+      }
+
+      console.log(`Application ${applicationSid} webhooks updated with custom headers:`, customHeaders);
+    } catch (error) {
+      console.error(`Error updating application webhooks for ${applicationSid}:`, error);
+      throw error;
+    }
   }
 
   /**
