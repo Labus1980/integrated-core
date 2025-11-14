@@ -784,7 +784,7 @@ export function createClient(config: VoiceWidgetEnvConfig & { JAMBONZ_WSS_ADDRES
     keepAliveInterval: config.KEEP_ALIVE_INTERVAL ? Number(config.KEEP_ALIVE_INTERVAL) : 30000,
     // Customer data and application name
     customerData,
-    targetApplicationName: config.TARGET_APPLICATION_NAME,
+    targetApplicationName: config.TARGET_APPLICATION_NAME || 'voicebot',
   };
 
   return new CodexSipClient(sipConfig);
