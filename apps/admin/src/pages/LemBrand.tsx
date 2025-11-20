@@ -273,6 +273,7 @@ const LemBrand = () => {
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
   const [strategyData, setStrategyData] = useState<StrategyData | null>(null);
   const [activeTab, setActiveTab] = useState<'immediate' | 'medium' | 'long'>('immediate');
+  const [manualBrandId, setManualBrandId] = useState('');
 
   // Load config from localStorage
   useEffect(() => {
@@ -688,18 +689,27 @@ const LemBrand = () => {
     let brandId: string | null;
     let analysisId: string | null;
 
-    if (config.testMode && config.testBrandId && config.testAnalysisId) {
-      // Use IDs from Testing Mode
+    // Priority 1: Manual Brand ID input (if provided)
+    if (manualBrandId.trim()) {
+      brandId = manualBrandId.trim();
+      analysisId = appState.analysisId || null;
+      console.log('🔧 Using manual Brand ID:', { brandId, analysisId });
+    }
+    // Priority 2: Testing Mode IDs
+    else if (config.testMode && config.testBrandId && config.testAnalysisId) {
       brandId = config.testBrandId;
       analysisId = config.testAnalysisId;
       console.log('🧪 Testing Mode: Using provided IDs', { brandId, analysisId });
-    } else if (appState.brandId && appState.analysisId) {
-      // Use IDs from analysis flow
+    }
+    // Priority 3: Analysis flow IDs
+    else if (appState.brandId && appState.analysisId) {
       brandId = appState.brandId;
       analysisId = appState.analysisId;
       console.log('📊 Using Analysis IDs', { brandId, analysisId });
-    } else {
-      alert('Analysis data not found. Please run analysis first or enable Testing Mode.');
+    }
+    // No IDs available
+    else {
+      alert('Please specify a Brand ID or run analysis first.');
       return;
     }
 
@@ -1103,6 +1113,50 @@ const LemBrand = () => {
                     Get 5 editorial pillars, key messages, recommended posting
                     frequency, and a detailed action plan in 2 minutes
                   </p>
+
+                  {/* Brand ID Input */}
+                  <div className="brand-id-input-wrapper" style={{ marginBottom: '24px' }}>
+                    <label htmlFor="manualBrandIdInput" style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      marginBottom: '8px',
+                      color: 'var(--text-primary)'
+                    }}>
+                      Brand ID (optional)
+                    </label>
+                    <input
+                      type="text"
+                      id="manualBrandIdInput"
+                      className="form-input"
+                      placeholder="Enter Brand ID from Baserow (e.g., 123)"
+                      value={manualBrandId}
+                      onChange={(e) => setManualBrandId(e.target.value)}
+                      disabled={appState.isGeneratingStrategy}
+                      style={{
+                        width: '100%',
+                        maxWidth: '400px',
+                        padding: '12px 16px',
+                        fontSize: '16px',
+                        border: '2px solid var(--border)',
+                        borderRadius: '8px',
+                        fontFamily: 'DM Sans, sans-serif'
+                      }}
+                    />
+                    <small style={{
+                      display: 'block',
+                      marginTop: '6px',
+                      fontSize: '13px',
+                      color: 'var(--text-muted)'
+                    }}>
+                      {manualBrandId.trim()
+                        ? `Using Brand ID: ${manualBrandId.trim()}`
+                        : appState.brandId
+                        ? `Using Brand ID from analysis: ${appState.brandId}`
+                        : 'No Brand ID specified'}
+                    </small>
+                  </div>
+
                   <button
                     className="btn-generate-strategy"
                     onClick={generateStrategy}
