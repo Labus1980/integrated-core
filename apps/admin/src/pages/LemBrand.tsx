@@ -151,7 +151,10 @@ class BaserowClient {
 
   async listRows(tableName: string, filters: Record<string, any> = {}): Promise<any[]> {
     const tableId = this.tables[tableName];
+    console.log(`🔍 listRows called for table "${tableName}"`, { tableId, filters });
+
     if (!tableId) {
+      console.error(`❌ Table "${tableName}" not found in tables:`, this.tables);
       throw new Error(`Table "${tableName}" not found. Available tables: ${Object.keys(this.tables).join(', ')}`);
     }
 
@@ -161,12 +164,25 @@ class BaserowClient {
       // Add filters as query parameters
       Object.entries(filters).forEach(([key, value]) => {
         queryParams.append(`filter__${key}__equal`, String(value));
+        console.log(`🔍 Adding filter: filter__${key}__equal = ${value}`);
       });
 
       const queryString = queryParams.toString();
       const endpoint = `/api/database/rows/table/${tableId}/${queryString ? '?' + queryString : ''}`;
+      const fullUrl = `${this.baseUrl}${endpoint}`;
+
+      console.log(`📡 Making request to Baserow API:`);
+      console.log(`   URL: ${fullUrl}`);
+      console.log(`   Table ID: ${tableId}`);
+      console.log(`   Filters: ${queryString || '(none)'}`);
 
       const data = await this.request(endpoint);
+
+      console.log(`✅ Baserow API request successful`);
+      console.log(`   Response type: ${typeof data}`);
+      console.log(`   Has results: ${!!data.results}`);
+      console.log(`   Results count: ${data.results?.length || (Array.isArray(data) ? data.length : 0)}`);
+
       return data.results || data || [];
     } catch (error) {
       console.error(`❌ Failed to list rows from table "${tableName}":`, error);
@@ -239,25 +255,33 @@ class BaserowClient {
       console.log('🎯 Fetching strategy for brand ID:', brandId);
       const rows = await this.listRows('strategies', { brand_id: brandId });
 
+      console.log('📦 Baserow API response - rows count:', rows?.length);
+      console.log('📦 Baserow API response - raw data:', rows);
+
       if (!rows || rows.length === 0) {
+        console.error('❌ No rows returned from Baserow API');
         throw new Error(`No strategy found for brand ID ${brandId}`);
       }
 
       const data = rows[0]; // Get first matching strategy
+      console.log('📄 First row data:', data);
 
       // Parse JSON fields if they are strings
       const parseField = (field: any) => {
         if (typeof field === 'string') {
           try {
-            return JSON.parse(field);
+            const parsed = JSON.parse(field);
+            console.log('✅ Parsed JSON field:', parsed);
+            return parsed;
           } catch {
+            console.warn('⚠️ Failed to parse JSON field, using as-is:', field);
             return field;
           }
         }
         return field;
       };
 
-      return {
+      const result = {
         summary: data.summary || '',
         editorial_pillars: parseField(data.editorial_pillars) || { pillars: [] },
         key_messages: parseField(data.key_messages) || [],
@@ -268,6 +292,9 @@ class BaserowClient {
           long_term: []
         }
       };
+
+      console.log('✅ Parsed strategy data:', result);
+      return result;
     } catch (error) {
       console.error('❌ Failed to get strategy:', error);
       throw error;
@@ -519,8 +546,19 @@ const LemBrand = () => {
   const fetchStrategyByBrandIdFromBaserow = async (brandId: string): Promise<StrategyData> => {
     try {
       console.log('🎯 Fetching strategy from Baserow by Brand ID using BaserowClient');
-      return await baserow.getStrategyByBrandId(brandId);
+      console.log('📥 Input Brand ID:', brandId);
+
+      const result = await baserow.getStrategyByBrandId(brandId);
+
+      console.log('✅ Strategy fetched successfully from Baserow');
+      console.log('📊 Strategy summary:', result.summary?.substring(0, 100) + '...');
+      console.log('📊 Editorial pillars count:', result.editorial_pillars?.pillars?.length);
+      console.log('📊 Key messages count:', result.key_messages?.length);
+      console.log('📊 Full strategy data:', result);
+
+      return result;
     } catch (error) {
+      console.error('❌ ERROR in fetchStrategyByBrandIdFromBaserow:', error);
       console.warn('⚠️ Failed to fetch strategy from Baserow, using mock data:', error);
       return MOCK_STRATEGY_DATA;
     }
@@ -823,6 +861,9 @@ const LemBrand = () => {
   const forceLoadStrategyFromBaserow = async () => {
     const brandId = manualBrandId.trim();
 
+    console.log('🔍 forceLoadStrategyFromBaserow called');
+    console.log('🔍 Manual Brand ID:', brandId);
+
     if (!brandId) {
       alert('Please enter a Brand ID first.');
       return;
@@ -831,6 +872,7 @@ const LemBrand = () => {
     try {
       console.log('📥 Force loading strategy from Baserow for Brand ID:', brandId);
 
+      console.log('🔧 Setting state: isGeneratingStrategy = true');
       setAppState(prev => ({ ...prev, isGeneratingStrategy: true }));
       setShowProgress(true);
       setShowResults(false);
@@ -838,29 +880,43 @@ const LemBrand = () => {
       setCurrentStage(5); // Show last step
 
       // Show quick progress (1 second)
+      console.log('⏳ Starting progress animation...');
       for (let i = 0; i <= 100; i += 20) {
         setProgress(i);
         await sleep(200);
       }
+      console.log('✅ Progress animation complete');
 
       // Fetch real strategy data from Baserow by Brand ID
+      console.log('📡 Calling fetchStrategyByBrandIdFromBaserow...');
       const strategy = await fetchStrategyByBrandIdFromBaserow(brandId);
+      console.log('📡 fetchStrategyByBrandIdFromBaserow returned:', strategy);
 
+      console.log('🔧 Setting strategy data to state...');
       setStrategyData(strategy);
+      console.log('🔧 Strategy data set successfully');
+
+      console.log('🔧 Updating app state...');
       setAppState(prev => ({
         ...prev,
         isGeneratingStrategy: false,
         strategyId: 'strategy-baserow-' + Date.now(),
         brandId: brandId
       }));
+      console.log('🔧 App state updated');
+
+      console.log('🔧 Setting UI flags...');
       setShowProgress(false);
       setShowResults(true);
       setShowStrategy(true);
+      console.log('🔧 UI flags set: showProgress=false, showResults=true, showStrategy=true');
 
       console.log('✅ Strategy loaded from Baserow successfully');
+      console.log('✅ Final strategyData state:', strategy);
 
     } catch (error) {
       console.error('❌ Failed to load strategy from Baserow:', error);
+      console.error('❌ Error stack:', error instanceof Error ? error.stack : 'N/A');
       alert('Failed to load strategy from Baserow. Please check Brand ID and try again.');
       setAppState(prev => ({ ...prev, isGeneratingStrategy: false }));
       setShowProgress(false);
