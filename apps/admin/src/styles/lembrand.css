@@ -1,0 +1,1062 @@
+/* ==============================================
+   LEMBRAND LANDING PAGE STYLES
+   ============================================== */
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* ==============================================
+   CSS VARIABLES & DESIGN SYSTEM
+   ============================================== */
+
+.lembrand-page {
+  --primary: #6366F1;
+  --primary-dark: #4F46E5;
+  --primary-light: #818CF8;
+  --secondary: #EC4899;
+  --secondary-dark: #DB2777;
+  --secondary-light: #F9A8D4;
+  --background: #FFFFFF;
+  --surface: #F9FAFB;
+  --surface-dark: #F3F4F6;
+  --border: #E5E7EB;
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  --info: #3B82F6;
+  --gradient-primary: linear-gradient(135deg, #6366F1 0%, #EC4899 100%);
+  --gradient-surface: linear-gradient(180deg, #FFFFFF 0%, #F9FAFB 100%);
+  --container-max-width: 1200px;
+  --spacing-section: 80px;
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==============================================
+   CONTAINER
+   ============================================== */
+
+.lembrand-page .container {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ==============================================
+   HEADER
+   ============================================== */
+
+.lembrand-page .header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  padding: 20px 0;
+}
+
+.lembrand-page .header .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lembrand-page .logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.lembrand-page .logo-icon {
+  font-size: 32px;
+}
+
+.lembrand-page .nav {
+  display: flex;
+  gap: 32px;
+}
+
+.lembrand-page .nav-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+.lembrand-page .nav-link:hover {
+  color: var(--primary);
+}
+
+/* ==============================================
+   HERO SECTION
+   ============================================== */
+
+.lembrand-page .hero {
+  padding: var(--spacing-section) 0;
+  text-align: center;
+}
+
+.lembrand-page .hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.lembrand-page .hero-title {
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 1.2;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 24px;
+}
+
+.lembrand-page .hero-description {
+  font-size: 20px;
+  color: var(--text-secondary);
+  margin-bottom: 48px;
+  line-height: 1.6;
+}
+
+/* URL Input Form */
+.lembrand-page .url-form {
+  margin-bottom: 32px;
+}
+
+.lembrand-page .input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  background: white;
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.1);
+  transition: all var(--transition-normal);
+  margin-bottom: 24px;
+}
+
+.lembrand-page .input-wrapper:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2);
+}
+
+.lembrand-page .input-icon {
+  font-size: 24px;
+  padding-left: 12px;
+}
+
+.lembrand-page .url-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 18px;
+  padding: 16px 8px;
+  font-family: inherit;
+}
+
+.lembrand-page .btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+  white-space: nowrap;
+}
+
+.lembrand-page .btn-primary:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.lembrand-page .btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Trust Badges */
+.lembrand-page .trust-badges {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.lembrand-page .badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.lembrand-page .badge svg {
+  color: var(--success);
+}
+
+/* ==============================================
+   FEATURES SECTION
+   ============================================== */
+
+.lembrand-page .features {
+  padding: var(--spacing-section) 0;
+  background: var(--surface);
+}
+
+.lembrand-page .section-title {
+  font-size: 36px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 48px;
+  color: var(--text-primary);
+}
+
+.lembrand-page .features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 32px;
+}
+
+.lembrand-page .feature-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  transition: all var(--transition-normal);
+}
+
+.lembrand-page .feature-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15);
+  transform: translateY(-4px);
+}
+
+.lembrand-page .feature-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.lembrand-page .feature-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.lembrand-page .feature-description {
+  font-size: 16px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* ==============================================
+   ANALYSIS PROGRESS
+   ============================================== */
+
+.lembrand-page .analysis-progress {
+  padding: var(--spacing-section) 0;
+}
+
+.lembrand-page .progress-card {
+  max-width: 700px;
+  margin: 0 auto;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 48px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.lembrand-page .progress-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.lembrand-page .spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.lembrand-page .progress-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.lembrand-page .progress-subtitle {
+  color: var(--text-secondary);
+}
+
+.lembrand-page .progress-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.lembrand-page .progress-bar {
+  flex: 1;
+  position: relative;
+  height: 8px;
+  background: var(--surface);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.lembrand-page .progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.lembrand-page .progress-text {
+  font-weight: 600;
+  color: var(--primary);
+  min-width: 50px;
+  text-align: right;
+}
+
+.lembrand-page .progress-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lembrand-page .step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--surface);
+  opacity: 0.5;
+  transition: all var(--transition-normal);
+}
+
+.lembrand-page .step.active {
+  opacity: 1;
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.lembrand-page .step.completed {
+  opacity: 0.8;
+}
+
+.lembrand-page .step-icon {
+  font-size: 20px;
+}
+
+.lembrand-page .step.completed .step-icon {
+  color: var(--success);
+}
+
+/* ==============================================
+   RESULTS SECTION
+   ============================================== */
+
+.lembrand-page .results-section {
+  padding: var(--spacing-section) 0;
+}
+
+.lembrand-page .results-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.lembrand-page .sparkle {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.lembrand-page .results-title {
+  font-size: 42px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.lembrand-page .results-subtitle {
+  font-size: 18px;
+  color: var(--text-secondary);
+}
+
+/* Score Card */
+.lembrand-page .score-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 24px;
+  padding: 48px;
+  text-align: center;
+  margin-bottom: 48px;
+  box-shadow: 0 12px 48px rgba(102, 126, 234, 0.3);
+}
+
+.lembrand-page .score-label {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.9;
+}
+
+.lembrand-page .score-display {
+  margin: 24px 0;
+}
+
+.lembrand-page .score-value {
+  font-size: 72px;
+  font-weight: 800;
+}
+
+.lembrand-page .score-max {
+  font-size: 36px;
+  opacity: 0.8;
+}
+
+.lembrand-page .score-gauge {
+  position: relative;
+  width: 100%;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  margin: 24px 0;
+  overflow: hidden;
+}
+
+.lembrand-page .gauge-fill {
+  height: 100%;
+  background: white;
+  border-radius: 6px;
+  transition: width 1s ease-out;
+}
+
+.lembrand-page .score-message {
+  font-size: 18px;
+  margin-top: 16px;
+}
+
+/* Dimensions */
+.lembrand-page .dimensions-section {
+  margin-bottom: 48px;
+}
+
+.lembrand-page .section-subtitle {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.lembrand-page .dimensions-grid {
+  display: grid;
+  gap: 20px;
+}
+
+.lembrand-page .dimension-item {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.lembrand-page .dimension-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.lembrand-page .dimension-name {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.lembrand-page .dimension-score {
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--primary);
+}
+
+.lembrand-page .dimension-bar {
+  position: relative;
+  height: 8px;
+  background: var(--surface);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.lembrand-page .dimension-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  border-radius: 4px;
+  transition: width 1s ease-out;
+}
+
+/* Strategy CTA */
+.lembrand-page .strategy-cta {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.1));
+  border: 2px solid var(--primary);
+  border-radius: 24px;
+  padding: 48px;
+  text-align: center;
+  margin: 48px 0;
+}
+
+.lembrand-page .cta-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.lembrand-page .cta-description {
+  font-size: 18px;
+  color: var(--text-secondary);
+  margin-bottom: 32px;
+}
+
+.lembrand-page .btn-generate-strategy {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  border: none;
+  border-radius: 16px;
+  padding: 20px 40px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+
+.lembrand-page .btn-generate-strategy:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.lembrand-page .btn-generate-strategy:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.lembrand-page .btn-icon {
+  transition: transform var(--transition-fast);
+}
+
+.lembrand-page .btn-generate-strategy:hover .btn-icon {
+  transform: translateX(4px);
+}
+
+/* Strategy Results */
+.lembrand-page .strategy-results {
+  margin-top: 48px;
+}
+
+.lembrand-page .strategy-section {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 32px;
+  margin-bottom: 32px;
+}
+
+.lembrand-page .section-icon {
+  font-size: 32px;
+  margin-bottom: 16px;
+}
+
+.lembrand-page .summary-text {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+}
+
+/* Pillars Grid */
+.lembrand-page .pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.lembrand-page .pillar-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.lembrand-page .pillar-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.lembrand-page .pillar-frequency {
+  display: inline-block;
+  background: var(--primary);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.lembrand-page .pillar-description {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.lembrand-page .pillar-examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lembrand-page .example-badge {
+  display: inline-block;
+  background: white;
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* Messages List */
+.lembrand-page .messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.lembrand-page .message-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: var(--surface);
+  border-radius: 12px;
+}
+
+.lembrand-page .message-icon {
+  flex-shrink: 0;
+  color: var(--success);
+  margin-top: 2px;
+}
+
+.lembrand-page .message-text {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+/* Frequency Display */
+.lembrand-page .frequency-display {
+  text-align: center;
+  padding: 32px;
+  background: var(--surface);
+  border-radius: 16px;
+  margin-top: 24px;
+}
+
+.lembrand-page .frequency-value {
+  font-size: 64px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+
+.lembrand-page .frequency-label {
+  font-size: 18px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.lembrand-page .frequency-reasoning {
+  font-size: 14px;
+  color: var(--text-muted);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Action Plan Tabs */
+.lembrand-page .action-plan-tabs {
+  display: flex;
+  gap: 12px;
+  margin: 24px 0;
+  border-bottom: 2px solid var(--border);
+}
+
+.lembrand-page .tab-btn {
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-bottom: -2px;
+}
+
+.lembrand-page .tab-btn.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.lembrand-page .tab-content {
+  display: none;
+}
+
+.lembrand-page .tab-content.active {
+  display: block;
+}
+
+.lembrand-page .action-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.lembrand-page .action-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.lembrand-page .action-title {
+  font-size: 18px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.lembrand-page .effort-badge {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.lembrand-page .effort-low {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+}
+
+.lembrand-page .effort-medium {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+}
+
+.lembrand-page .effort-high {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+}
+
+.lembrand-page .action-reason {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* ==============================================
+   SETTINGS MODAL
+   ============================================== */
+
+.lembrand-page .modal {
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.lembrand-page .modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.lembrand-page .modal-content {
+  position: relative;
+  background: white;
+  border-radius: 24px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.lembrand-page .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.lembrand-page .modal-header h3 {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.lembrand-page .modal-close {
+  background: none;
+  border: none;
+  font-size: 32px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all var(--transition-fast);
+}
+
+.lembrand-page .modal-close:hover {
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+.lembrand-page .modal-body {
+  padding: 24px;
+}
+
+.lembrand-page .form-group {
+  margin-bottom: 24px;
+}
+
+.lembrand-page .form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.lembrand-page .form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 16px;
+  font-family: inherit;
+  transition: all var(--transition-fast);
+}
+
+.lembrand-page .form-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.lembrand-page .form-hint {
+  display: block;
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.lembrand-page .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.lembrand-page .btn-secondary {
+  padding: 12px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.lembrand-page .btn-secondary:hover {
+  background: white;
+  border-color: var(--text-secondary);
+}
+
+/* Settings Button (Floating) */
+.lembrand-page .settings-btn {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 56px;
+  height: 56px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+  transition: all var(--transition-normal);
+  z-index: 999;
+}
+
+.lembrand-page .settings-btn:hover {
+  transform: scale(1.1) rotate(90deg);
+  box-shadow: 0 6px 28px rgba(99, 102, 241, 0.6);
+}
+
+/* Loading spinner for buttons */
+.lembrand-page .spinner-small {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ==============================================
+   RESPONSIVE
+   ============================================== */
+
+@media (max-width: 768px) {
+  .lembrand-page .hero-title {
+    font-size: 32px;
+  }
+
+  .lembrand-page .hero-description {
+    font-size: 18px;
+  }
+
+  .lembrand-page .input-wrapper {
+    flex-direction: column;
+  }
+
+  .lembrand-page .url-input {
+    width: 100%;
+  }
+
+  .lembrand-page .btn-primary {
+    width: 100%;
+  }
+
+  .lembrand-page .trust-badges {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .lembrand-page .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lembrand-page .progress-card {
+    padding: 32px 24px;
+  }
+
+  .lembrand-page .score-value {
+    font-size: 56px;
+  }
+
+  .lembrand-page .dimensions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lembrand-page .pillars-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lembrand-page .action-plan-tabs {
+    flex-direction: column;
+    border-bottom: none;
+  }
+
+  .lembrand-page .tab-btn {
+    border-bottom: none;
+    border-left: 2px solid transparent;
+    text-align: left;
+    margin-bottom: 0;
+    margin-left: -2px;
+  }
+
+  .lembrand-page .tab-btn.active {
+    border-bottom: none;
+    border-left-color: var(--primary);
+  }
+
+  .lembrand-page .settings-btn {
+    bottom: 16px;
+    right: 16px;
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+}
+
+/* ==============================================
+   ANIMATIONS
+   ============================================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.lembrand-page .fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
