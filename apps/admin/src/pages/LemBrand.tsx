@@ -472,16 +472,10 @@ const LemBrand = () => {
 
   const LogoShape = () => (
     <svg className="logo-shape" width="32" height="32" viewBox="0 0 32 32">
-      <defs>
-        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style={{stopColor: '#E8B4A0'}}/>
-          <stop offset="100%" style={{stopColor: '#A4C3B2'}}/>
-        </linearGradient>
-      </defs>
       <path d="M16 2L30 16L16 30L2 16Z"
-            fill="url(#logoGradient)"
-            stroke="currentColor"
-            strokeWidth="2"/>
+            fill="#2B5F75"
+            stroke="#D97757"
+            strokeWidth="3"/>
     </svg>
   );
 
