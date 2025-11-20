@@ -347,6 +347,13 @@ class BaserowClient {
       // field_7962 = key_messages (plain text string)
       // field_7963 = recommended_frequency (number as string)
       // field_7964 = action_plan (JSON)
+      // field_8041 = score_overall
+      // field_8042 = score_visual_consistency
+      // field_8043 = score_tone_consistency
+      // field_8044 = score_regularity
+      // field_8045 = score_diversity
+      // field_8046 = score_engagement
+      // field_8047 = score_positioning
 
       // Parse JSON fields if they are strings
       const parseField = (field: any) => {
@@ -392,6 +399,28 @@ class BaserowClient {
       console.error('❌ Failed to get strategy:', error);
       throw error;
     }
+  }
+
+  // Get analysis scores from strategy row (scores are stored in strategies table)
+  getAnalysisFromStrategyRow(data: any): AnalysisData {
+    console.log('📊 Extracting scores from strategy row');
+    console.log('  field_8041 (overall):', data.field_8041);
+    console.log('  field_8042 (visual):', data.field_8042);
+    console.log('  field_8043 (tone):', data.field_8043);
+    console.log('  field_8044 (regularity):', data.field_8044);
+    console.log('  field_8045 (diversity):', data.field_8045);
+    console.log('  field_8046 (engagement):', data.field_8046);
+    console.log('  field_8047 (positioning):', data.field_8047);
+
+    return {
+      score_overall: parseInt(data.field_8041) || 0,
+      score_visual_consistency: parseInt(data.field_8042) || 0,
+      score_tone_consistency: parseInt(data.field_8043) || 0,
+      score_regularity: parseInt(data.field_8044) || 0,
+      score_diversity: parseInt(data.field_8045) || 0,
+      score_engagement: parseInt(data.field_8046) || 0,
+      score_positioning: parseInt(data.field_8047) || 0
+    };
   }
 }
 
@@ -963,7 +992,7 @@ const LemBrand = () => {
     }
 
     try {
-      console.log('📥 Force loading analysis and strategy from Baserow for Brand ID:', brandId);
+      console.log('📥 Force loading strategy and scores from Baserow for Brand ID:', brandId);
 
       console.log('🔧 Setting state: isGeneratingStrategy = true');
       setAppState(prev => ({ ...prev, isGeneratingStrategy: true }));
@@ -980,25 +1009,30 @@ const LemBrand = () => {
       }
       console.log('✅ Progress animation complete');
 
-      // Fetch both analysis and strategy data from Baserow by Brand ID
-      console.log('📡 Fetching analysis by brand_id...');
-      let analysis: AnalysisData | null = null;
-      try {
-        analysis = await baserow.getAnalysisByBrandId(brandId);
-        console.log('✅ Analysis loaded:', analysis);
-      } catch (error) {
-        console.warn('⚠️ Failed to load analysis, will show strategy only:', error);
+      // Fetch strategy data from Baserow by Brand ID
+      console.log('📡 Fetching strategy row by brand_id...');
+      const rows = await baserow.listRows('strategies', { brand_id: brandId });
+
+      if (!rows || rows.length === 0) {
+        throw new Error(`No strategy found for brand ID ${brandId}`);
       }
 
-      console.log('📡 Calling fetchStrategyByBrandIdFromBaserow...');
+      const strategyRow = rows[0];
+      console.log('✅ Strategy row loaded:', strategyRow);
+
+      // Extract scores from strategy row (scores are stored in strategies table)
+      console.log('📊 Extracting analysis scores from strategy row...');
+      const analysis = baserow.getAnalysisFromStrategyRow(strategyRow);
+      console.log('✅ Analysis scores extracted:', analysis);
+
+      // Parse strategy data
+      console.log('📡 Parsing strategy data...');
       const strategy = await fetchStrategyByBrandIdFromBaserow(brandId);
-      console.log('📡 fetchStrategyByBrandIdFromBaserow returned:', strategy);
+      console.log('📡 Strategy data parsed:', strategy);
 
       console.log('🔧 Setting analysis and strategy data to state...');
-      if (analysis) {
-        setAnalysisData(analysis);
-        console.log('🔧 Analysis data set successfully');
-      }
+      setAnalysisData(analysis);
+      console.log('🔧 Analysis data set successfully');
       setStrategyData(strategy);
       console.log('🔧 Strategy data set successfully');
 
@@ -1008,7 +1042,7 @@ const LemBrand = () => {
         isGeneratingStrategy: false,
         strategyId: 'strategy-baserow-' + Date.now(),
         brandId: brandId,
-        analysisId: analysis ? 'analysis-baserow-' + Date.now() : prev.analysisId
+        analysisId: 'analysis-baserow-' + Date.now()
       }));
       console.log('🔧 App state updated');
 
