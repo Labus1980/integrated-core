@@ -65,6 +65,181 @@ interface StrategyData {
 // Helper function for sleep/delay
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+// ========================================
+// Baserow API Client
+// ========================================
+class BaserowClient {
+  baseUrl: string;
+  apiKey: string;
+  databaseId: number;
+  tables: Record<string, number>;
+
+  constructor(config: { baseUrl: string; apiKey: string; databaseId: number; tables?: Record<string, number> }) {
+    this.baseUrl = config.baseUrl;
+    this.apiKey = config.apiKey;
+    this.databaseId = config.databaseId;
+    this.tables = config.tables || {};
+  }
+
+  async request(endpoint: string, options: RequestInit = {}): Promise<any> {
+    const url = `${this.baseUrl}${endpoint}`;
+    const headers = {
+      'Authorization': `Token ${this.apiKey}`,
+      'Content-Type': 'application/json',
+      ...(options.headers || {})
+    };
+
+    try {
+      const response = await fetch(url, { ...options, headers });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Baserow API error (${response.status}): ${errorText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('❌ Baserow request failed:', error);
+      throw error;
+    }
+  }
+
+  async getTables(): Promise<any[]> {
+    try {
+      const data = await this.request(`/api/database/tables/database/${this.databaseId}/`);
+      return data.results || data || [];
+    } catch (error) {
+      console.error('❌ Failed to get tables:', error);
+      return [];
+    }
+  }
+
+  async discoverTables(): Promise<void> {
+    try {
+      console.log('🔍 Discovering tables in database', this.databaseId);
+      const tables = await this.getTables();
+
+      const tableMap: Record<string, number> = {};
+      tables.forEach((table: any) => {
+        const normalizedName = table.name.toLowerCase().replace(/\s+/g, '_');
+        tableMap[normalizedName] = table.id;
+        console.log(`  ✓ Found table: "${table.name}" (ID: ${table.id})`);
+      });
+
+      this.tables = tableMap;
+      console.log('✅ Table discovery complete:', this.tables);
+    } catch (error) {
+      console.error('❌ Table discovery failed:', error);
+    }
+  }
+
+  async getRow(tableName: string, rowId: string | number): Promise<any> {
+    const tableId = this.tables[tableName];
+    if (!tableId) {
+      throw new Error(`Table "${tableName}" not found. Available tables: ${Object.keys(this.tables).join(', ')}`);
+    }
+
+    try {
+      return await this.request(`/api/database/rows/table/${tableId}/${rowId}/`);
+    } catch (error) {
+      console.error(`❌ Failed to get row ${rowId} from table "${tableName}":`, error);
+      throw error;
+    }
+  }
+
+  async listRows(tableName: string, filters: Record<string, any> = {}): Promise<any[]> {
+    const tableId = this.tables[tableName];
+    if (!tableId) {
+      throw new Error(`Table "${tableName}" not found. Available tables: ${Object.keys(this.tables).join(', ')}`);
+    }
+
+    try {
+      const queryParams = new URLSearchParams();
+
+      // Add filters as query parameters
+      Object.entries(filters).forEach(([key, value]) => {
+        queryParams.append(`filter__${key}__equal`, String(value));
+      });
+
+      const queryString = queryParams.toString();
+      const endpoint = `/api/database/rows/table/${tableId}/${queryString ? '?' + queryString : ''}`;
+
+      const data = await this.request(endpoint);
+      return data.results || data || [];
+    } catch (error) {
+      console.error(`❌ Failed to list rows from table "${tableName}":`, error);
+      throw error;
+    }
+  }
+
+  async getAnalysis(analysisId: string | number): Promise<AnalysisData> {
+    try {
+      console.log('📊 Fetching analysis from Baserow:', analysisId);
+      const data = await this.getRow('analysis', analysisId);
+
+      return {
+        score_overall: data.score_overall || 0,
+        score_visual_consistency: data.score_visual_consistency || 0,
+        score_tone_consistency: data.score_tone_consistency || 0,
+        score_regularity: data.score_regularity || 0,
+        score_diversity: data.score_diversity || 0,
+        score_engagement: data.score_engagement || 0,
+        score_positioning: data.score_positioning || 0
+      };
+    } catch (error) {
+      console.error('❌ Failed to get analysis:', error);
+      throw error;
+    }
+  }
+
+  async getStrategyByAnalysisId(analysisId: string | number): Promise<StrategyData> {
+    try {
+      console.log('🎯 Fetching strategy for analysis ID:', analysisId);
+      const rows = await this.listRows('strategy', { analysis_id: analysisId });
+
+      if (!rows || rows.length === 0) {
+        throw new Error(`No strategy found for analysis ID ${analysisId}`);
+      }
+
+      const data = rows[0]; // Get first matching strategy
+
+      // Parse JSON fields if they are strings
+      const parseField = (field: any) => {
+        if (typeof field === 'string') {
+          try {
+            return JSON.parse(field);
+          } catch {
+            return field;
+          }
+        }
+        return field;
+      };
+
+      return {
+        summary: data.summary || '',
+        editorial_pillars: parseField(data.editorial_pillars) || { pillars: [] },
+        key_messages: parseField(data.key_messages) || [],
+        recommended_frequency: data.recommended_frequency || 0,
+        action_plan: parseField(data.action_plan) || {
+          immediate: [],
+          medium_term: [],
+          long_term: []
+        }
+      };
+    } catch (error) {
+      console.error('❌ Failed to get strategy:', error);
+      throw error;
+    }
+  }
+}
+
+// Initialize Baserow client
+const baserow = new BaserowClient({
+  baseUrl: 'https://baserow.okta-solutions.com',
+  apiKey: 'Zclj1r4KAZLRv7MnSuE4We2fgkJRdJb6',
+  databaseId: 216
+});
+
 const LemBrand = () => {
   // State management
   const [config, setConfig] = useState<Config>({
@@ -114,6 +289,21 @@ const LemBrand = () => {
         console.log('   Baserow Token:', loadedConfig.baserowToken ? '***configured***' : 'not set');
       }
     }
+  }, []);
+
+  // Auto-discover Baserow tables on component mount
+  useEffect(() => {
+    const initializeBaserow = async () => {
+      try {
+        console.log('🔍 Initializing Baserow integration...');
+        await baserow.discoverTables();
+        console.log('✅ Baserow initialized successfully');
+      } catch (error) {
+        console.error('❌ Failed to initialize Baserow:', error);
+      }
+    };
+
+    initializeBaserow();
   }, []);
 
   // Save config to localStorage
@@ -261,41 +451,23 @@ const LemBrand = () => {
 
   // Fetch analysis data from Baserow (for testing mode)
   const fetchAnalysisFromBaserow = async (analysisId: string): Promise<AnalysisData> => {
-    if (!config.baserowToken) {
-      console.warn('Baserow token not configured, using mock data');
+    try {
+      console.log('📊 Fetching analysis from Baserow using BaserowClient');
+      return await baserow.getAnalysis(analysisId);
+    } catch (error) {
+      console.warn('⚠️ Failed to fetch from Baserow, using mock data:', error);
       return MOCK_ANALYSIS_DATA;
     }
+  };
 
+  // Fetch strategy data from Baserow (for testing mode)
+  const fetchStrategyFromBaserow = async (analysisId: string): Promise<StrategyData> => {
     try {
-      const response = await fetch(
-        `https://api.baserow.io/api/database/rows/table/832/${analysisId}/`,
-        {
-          headers: {
-            'Authorization': `Token ${config.baserowToken}`
-          }
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Baserow API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      // Transform Baserow data to expected format
-      return {
-        score_overall: data.score_overall || 0,
-        score_visual_consistency: data.score_visual_consistency || 0,
-        score_tone_consistency: data.score_tone_consistency || 0,
-        score_regularity: data.score_regularity || 0,
-        score_diversity: data.score_diversity || 0,
-        score_engagement: data.score_engagement || 0,
-        score_positioning: data.score_positioning || 0
-      };
+      console.log('🎯 Fetching strategy from Baserow using BaserowClient');
+      return await baserow.getStrategyByAnalysisId(analysisId);
     } catch (error) {
-      console.error('Error fetching from Baserow:', error);
-      // Fallback to mock data
-      return MOCK_ANALYSIS_DATA;
+      console.warn('⚠️ Failed to fetch strategy from Baserow, using mock data:', error);
+      return MOCK_STRATEGY_DATA;
     }
   };
 
@@ -402,6 +574,39 @@ const LemBrand = () => {
     }
 
     try {
+      // Check if Testing Mode - skip timer and fetch from Baserow
+      if (config.testMode && config.testBrandId && config.testAnalysisId) {
+        console.log('🧪 Testing Mode: Skipping timer, loading strategy from Baserow');
+
+        setAppState(prev => ({ ...prev, isGeneratingStrategy: true }));
+        setShowProgress(true);
+        setShowResults(false);
+        setProgress(0);
+        setCurrentStage(5); // Show last step
+
+        // Show quick progress (1 second)
+        for (let i = 0; i <= 100; i += 20) {
+          setProgress(i);
+          await sleep(200);
+        }
+
+        // Fetch real strategy data from Baserow
+        const strategy = await fetchStrategyFromBaserow(config.testAnalysisId);
+
+        setStrategyData(strategy);
+        setAppState(prev => ({
+          ...prev,
+          isGeneratingStrategy: false,
+          strategyId: 'strategy-' + Date.now()
+        }));
+        setShowProgress(false);
+        setShowResults(true);
+        setShowStrategy(true);
+
+        return;
+      }
+
+      // Normal flow: start strategy generation with timer
       setAppState(prev => ({ ...prev, isGeneratingStrategy: true }));
       setShowProgress(true);
       setShowResults(false);
