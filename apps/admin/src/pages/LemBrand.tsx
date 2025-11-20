@@ -235,11 +235,19 @@ class BaserowClient {
   }
 }
 
-// Initialize Baserow client (will be updated with token from config)
+// Initialize Baserow client with hardcoded token and table IDs for demo
 let baserow = new BaserowClient({
   baseUrl: 'https://baserow.okta-solutions.com',
-  apiKey: '', // Will be set from config
-  databaseId: 216
+  apiKey: 'Zclj1r4KAZLRv7MnSuE4We2fgkJRdJb6',
+  databaseId: 216,
+  tables: {
+    brands: 831,
+    posts_scraped: 833,
+    competitors: 834,
+    strategies: 835,
+    posts_generated: 836,
+    analysis: 837
+  }
 });
 
 const LemBrand = () => {
@@ -296,27 +304,11 @@ const LemBrand = () => {
     }
   }, []);
 
-  // Auto-discover Baserow tables on component mount
+  // Baserow is already initialized with hardcoded token and table IDs
   useEffect(() => {
-    const initializeBaserow = async () => {
-      // Update API key from config
-      if (config.baserowToken) {
-        baserow.apiKey = config.baserowToken;
-
-        try {
-          console.log('🔍 Initializing Baserow integration...');
-          await baserow.discoverTables();
-          console.log('✅ Baserow initialized successfully');
-        } catch (error) {
-          console.error('❌ Failed to initialize Baserow:', error);
-        }
-      } else {
-        console.warn('⚠️ Baserow token not configured. Please set it in settings to use Baserow integration.');
-      }
-    };
-
-    initializeBaserow();
-  }, [config.baserowToken]);
+    console.log('✅ Baserow initialized with hardcoded configuration');
+    console.log('📋 Available tables:', Object.keys(baserow.tables).join(', '));
+  }, []);
 
   // Save config to localStorage
   const saveConfigToStorage = (newConfig: Config) => {
@@ -782,11 +774,6 @@ const LemBrand = () => {
 
     if (!brandId) {
       alert('Please enter a Brand ID first.');
-      return;
-    }
-
-    if (!config.baserowToken) {
-      alert('Baserow API token not configured. Please set it in Settings (⚙️) to use Baserow integration.');
       return;
     }
 
