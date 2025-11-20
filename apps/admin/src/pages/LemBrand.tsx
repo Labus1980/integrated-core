@@ -265,6 +265,8 @@ class BaserowClient {
 
       const data = rows[0]; // Get first matching strategy
       console.log('📄 First row data:', data);
+      console.log('📄 All field names:', Object.keys(data));
+      console.log('📄 Full row JSON:', JSON.stringify(data, null, 2));
 
       // Parse JSON fields if they are strings
       const parseField = (field: any) => {
