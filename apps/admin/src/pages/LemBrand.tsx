@@ -195,6 +195,10 @@ class BaserowClient {
       console.log('📊 Fetching analysis from Baserow:', analysisId);
       const data = await this.getRow('analysis', analysisId);
 
+      console.log('📄 Analysis field names:', Object.keys(data));
+      console.log('📄 Full analysis JSON:', JSON.stringify(data, null, 2));
+
+      // TODO: Map field_* names if needed (currently using direct field names)
       return {
         score_overall: data.score_overall || 0,
         score_visual_consistency: data.score_visual_consistency || 0,
@@ -221,7 +225,7 @@ class BaserowClient {
 
       const data = rows[0]; // Get first matching strategy
 
-      // Parse JSON fields if they are strings
+      // Baserow field mapping (same as getStrategyByBrandId)
       const parseField = (field: any) => {
         if (typeof field === 'string') {
           try {
@@ -233,12 +237,21 @@ class BaserowClient {
         return field;
       };
 
+      const parseKeyMessages = (text: string): string[] => {
+        if (!text) return [];
+        return text
+          .split(/\.\s+|\n/)
+          .map(msg => msg.trim())
+          .filter(msg => msg.length > 0)
+          .map(msg => msg.endsWith('.') ? msg : msg + '.');
+      };
+
       return {
-        summary: data.summary || '',
-        editorial_pillars: parseField(data.editorial_pillars) || { pillars: [] },
-        key_messages: parseField(data.key_messages) || [],
-        recommended_frequency: data.recommended_frequency || 0,
-        action_plan: parseField(data.action_plan) || {
+        summary: data.field_7960 || '',
+        editorial_pillars: parseField(data.field_7961) || { pillars: [] },
+        key_messages: parseKeyMessages(data.field_7962 || ''),
+        recommended_frequency: parseFloat(data.field_7963) || 0,
+        action_plan: parseField(data.field_7964) || {
           immediate: [],
           medium_term: [],
           long_term: []
@@ -268,6 +281,13 @@ class BaserowClient {
       console.log('📄 All field names:', Object.keys(data));
       console.log('📄 Full row JSON:', JSON.stringify(data, null, 2));
 
+      // Baserow field mapping
+      // field_7960 = summary
+      // field_7961 = editorial_pillars (JSON)
+      // field_7962 = key_messages (plain text string)
+      // field_7963 = recommended_frequency (number as string)
+      // field_7964 = action_plan (JSON)
+
       // Parse JSON fields if they are strings
       const parseField = (field: any) => {
         if (typeof field === 'string') {
@@ -283,12 +303,23 @@ class BaserowClient {
         return field;
       };
 
+      // Parse key_messages string into array (split by periods or newlines)
+      const parseKeyMessages = (text: string): string[] => {
+        if (!text) return [];
+        // Split by periods followed by space, or by newlines
+        return text
+          .split(/\.\s+|\n/)
+          .map(msg => msg.trim())
+          .filter(msg => msg.length > 0)
+          .map(msg => msg.endsWith('.') ? msg : msg + '.');
+      };
+
       const result = {
-        summary: data.summary || '',
-        editorial_pillars: parseField(data.editorial_pillars) || { pillars: [] },
-        key_messages: parseField(data.key_messages) || [],
-        recommended_frequency: data.recommended_frequency || 0,
-        action_plan: parseField(data.action_plan) || {
+        summary: data.field_7960 || '',
+        editorial_pillars: parseField(data.field_7961) || { pillars: [] },
+        key_messages: parseKeyMessages(data.field_7962 || ''),
+        recommended_frequency: parseFloat(data.field_7963) || 0,
+        action_plan: parseField(data.field_7964) || {
           immediate: [],
           medium_term: [],
           long_term: []
