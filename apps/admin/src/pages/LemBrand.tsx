@@ -471,7 +471,122 @@ const LemBrand = () => {
     }
   };
 
-  // Start analysis with FIXED 2-minute timer
+  // Call analysis webhook and wait for response
+  const callAnalysisWebhook = async (websiteUrl: string) => {
+    console.log('📡 Calling analysis webhook:', config.analysisWebhook);
+
+    try {
+      const response = await fetch(config.analysisWebhook, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ websiteUrl })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Webhook response:', data);
+
+      // Validate response format
+      if (!data.success || !data.brandId || !data.analysisId || !data.data) {
+        throw new Error('Invalid webhook response format');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('❌ Webhook error:', error);
+      throw error;
+    }
+  };
+
+  // Call strategy webhook and wait for response
+  const callStrategyWebhook = async (brandId: string, analysisId: string) => {
+    console.log('📡 Calling strategy webhook:', config.strategyWebhook);
+    console.log('📦 Request body:', { brandId, analysisId });
+
+    try {
+      const response = await fetch(config.strategyWebhook, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ brandId, analysisId })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Webhook response:', data);
+
+      // Validate response format
+      if (!data.success || !data.data) {
+        throw new Error('Invalid webhook response format');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('❌ Webhook error:', error);
+      throw error;
+    }
+  };
+
+  // Run progress timer with updates (returns a promise that rejects on timeout)
+  const runProgressTimer = async (durationSeconds: number, isStrategy: boolean = false): Promise<never> => {
+    return new Promise((_, reject) => {
+      const startTime = Date.now();
+      const totalSteps = 100;
+      const stepDuration = (durationSeconds * 1000) / totalSteps;
+
+      const stages = isStrategy
+        ? [
+            { threshold: 0, message: 'Initializing strategy generation...', step: 1 },
+            { threshold: 20, message: 'Analyzing brand positioning...', step: 2 },
+            { threshold: 40, message: 'Creating editorial pillars...', step: 3 },
+            { threshold: 60, message: 'Developing key messages...', step: 4 },
+            { threshold: 80, message: 'Finalizing action plan...', step: 5 }
+          ]
+        : [
+            { threshold: 0, message: 'Analyzing website structure...', step: 1 },
+            { threshold: 20, message: 'Collecting Instagram data...', step: 2 },
+            { threshold: 40, message: 'Analyzing Facebook posts...', step: 3 },
+            { threshold: 60, message: 'Finding competitors...', step: 4 },
+            { threshold: 80, message: 'Calculating LemBrand Score...', step: 5 }
+          ];
+
+      let currentStep = 0;
+
+      const interval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min((elapsed / (durationSeconds * 1000)) * 100, 100);
+
+        setProgress(progress);
+
+        // Update stage message
+        const currentStageData = stages.filter(s => s.threshold <= progress).pop();
+        if (currentStageData) {
+          setProgressMessage(currentStageData.message);
+          if (currentStageData.step !== currentStep) {
+            setCurrentStage(currentStageData.step);
+            currentStep = currentStageData.step;
+          }
+        }
+
+        // Check if time's up
+        if (elapsed >= durationSeconds * 1000) {
+          clearInterval(interval);
+          reject(new Error(`Timeout after ${durationSeconds} seconds`));
+        }
+      }, stepDuration);
+    });
+  };
+
+  // Start analysis with REAL webhook integration
   const startAnalysis = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -515,7 +630,7 @@ const LemBrand = () => {
         return;
       }
 
-      // Normal flow: start analysis with timer
+      // Normal flow: start analysis with real webhook
       setAppState(prev => ({ ...prev, isAnalyzing: true }));
       setShowProgress(true);
       setShowResults(false);
@@ -523,30 +638,45 @@ const LemBrand = () => {
       setProgress(0);
       setCurrentStage(0);
 
-      // Call analysis webhook (fire and forget)
-      fetch(config.analysisWebhook, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ websiteUrl })
-      }).catch(err => console.error('Webhook error:', err));
+      // Race webhook call against timer - whichever finishes first wins
+      const result = await Promise.race([
+        callAnalysisWebhook(websiteUrl),
+        runProgressTimer(config.analysisDuration, false)
+      ]);
 
-      // Start FIXED 2-minute progress animation
-      await animateProgress(config.analysisDuration, false);
+      // Webhook returned successfully
+      console.log('✅ Analysis complete:', {
+        brandId: result.brandId,
+        analysisId: result.analysisId,
+        processingTime: result.processingTime
+      });
 
-      // After 2 minutes, show results
+      // Jump progress to 100% and pause briefly
+      setProgress(100);
+      setProgressMessage('Analysis complete!');
+      await sleep(500);
+
+      // Save IDs and data
       setAppState(prev => ({
         ...prev,
         isAnalyzing: false,
-        brandId: 'brand-' + Date.now(),
-        analysisId: 'analysis-' + Date.now()
+        brandId: result.brandId,
+        analysisId: result.analysisId
       }));
-      setAnalysisData(MOCK_ANALYSIS_DATA);
+      setAnalysisData(result.data);
       setShowProgress(false);
       setShowResults(true);
 
     } catch (error) {
       console.error('Analysis error:', error);
-      alert('Analysis failed. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Analysis failed';
+
+      if (errorMessage.includes('Timeout')) {
+        alert('Analysis is taking longer than expected. Please try again or contact support.');
+      } else {
+        alert('Analysis failed: ' + errorMessage);
+      }
+
       setAppState(prev => ({ ...prev, isAnalyzing: false }));
       setShowProgress(false);
     }
@@ -606,42 +736,51 @@ const LemBrand = () => {
         return;
       }
 
-      // Normal flow: start strategy generation with timer
+      // Normal flow: start strategy generation with real webhook
       setAppState(prev => ({ ...prev, isGeneratingStrategy: true }));
       setShowProgress(true);
       setShowResults(false);
       setProgress(0);
       setCurrentStage(0);
 
-      // Call strategy webhook with correct IDs
-      fetch(config.strategyWebhook, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          brandId: brandId,
-          analysisId: analysisId
-        })
-      }).then(() => {
-        console.log('✅ Strategy webhook called with:', { brandId, analysisId });
-      }).catch(err => console.error('Webhook error:', err));
+      // Race webhook call against timer - whichever finishes first wins
+      const result = await Promise.race([
+        callStrategyWebhook(brandId, analysisId),
+        runProgressTimer(config.strategyDuration, true)
+      ]);
 
-      // Start FIXED 2-minute progress animation
-      await animateProgress(config.strategyDuration, true);
+      // Webhook returned successfully
+      console.log('✅ Strategy complete:', {
+        strategyId: result.strategyId,
+        processingTime: result.processingTime
+      });
 
-      // After 2 minutes, show strategy results
+      // Jump progress to 100% and pause briefly
+      setProgress(100);
+      setProgressMessage('Strategy generation complete!');
+      await sleep(500);
+
+      // Save strategy data
       setAppState(prev => ({
         ...prev,
         isGeneratingStrategy: false,
-        strategyId: 'strategy-' + Date.now()
+        strategyId: result.strategyId
       }));
-      setStrategyData(MOCK_STRATEGY_DATA);
+      setStrategyData(result.data);
       setShowProgress(false);
       setShowResults(true);
       setShowStrategy(true);
 
     } catch (error) {
       console.error('Strategy error:', error);
-      alert('Strategy generation failed. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Strategy generation failed';
+
+      if (errorMessage.includes('Timeout')) {
+        alert('Strategy generation is taking longer than expected. Please try again or contact support.');
+      } else {
+        alert('Strategy generation failed: ' + errorMessage);
+      }
+
       setAppState(prev => ({ ...prev, isGeneratingStrategy: false }));
       setShowProgress(false);
       setShowResults(true);
