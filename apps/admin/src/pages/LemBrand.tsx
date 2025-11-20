@@ -769,6 +769,54 @@ const LemBrand = () => {
     }
   };
 
+  // Force load strategy from Baserow by Brand ID
+  const forceLoadStrategyFromBaserow = async () => {
+    const brandId = manualBrandId.trim();
+
+    if (!brandId) {
+      alert('Please enter a Brand ID first.');
+      return;
+    }
+
+    try {
+      console.log('📥 Force loading strategy from Baserow for Brand ID:', brandId);
+
+      setAppState(prev => ({ ...prev, isGeneratingStrategy: true }));
+      setShowProgress(true);
+      setShowResults(false);
+      setProgress(0);
+      setCurrentStage(5); // Show last step
+
+      // Show quick progress (1 second)
+      for (let i = 0; i <= 100; i += 20) {
+        setProgress(i);
+        await sleep(200);
+      }
+
+      // Fetch real strategy data from Baserow by Brand ID
+      const strategy = await fetchStrategyFromBaserow(brandId);
+
+      setStrategyData(strategy);
+      setAppState(prev => ({
+        ...prev,
+        isGeneratingStrategy: false,
+        strategyId: 'strategy-baserow-' + Date.now(),
+        brandId: brandId
+      }));
+      setShowProgress(false);
+      setShowResults(true);
+      setShowStrategy(true);
+
+      console.log('✅ Strategy loaded from Baserow successfully');
+
+    } catch (error) {
+      console.error('❌ Failed to load strategy from Baserow:', error);
+      alert('Failed to load strategy from Baserow. Please check Brand ID and try again.');
+      setAppState(prev => ({ ...prev, isGeneratingStrategy: false }));
+      setShowProgress(false);
+    }
+  };
+
   // Get score message
   const getScoreMessage = (score: number): string => {
     if (score >= 80) return '🎉 Excellent! Your social media presence is strong';
@@ -1129,25 +1177,50 @@ const LemBrand = () => {
                     </small>
                   </div>
 
-                  <button
-                    className="btn-generate-strategy"
-                    onClick={generateStrategy}
-                    disabled={appState.isGeneratingStrategy}
-                  >
-                    {appState.isGeneratingStrategy ? (
-                      <>
-                        <SpinnerIcon />
-                        <span>Generating...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>Generate Full Strategy</span>
-                        <svg className="btn-arrow" width="20" height="20" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" fill="currentColor" />
-                        </svg>
-                      </>
-                    )}
-                  </button>
+                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                    <button
+                      className="btn-generate-strategy"
+                      onClick={generateStrategy}
+                      disabled={appState.isGeneratingStrategy}
+                    >
+                      {appState.isGeneratingStrategy ? (
+                        <>
+                          <SpinnerIcon />
+                          <span>Generating...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Generate Full Strategy</span>
+                          <svg className="btn-arrow" width="20" height="20" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" fill="currentColor" />
+                          </svg>
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      className="btn-secondary"
+                      onClick={forceLoadStrategyFromBaserow}
+                      disabled={appState.isGeneratingStrategy || !manualBrandId.trim()}
+                      style={{
+                        padding: '16px 24px',
+                        fontSize: '17px',
+                        fontWeight: '600',
+                        borderRadius: '12px',
+                        border: '3px solid var(--primary)',
+                        background: 'transparent',
+                        color: 'var(--primary)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                      title="Load strategy directly from Baserow (skip webhook)"
+                    >
+                      📥 Load from Baserow
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -1344,25 +1417,50 @@ const LemBrand = () => {
                   </small>
                 </div>
 
-                <button
-                  className="btn-generate-strategy"
-                  onClick={generateStrategy}
-                  disabled={appState.isGeneratingStrategy || !manualBrandId.trim()}
-                >
-                  {appState.isGeneratingStrategy ? (
-                    <>
-                      <SpinnerIcon />
-                      <span>Generating...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Generate Full Strategy</span>
-                      <svg className="btn-arrow" width="20" height="20" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" fill="currentColor" />
-                      </svg>
-                    </>
-                  )}
-                </button>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                  <button
+                    className="btn-generate-strategy"
+                    onClick={generateStrategy}
+                    disabled={appState.isGeneratingStrategy || !manualBrandId.trim()}
+                  >
+                    {appState.isGeneratingStrategy ? (
+                      <>
+                        <SpinnerIcon />
+                        <span>Generating...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Generate Full Strategy</span>
+                        <svg className="btn-arrow" width="20" height="20" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" fill="currentColor" />
+                        </svg>
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    className="btn-secondary"
+                    onClick={forceLoadStrategyFromBaserow}
+                    disabled={appState.isGeneratingStrategy || !manualBrandId.trim()}
+                    style={{
+                      padding: '16px 24px',
+                      fontSize: '17px',
+                      fontWeight: '600',
+                      borderRadius: '12px',
+                      border: '3px solid var(--primary)',
+                      background: 'transparent',
+                      color: 'var(--primary)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                    title="Load strategy directly from Baserow (skip webhook)"
+                  >
+                    📥 Load from Baserow
+                  </button>
+                </div>
               </div>
             </div>
           </div>
