@@ -195,6 +195,10 @@ class BaserowClient {
       console.log('📊 Fetching analysis from Baserow:', analysisId);
       const data = await this.getRow('analysis', analysisId);
 
+      console.log('📄 Analysis field names:', Object.keys(data));
+      console.log('📄 Full analysis JSON:', JSON.stringify(data, null, 2));
+
+      // TODO: Map field_* names if needed (currently using direct field names)
       return {
         score_overall: data.score_overall || 0,
         score_visual_consistency: data.score_visual_consistency || 0,
