@@ -103,7 +103,16 @@ const LemBrand = () => {
   useEffect(() => {
     const saved = localStorage.getItem('lembrand_config');
     if (saved) {
-      setConfig({ ...config, ...JSON.parse(saved) });
+      const loadedConfig = { ...config, ...JSON.parse(saved) };
+      setConfig(loadedConfig);
+
+      // Debug logging for Testing Mode
+      if (loadedConfig.testMode) {
+        console.log('🧪 Testing Mode is ENABLED');
+        console.log('   Brand ID:', loadedConfig.testBrandId);
+        console.log('   Analysis ID:', loadedConfig.testAnalysisId);
+        console.log('   Baserow Token:', loadedConfig.baserowToken ? '***configured***' : 'not set');
+      }
     }
   }, []);
 
@@ -111,6 +120,14 @@ const LemBrand = () => {
   const saveConfigToStorage = (newConfig: Config) => {
     localStorage.setItem('lembrand_config', JSON.stringify(newConfig));
     setConfig(newConfig);
+
+    // Debug logging
+    console.log('💾 Configuration saved:', {
+      testMode: newConfig.testMode,
+      testBrandId: newConfig.testBrandId,
+      testAnalysisId: newConfig.testAnalysisId,
+      hasBaserowToken: !!newConfig.baserowToken
+    });
   };
 
   // Mock analysis data
@@ -365,8 +382,22 @@ const LemBrand = () => {
 
   // Generate strategy with FIXED 2-minute timer
   const generateStrategy = async () => {
-    if (!appState.brandId || !appState.analysisId) {
-      alert('Analysis data not found');
+    // FIX Bug #1: Determine which IDs to use
+    let brandId: string | null;
+    let analysisId: string | null;
+
+    if (config.testMode && config.testBrandId && config.testAnalysisId) {
+      // Use IDs from Testing Mode
+      brandId = config.testBrandId;
+      analysisId = config.testAnalysisId;
+      console.log('🧪 Testing Mode: Using provided IDs', { brandId, analysisId });
+    } else if (appState.brandId && appState.analysisId) {
+      // Use IDs from analysis flow
+      brandId = appState.brandId;
+      analysisId = appState.analysisId;
+      console.log('📊 Using Analysis IDs', { brandId, analysisId });
+    } else {
+      alert('Analysis data not found. Please run analysis first or enable Testing Mode.');
       return;
     }
 
@@ -377,14 +408,16 @@ const LemBrand = () => {
       setProgress(0);
       setCurrentStage(0);
 
-      // Call strategy webhook (fire and forget)
+      // Call strategy webhook with correct IDs
       fetch(config.strategyWebhook, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          brandId: appState.brandId,
-          analysisId: appState.analysisId
+          brandId: brandId,
+          analysisId: analysisId
         })
+      }).then(() => {
+        console.log('✅ Strategy webhook called with:', { brandId, analysisId });
       }).catch(err => console.error('Webhook error:', err));
 
       // Start FIXED 2-minute progress animation
