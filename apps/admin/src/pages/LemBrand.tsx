@@ -214,6 +214,39 @@ class BaserowClient {
     }
   }
 
+  async getAnalysisByBrandId(brandId: string | number): Promise<AnalysisData> {
+    try {
+      console.log('📊 Fetching analysis for brand ID:', brandId);
+      const rows = await this.listRows('analysis', { brand_id: brandId });
+
+      console.log('📦 Analysis API response - rows count:', rows?.length);
+      console.log('📦 Analysis API response - raw data:', rows);
+
+      if (!rows || rows.length === 0) {
+        console.error('❌ No analysis found for brand ID:', brandId);
+        throw new Error(`No analysis found for brand ID ${brandId}`);
+      }
+
+      const data = rows[0]; // Get first matching analysis
+      console.log('📄 Analysis field names:', Object.keys(data));
+      console.log('📄 Full analysis JSON:', JSON.stringify(data, null, 2));
+
+      // TODO: Map field_* names if needed (will check field names from logs)
+      return {
+        score_overall: data.score_overall || 0,
+        score_visual_consistency: data.score_visual_consistency || 0,
+        score_tone_consistency: data.score_tone_consistency || 0,
+        score_regularity: data.score_regularity || 0,
+        score_diversity: data.score_diversity || 0,
+        score_engagement: data.score_engagement || 0,
+        score_positioning: data.score_positioning || 0
+      };
+    } catch (error) {
+      console.error('❌ Failed to get analysis by brand ID:', error);
+      throw error;
+    }
+  }
+
   async getStrategyByAnalysisId(analysisId: string | number): Promise<StrategyData> {
     try {
       console.log('🎯 Fetching strategy for analysis ID:', analysisId);
@@ -903,7 +936,7 @@ const LemBrand = () => {
     }
 
     try {
-      console.log('📥 Force loading strategy from Baserow for Brand ID:', brandId);
+      console.log('📥 Force loading analysis and strategy from Baserow for Brand ID:', brandId);
 
       console.log('🔧 Setting state: isGeneratingStrategy = true');
       setAppState(prev => ({ ...prev, isGeneratingStrategy: true }));
@@ -920,12 +953,25 @@ const LemBrand = () => {
       }
       console.log('✅ Progress animation complete');
 
-      // Fetch real strategy data from Baserow by Brand ID
+      // Fetch both analysis and strategy data from Baserow by Brand ID
+      console.log('📡 Fetching analysis by brand_id...');
+      let analysis: AnalysisData | null = null;
+      try {
+        analysis = await baserow.getAnalysisByBrandId(brandId);
+        console.log('✅ Analysis loaded:', analysis);
+      } catch (error) {
+        console.warn('⚠️ Failed to load analysis, will show strategy only:', error);
+      }
+
       console.log('📡 Calling fetchStrategyByBrandIdFromBaserow...');
       const strategy = await fetchStrategyByBrandIdFromBaserow(brandId);
       console.log('📡 fetchStrategyByBrandIdFromBaserow returned:', strategy);
 
-      console.log('🔧 Setting strategy data to state...');
+      console.log('🔧 Setting analysis and strategy data to state...');
+      if (analysis) {
+        setAnalysisData(analysis);
+        console.log('🔧 Analysis data set successfully');
+      }
       setStrategyData(strategy);
       console.log('🔧 Strategy data set successfully');
 
@@ -934,7 +980,8 @@ const LemBrand = () => {
         ...prev,
         isGeneratingStrategy: false,
         strategyId: 'strategy-baserow-' + Date.now(),
-        brandId: brandId
+        brandId: brandId,
+        analysisId: analysis ? 'analysis-baserow-' + Date.now() : prev.analysisId
       }));
       console.log('🔧 App state updated');
 
@@ -944,13 +991,14 @@ const LemBrand = () => {
       setShowStrategy(true);
       console.log('🔧 UI flags set: showProgress=false, showResults=true, showStrategy=true');
 
-      console.log('✅ Strategy loaded from Baserow successfully');
+      console.log('✅ Data loaded from Baserow successfully');
+      console.log('✅ Final analysisData state:', analysis);
       console.log('✅ Final strategyData state:', strategy);
 
     } catch (error) {
-      console.error('❌ Failed to load strategy from Baserow:', error);
+      console.error('❌ Failed to load data from Baserow:', error);
       console.error('❌ Error stack:', error instanceof Error ? error.stack : 'N/A');
-      alert('Failed to load strategy from Baserow. Please check Brand ID and try again.');
+      alert('Failed to load data from Baserow. Please check Brand ID and try again.');
       setAppState(prev => ({ ...prev, isGeneratingStrategy: false }));
       setShowProgress(false);
     }
