@@ -197,7 +197,7 @@ class BaserowClient {
   async getStrategyByAnalysisId(analysisId: string | number): Promise<StrategyData> {
     try {
       console.log('🎯 Fetching strategy for analysis ID:', analysisId);
-      const rows = await this.listRows('strategy', { analysis_id: analysisId });
+      const rows = await this.listRows('strategies', { analysis_id: analysisId });
 
       if (!rows || rows.length === 0) {
         throw new Error(`No strategy found for analysis ID ${analysisId}`);
