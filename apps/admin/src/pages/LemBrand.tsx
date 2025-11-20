@@ -12,6 +12,8 @@ interface Config {
   testBrandId: string | null;
   testAnalysisId: string | null;
   baserowToken: string | null;
+  // Advanced options
+  alwaysShowStrategyButton: boolean;
 }
 
 // App state interface
@@ -251,7 +253,9 @@ const LemBrand = () => {
     testMode: false,
     testBrandId: null,
     testAnalysisId: null,
-    baserowToken: null
+    baserowToken: null,
+    // Advanced options
+    alwaysShowStrategyButton: false
   });
 
   const [appState, setAppState] = useState<AppState>({
@@ -1283,6 +1287,88 @@ const LemBrand = () => {
         </section>
       )}
 
+      {/* Standalone Strategy Generation (when always show is enabled) */}
+      {config.alwaysShowStrategyButton && !showResults && !showStrategy && (
+        <section className="standalone-strategy-section" style={{
+          padding: '80px 0',
+          background: 'var(--surface)',
+          borderTop: '3px solid var(--border)'
+        }}>
+          <div className="container">
+            <div className="strategy-cta">
+              <div className="cta-content">
+                <h3 className="cta-title">Generate Brand Strategy</h3>
+                <p className="cta-description">
+                  Create a personalized content strategy with editorial pillars, key messages,
+                  and action plan using your Brand ID
+                </p>
+
+                {/* Brand ID Input */}
+                <div className="brand-id-input-wrapper" style={{ marginBottom: '24px' }}>
+                  <label htmlFor="standaloneBrandIdInput" style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    marginBottom: '8px',
+                    color: 'var(--text-primary)'
+                  }}>
+                    Brand ID (required)
+                  </label>
+                  <input
+                    type="text"
+                    id="standaloneBrandIdInput"
+                    className="form-input"
+                    placeholder="Enter Brand ID from Baserow (e.g., 123)"
+                    value={manualBrandId}
+                    onChange={(e) => setManualBrandId(e.target.value)}
+                    disabled={appState.isGeneratingStrategy}
+                    style={{
+                      width: '100%',
+                      maxWidth: '400px',
+                      padding: '12px 16px',
+                      fontSize: '16px',
+                      border: '2px solid var(--border)',
+                      borderRadius: '8px',
+                      fontFamily: 'DM Sans, sans-serif'
+                    }}
+                  />
+                  <small style={{
+                    display: 'block',
+                    marginTop: '6px',
+                    fontSize: '13px',
+                    color: 'var(--text-muted)'
+                  }}>
+                    {manualBrandId.trim()
+                      ? `Using Brand ID: ${manualBrandId.trim()}`
+                      : 'Please enter a Brand ID to generate strategy'}
+                  </small>
+                </div>
+
+                <button
+                  className="btn-generate-strategy"
+                  onClick={generateStrategy}
+                  disabled={appState.isGeneratingStrategy || !manualBrandId.trim()}
+                >
+                  {appState.isGeneratingStrategy ? (
+                    <>
+                      <SpinnerIcon />
+                      <span>Generating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Generate Full Strategy</span>
+                      <svg className="btn-arrow" width="20" height="20" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" fill="currentColor" />
+                      </svg>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Settings Modal */}
       {showSettings && (
         <div className="modal">
@@ -1448,6 +1534,22 @@ const LemBrand = () => {
                   </label>
                   <small className="form-hint" style={{ marginLeft: '30px' }}>
                     Skip 2-minute timers and load results immediately (requires Brand ID and Analysis ID)
+                  </small>
+                </div>
+
+                <div className="form-group">
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      id="alwaysShowStrategyCheckbox"
+                      checked={config.alwaysShowStrategyButton}
+                      onChange={(e) => setConfig({ ...config, alwaysShowStrategyButton: e.target.checked })}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
+                    <span style={{ fontWeight: '500' }}>Always show "Generate Strategy" button</span>
+                  </label>
+                  <small className="form-hint" style={{ marginLeft: '30px' }}>
+                    Show strategy generation button even without running analysis first
                   </small>
                 </div>
               </div>
