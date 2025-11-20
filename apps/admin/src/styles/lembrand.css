@@ -395,34 +395,69 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  margin-top: 24px;
 }
 
+/* FIX Bug #2: High contrast progress steps */
 .lembrand-page .step {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
-  border-radius: 8px;
-  background: var(--surface);
-  opacity: 0.5;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  /* White background for contrast */
+  background: #FFFFFF;
+  border: 2px solid var(--border);
   transition: all var(--transition-normal);
+}
+
+/* Inactive step - slightly dimmed */
+.lembrand-page .step:not(.active):not(.completed) {
+  opacity: 0.6;
 }
 
 .lembrand-page .step.active {
   opacity: 1;
-  background: rgba(99, 102, 241, 0.1);
+  /* Highlighted background */
+  background: var(--surface);
+  border-color: var(--primary);
+  box-shadow: 0 2px 12px rgba(43, 95, 117, 0.15);
 }
 
 .lembrand-page .step.completed {
-  opacity: 0.8;
+  opacity: 1;
+  background: #FFFFFF;
+  border-color: var(--success);
 }
 
+/* Step icon with high contrast */
 .lembrand-page .step-icon {
+  flex-shrink: 0;
   font-size: 20px;
+  color: var(--text-muted);
+  transition: color var(--transition-normal);
+}
+
+.lembrand-page .step.active .step-icon {
+  color: var(--primary);
+  font-size: 22px;
 }
 
 .lembrand-page .step.completed .step-icon {
   color: var(--success);
+}
+
+/* Step text with high contrast */
+.lembrand-page .step-text {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.lembrand-page .step.active .step-text {
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 /* ==============================================
