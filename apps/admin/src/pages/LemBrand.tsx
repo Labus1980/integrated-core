@@ -233,6 +233,46 @@ class BaserowClient {
       throw error;
     }
   }
+
+  async getStrategyByBrandId(brandId: string | number): Promise<StrategyData> {
+    try {
+      console.log('🎯 Fetching strategy for brand ID:', brandId);
+      const rows = await this.listRows('strategies', { brand_id: brandId });
+
+      if (!rows || rows.length === 0) {
+        throw new Error(`No strategy found for brand ID ${brandId}`);
+      }
+
+      const data = rows[0]; // Get first matching strategy
+
+      // Parse JSON fields if they are strings
+      const parseField = (field: any) => {
+        if (typeof field === 'string') {
+          try {
+            return JSON.parse(field);
+          } catch {
+            return field;
+          }
+        }
+        return field;
+      };
+
+      return {
+        summary: data.summary || '',
+        editorial_pillars: parseField(data.editorial_pillars) || { pillars: [] },
+        key_messages: parseField(data.key_messages) || [],
+        recommended_frequency: data.recommended_frequency || 0,
+        action_plan: parseField(data.action_plan) || {
+          immediate: [],
+          medium_term: [],
+          long_term: []
+        }
+      };
+    } catch (error) {
+      console.error('❌ Failed to get strategy:', error);
+      throw error;
+    }
+  }
 }
 
 // Initialize Baserow client with hardcoded token and table IDs for demo
@@ -469,6 +509,17 @@ const LemBrand = () => {
     try {
       console.log('🎯 Fetching strategy from Baserow using BaserowClient');
       return await baserow.getStrategyByAnalysisId(analysisId);
+    } catch (error) {
+      console.warn('⚠️ Failed to fetch strategy from Baserow, using mock data:', error);
+      return MOCK_STRATEGY_DATA;
+    }
+  };
+
+  // Fetch strategy data from Baserow by Brand ID
+  const fetchStrategyByBrandIdFromBaserow = async (brandId: string): Promise<StrategyData> => {
+    try {
+      console.log('🎯 Fetching strategy from Baserow by Brand ID using BaserowClient');
+      return await baserow.getStrategyByBrandId(brandId);
     } catch (error) {
       console.warn('⚠️ Failed to fetch strategy from Baserow, using mock data:', error);
       return MOCK_STRATEGY_DATA;
@@ -793,7 +844,7 @@ const LemBrand = () => {
       }
 
       // Fetch real strategy data from Baserow by Brand ID
-      const strategy = await fetchStrategyFromBaserow(brandId);
+      const strategy = await fetchStrategyByBrandIdFromBaserow(brandId);
 
       setStrategyData(strategy);
       setAppState(prev => ({
