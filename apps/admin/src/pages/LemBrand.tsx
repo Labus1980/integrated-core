@@ -7,6 +7,11 @@ interface Config {
   strategyWebhook: string;
   analysisDuration: number; // seconds
   strategyDuration: number; // seconds
+  // Testing mode
+  testMode: boolean;
+  testBrandId: string | null;
+  testAnalysisId: string | null;
+  baserowToken: string | null;
 }
 
 // App state interface
@@ -66,7 +71,12 @@ const LemBrand = () => {
     analysisWebhook: 'https://n8n.okta-solutions.com/webhook-test/lembrand-start',
     strategyWebhook: 'https://n8n.okta-solutions.com/webhook-test/lembrand-strategy',
     analysisDuration: 120, // 2 minutes in seconds
-    strategyDuration: 120 // 2 minutes in seconds
+    strategyDuration: 120, // 2 minutes in seconds
+    // Testing mode
+    testMode: false,
+    testBrandId: null,
+    testAnalysisId: null,
+    baserowToken: null
   });
 
   const [appState, setAppState] = useState<AppState>({
@@ -232,6 +242,46 @@ const LemBrand = () => {
     }
   };
 
+  // Fetch analysis data from Baserow (for testing mode)
+  const fetchAnalysisFromBaserow = async (analysisId: string): Promise<AnalysisData> => {
+    if (!config.baserowToken) {
+      console.warn('Baserow token not configured, using mock data');
+      return MOCK_ANALYSIS_DATA;
+    }
+
+    try {
+      const response = await fetch(
+        `https://api.baserow.io/api/database/rows/table/832/${analysisId}/`,
+        {
+          headers: {
+            'Authorization': `Token ${config.baserowToken}`
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Baserow API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Transform Baserow data to expected format
+      return {
+        score_overall: data.score_overall || 0,
+        score_visual_consistency: data.score_visual_consistency || 0,
+        score_tone_consistency: data.score_tone_consistency || 0,
+        score_regularity: data.score_regularity || 0,
+        score_diversity: data.score_diversity || 0,
+        score_engagement: data.score_engagement || 0,
+        score_positioning: data.score_positioning || 0
+      };
+    } catch (error) {
+      console.error('Error fetching from Baserow:', error);
+      // Fallback to mock data
+      return MOCK_ANALYSIS_DATA;
+    }
+  };
+
   // Start analysis with FIXED 2-minute timer
   const startAnalysis = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -242,6 +292,41 @@ const LemBrand = () => {
     }
 
     try {
+      // Check if testing mode is enabled
+      if (config.testMode && config.testBrandId && config.testAnalysisId) {
+        console.log('🧪 Testing mode: Skipping analysis, loading data directly');
+
+        setShowProgress(true);
+        setShowResults(false);
+        setShowStrategy(false);
+        setProgress(0);
+        setCurrentStage(5); // Show last step
+
+        setAppState(prev => ({
+          ...prev,
+          brandId: config.testBrandId,
+          analysisId: config.testAnalysisId,
+          isAnalyzing: true
+        }));
+
+        // Show quick progress (1 second)
+        for (let i = 0; i <= 100; i += 20) {
+          setProgress(i);
+          await sleep(200);
+        }
+
+        // Fetch real data from Baserow
+        const data = await fetchAnalysisFromBaserow(config.testAnalysisId);
+
+        setAnalysisData(data);
+        setAppState(prev => ({ ...prev, isAnalyzing: false }));
+        setShowProgress(false);
+        setShowResults(true);
+
+        return;
+      }
+
+      // Normal flow: start analysis with timer
       setAppState(prev => ({ ...prev, isAnalyzing: true }));
       setShowProgress(true);
       setShowResults(false);
@@ -866,6 +951,112 @@ const LemBrand = () => {
                   max="300"
                 />
                 <small className="form-hint">Duration for strategy generation (default: 120 seconds = 2 minutes)</small>
+              </div>
+
+              {/* Testing Mode Section */}
+              <div style={{ borderTop: '2px solid var(--border)', margin: '32px 0', paddingTop: '24px' }}>
+                <div style={{ marginBottom: '24px' }}>
+                  <h4 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    🧪 Testing Mode
+                  </h4>
+                  <p className="form-hint" style={{ marginTop: 0 }}>
+                    Skip analysis timer and load data directly from Baserow
+                  </p>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="testBrandIdInput">
+                    Brand ID (from Baserow)
+                    <span style={{
+                      marginLeft: '8px',
+                      padding: '2px 8px',
+                      background: 'var(--surface)',
+                      borderRadius: '4px',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      color: 'var(--text-muted)'
+                    }}>
+                      Optional
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    id="testBrandIdInput"
+                    className="form-input"
+                    placeholder="e.g., 123"
+                    value={config.testBrandId || ''}
+                    onChange={(e) => setConfig({ ...config, testBrandId: e.target.value || null })}
+                  />
+                  <small className="form-hint">Enter Brand ID to skip analysis timer</small>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="testAnalysisIdInput">
+                    Analysis ID (from Baserow)
+                    <span style={{
+                      marginLeft: '8px',
+                      padding: '2px 8px',
+                      background: 'var(--surface)',
+                      borderRadius: '4px',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      color: 'var(--text-muted)'
+                    }}>
+                      Optional
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    id="testAnalysisIdInput"
+                    className="form-input"
+                    placeholder="e.g., 456"
+                    value={config.testAnalysisId || ''}
+                    onChange={(e) => setConfig({ ...config, testAnalysisId: e.target.value || null })}
+                  />
+                  <small className="form-hint">Enter Analysis ID to load scores from Baserow</small>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="baserowTokenInput">
+                    Baserow API Token
+                    <span style={{
+                      marginLeft: '8px',
+                      padding: '2px 8px',
+                      background: 'var(--surface)',
+                      borderRadius: '4px',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      color: 'var(--text-muted)'
+                    }}>
+                      Optional
+                    </span>
+                  </label>
+                  <input
+                    type="password"
+                    id="baserowTokenInput"
+                    className="form-input"
+                    placeholder="Enter your Baserow API token"
+                    value={config.baserowToken || ''}
+                    onChange={(e) => setConfig({ ...config, baserowToken: e.target.value || null })}
+                  />
+                  <small className="form-hint">Required only for fetching real data from Baserow</small>
+                </div>
+
+                <div className="form-group">
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      id="testModeCheckbox"
+                      checked={config.testMode}
+                      onChange={(e) => setConfig({ ...config, testMode: e.target.checked })}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
+                    <span style={{ fontWeight: '500' }}>Enable Testing Mode</span>
+                  </label>
+                  <small className="form-hint" style={{ marginLeft: '30px' }}>
+                    Skip 2-minute timers and load results immediately (requires Brand ID and Analysis ID)
+                  </small>
+                </div>
               </div>
             </div>
 
