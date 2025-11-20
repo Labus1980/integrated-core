@@ -714,38 +714,6 @@ const LemBrand = () => {
     }
 
     try {
-      // Check if Testing Mode - skip timer and fetch from Baserow
-      if (config.testMode && config.testBrandId && config.testAnalysisId) {
-        console.log('🧪 Testing Mode: Skipping timer, loading strategy from Baserow');
-
-        setAppState(prev => ({ ...prev, isGeneratingStrategy: true }));
-        setShowProgress(true);
-        setShowResults(false);
-        setProgress(0);
-        setCurrentStage(5); // Show last step
-
-        // Show quick progress (1 second)
-        for (let i = 0; i <= 100; i += 20) {
-          setProgress(i);
-          await sleep(200);
-        }
-
-        // Fetch real strategy data from Baserow
-        const strategy = await fetchStrategyFromBaserow(config.testAnalysisId);
-
-        setStrategyData(strategy);
-        setAppState(prev => ({
-          ...prev,
-          isGeneratingStrategy: false,
-          strategyId: 'strategy-' + Date.now()
-        }));
-        setShowProgress(false);
-        setShowResults(true);
-        setShowStrategy(true);
-
-        return;
-      }
-
       // Normal flow: start strategy generation with real webhook
       setAppState(prev => ({ ...prev, isGeneratingStrategy: true }));
       setShowProgress(true);
