@@ -3,43 +3,44 @@
    ============================================== */
 
 /* Import Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&display=swap');
 
 /* ==============================================
    CSS VARIABLES & DESIGN SYSTEM
    ============================================== */
 
 .lembrand-page {
-  /* Main Brand Colors - Warm Pastels */
-  --primary: #E8B4A0;
-  --primary-dark: #D99A82;
-  --primary-light: #F0C9B8;
+  /* Primary Colors - Deep & Rich */
+  --primary: #2B5F75;              /* Deep Teal */
+  --primary-dark: #1E4558;
+  --primary-light: #3A7A93;
 
-  /* Accent Colors - Cool Pastels */
-  --accent: #A4C3B2;
-  --accent-dark: #8FAF9E;
-  --accent-light: #C1D9CC;
+  /* Accent Colors - Warm Contrast */
+  --accent: #D97757;               /* Warm Terracotta */
+  --accent-dark: #C15E3E;
+  --accent-light: #E69878;
 
-  /* Neutral Base */
-  --background: #FDFBF7;
-  --surface: #F5F1EB;
-  --surface-light: #FAF7F2;
-  --border: #E6DFD4;
+  /* Neutrals - Clean & Clear */
+  --background: #FFFFFF;           /* Pure white */
+  --surface: #F8F9FA;
+  --surface-light: #FFFFFF;
+  --surface-dark: #E9ECEF;
+  --border: #CED4DA;
+  --border-dark: #ADB5BD;
 
-  /* Text Colors */
-  --text-primary: #3A3530;
-  --text-secondary: #6B6560;
-  --text-muted: #9A938C;
+  /* Text - High Contrast */
+  --text-primary: #212529;         /* Almost black */
+  --text-secondary: #495057;
+  --text-muted: #6C757D;
 
-  /* Status Colors - Soft Versions */
-  --success: #8FBC8F;
-  --warning: #E8C07D;
-  --error: #D8A5A5;
-  --info: #A4BFD9;
+  /* Status Colors - Bold & Clear */
+  --success: #28A745;
+  --warning: #FFC107;
+  --error: #DC3545;
+  --info: #17A2B8;
 
-  /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #E8B4A0 0%, #A4C3B2 100%);
-  --gradient-surface: linear-gradient(180deg, #FDFBF7 0%, #F5F1EB 100%);
+  /* No gradients - solid colors only */
+  --secondary: var(--accent);      /* For backward compatibility */
 
   --container-max-width: 1200px;
   --spacing-section: 80px;
@@ -47,7 +48,9 @@
   --transition-normal: 0.3s ease;
   --transition-slow: 0.5s ease;
 
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 17px;
+  line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -70,10 +73,11 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(12px);
+  border-bottom: 3px solid var(--border);
   padding: 20px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .lembrand-page .header .container {
@@ -86,10 +90,11 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 26px;
+  font-weight: 900;
   color: var(--text-primary);
   text-decoration: none;
+  letter-spacing: -0.02em;
 }
 
 .lembrand-page .logo-icon {
@@ -117,29 +122,29 @@
    ============================================== */
 
 .lembrand-page .hero {
-  background: linear-gradient(180deg, #FDFBF7 0%, #F5F1EB 100%);
+  background: var(--surface);
   padding: var(--spacing-section) 0 120px;
   text-align: center;
+  border-bottom: 3px solid var(--border);
 }
 
 .lembrand-page .hero-content {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
 .lembrand-page .hero-title {
-  font-size: 48px;
-  font-weight: 800;
-  line-height: 1.2;
-  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--accent-dark) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: 60px;
+  font-weight: 900;
+  line-height: 1.1;
+  color: var(--primary);
   margin-bottom: 24px;
+  letter-spacing: -0.03em;
 }
 
 .lembrand-page .hero-description {
   font-size: 20px;
+  font-weight: 500;
   color: var(--text-secondary);
   margin-bottom: 48px;
   line-height: 1.6;
@@ -156,16 +161,16 @@
   gap: 12px;
   padding: 8px;
   background: #FFFFFF;
-  border: 2px solid var(--border);
+  border: 3px solid var(--border);
   border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(58, 53, 48, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   transition: all var(--transition-normal);
   margin-bottom: 24px;
 }
 
 .lembrand-page .input-wrapper:focus-within {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(232, 180, 160, 0.15);
+  box-shadow: 0 0 0 4px rgba(43, 95, 117, 0.15);
 }
 
 .lembrand-page .input-icon {
@@ -193,28 +198,30 @@
 }
 
 .lembrand-page .btn-primary {
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: var(--accent);
   color: #FFFFFF;
-  border: none;
+  border: 3px solid var(--accent-dark);
   border-radius: 12px;
   padding: 16px 32px;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(232, 180, 160, 0.3);
+  box-shadow: 0 4px 12px rgba(217, 119, 87, 0.3);
 }
 
 .lembrand-page .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--primary-dark), var(--accent-dark));
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(232, 180, 160, 0.4);
+  background: var(--accent-dark);
+  border-color: var(--accent-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(217, 119, 87, 0.4);
 }
 
 .lembrand-page .btn-primary:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
 /* Trust Badges */
@@ -245,15 +252,16 @@
 .lembrand-page .features {
   padding: var(--spacing-section) 0;
   background: #FFFFFF;
-  border-top: 1px solid var(--border);
+  border-top: 3px solid var(--border);
 }
 
 .lembrand-page .section-title {
-  font-size: 36px;
-  font-weight: 700;
+  font-size: 42px;
+  font-weight: 900;
   text-align: center;
   margin-bottom: 48px;
   color: var(--text-primary);
+  letter-spacing: -0.02em;
 }
 
 .lembrand-page .features-grid {
@@ -263,10 +271,10 @@
 }
 
 .lembrand-page .feature-card {
-  background: var(--background);
-  border: 1px solid var(--border);
+  background: var(--surface);
+  border: 3px solid var(--border);
   border-radius: 16px;
-  padding: 32px;
+  padding: 36px;
   text-align: center;
   transition: all var(--transition-normal);
 }
@@ -274,26 +282,28 @@
 .lembrand-page .feature-card:hover {
   background: #FFFFFF;
   border-color: var(--primary);
-  box-shadow: 0 8px 24px rgba(232, 180, 160, 0.15);
-  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(43, 95, 117, 0.2);
+  transform: translateY(-6px);
 }
 
 .lembrand-page .feature-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
+  font-size: 56px;
+  margin-bottom: 20px;
 }
 
 .lembrand-page .feature-title {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 26px;
+  font-weight: 900;
   margin-bottom: 12px;
   color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
 
 .lembrand-page .feature-description {
-  font-size: 16px;
+  font-size: 17px;
+  font-weight: 500;
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 /* ==============================================
@@ -308,10 +318,10 @@
   max-width: 700px;
   margin: 0 auto;
   background: white;
-  border: 1px solid var(--border);
+  border: 3px solid var(--border);
   border-radius: 24px;
   padding: 48px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
 .lembrand-page .progress-header {
@@ -320,13 +330,13 @@
 }
 
 .lembrand-page .spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid var(--border);
+  width: 56px;
+  height: 56px;
+  border: 5px solid var(--border);
   border-top-color: var(--primary);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 16px;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 20px;
 }
 
 @keyframes spin {
@@ -336,12 +346,16 @@
 }
 
 .lembrand-page .progress-title {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 28px;
+  font-weight: 900;
   margin-bottom: 8px;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
 
 .lembrand-page .progress-subtitle {
+  font-size: 17px;
+  font-weight: 500;
   color: var(--text-secondary);
 }
 
@@ -355,23 +369,25 @@
 .lembrand-page .progress-bar {
   flex: 1;
   position: relative;
-  height: 8px;
+  height: 12px;
   background: var(--surface);
-  border-radius: 4px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
   overflow: hidden;
 }
 
 .lembrand-page .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--primary), var(--secondary));
-  border-radius: 4px;
+  background: var(--primary);
+  border-radius: 6px;
   transition: width 0.5s ease;
 }
 
 .lembrand-page .progress-text {
-  font-weight: 600;
+  font-weight: 900;
+  font-size: 18px;
   color: var(--primary);
-  min-width: 50px;
+  min-width: 60px;
   text-align: right;
 }
 
@@ -428,68 +444,77 @@
 }
 
 .lembrand-page .results-title {
-  font-size: 42px;
-  font-weight: 700;
+  font-size: 48px;
+  font-weight: 900;
   margin-bottom: 12px;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
 }
 
 .lembrand-page .results-subtitle {
-  font-size: 18px;
+  font-size: 20px;
+  font-weight: 500;
   color: var(--text-secondary);
 }
 
 /* Score Card */
 .lembrand-page .score-card {
-  background: linear-gradient(135deg, #E8B4A0 0%, #D8C4B0 100%);
+  background: var(--primary);
   color: white;
+  border: 4px solid var(--primary-dark);
   border-radius: 24px;
-  padding: 48px;
+  padding: 56px;
   text-align: center;
   margin-bottom: 48px;
-  box-shadow: 0 12px 48px rgba(232, 180, 160, 0.3);
+  box-shadow: 0 12px 48px rgba(43, 95, 117, 0.3);
 }
 
 .lembrand-page .score-label {
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  opacity: 0.9;
+  letter-spacing: 1.5px;
+  opacity: 0.95;
 }
 
 .lembrand-page .score-display {
-  margin: 24px 0;
+  margin: 32px 0;
 }
 
 .lembrand-page .score-value {
-  font-size: 72px;
-  font-weight: 800;
+  font-size: 84px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
 }
 
 .lembrand-page .score-max {
-  font-size: 36px;
-  opacity: 0.8;
+  font-size: 42px;
+  font-weight: 700;
+  opacity: 0.9;
 }
 
 .lembrand-page .score-gauge {
   position: relative;
   width: 100%;
-  height: 12px;
+  height: 16px;
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
-  margin: 24px 0;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  margin: 32px 0;
   overflow: hidden;
 }
 
 .lembrand-page .gauge-fill {
   height: 100%;
   background: white;
-  border-radius: 6px;
+  border-radius: 8px;
   transition: width 1s ease-out;
 }
 
 .lembrand-page .score-message {
-  font-size: 18px;
-  margin-top: 16px;
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 20px;
 }
 
 /* Dimensions */
@@ -498,9 +523,11 @@
 }
 
 .lembrand-page .section-subtitle {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 30px;
+  font-weight: 900;
   margin-bottom: 24px;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
 
 .lembrand-page .dimensions-grid {
@@ -510,88 +537,104 @@
 
 .lembrand-page .dimension-item {
   background: white;
-  border: 1px solid var(--border);
+  border: 3px solid var(--border);
   border-radius: 12px;
-  padding: 20px;
+  padding: 24px;
+  transition: all var(--transition-normal);
+}
+
+.lembrand-page .dimension-item:hover {
+  border-color: var(--primary-light);
+  box-shadow: 0 4px 16px rgba(43, 95, 117, 0.1);
 }
 
 .lembrand-page .dimension-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .lembrand-page .dimension-name {
-  font-weight: 500;
+  font-weight: 700;
+  font-size: 17px;
   color: var(--text-primary);
 }
 
 .lembrand-page .dimension-score {
-  font-weight: 700;
-  font-size: 18px;
+  font-weight: 900;
+  font-size: 22px;
   color: var(--primary);
 }
 
 .lembrand-page .dimension-bar {
   position: relative;
-  height: 8px;
+  height: 10px;
   background: var(--surface);
-  border-radius: 4px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
   overflow: hidden;
 }
 
 .lembrand-page .dimension-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  background: var(--accent);
   border-radius: 4px;
   transition: width 1s ease-out;
 }
 
 /* Strategy CTA */
 .lembrand-page .strategy-cta {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.1));
-  border: 2px solid var(--primary);
+  background: var(--surface);
+  border: 4px solid var(--primary);
   border-radius: 24px;
-  padding: 48px;
+  padding: 56px;
   text-align: center;
   margin: 48px 0;
+  box-shadow: 0 8px 24px rgba(43, 95, 117, 0.12);
 }
 
 .lembrand-page .cta-title {
-  font-size: 32px;
-  font-weight: 700;
+  font-size: 36px;
+  font-weight: 900;
   margin-bottom: 12px;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
 }
 
 .lembrand-page .cta-description {
-  font-size: 18px;
+  font-size: 20px;
+  font-weight: 500;
   color: var(--text-secondary);
-  margin-bottom: 32px;
+  margin-bottom: 36px;
 }
 
 .lembrand-page .btn-generate-strategy {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  background: var(--primary);
   color: white;
-  border: none;
+  border: 3px solid var(--primary-dark);
   border-radius: 16px;
-  padding: 20px 40px;
-  font-size: 18px;
-  font-weight: 600;
+  padding: 22px 44px;
+  font-size: 20px;
+  font-weight: 900;
   cursor: pointer;
-  transition: transform var(--transition-fast);
+  transition: all var(--transition-fast);
+  box-shadow: 0 6px 20px rgba(43, 95, 117, 0.3);
 }
 
 .lembrand-page .btn-generate-strategy:hover:not(:disabled) {
-  transform: scale(1.05);
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(43, 95, 117, 0.4);
 }
 
 .lembrand-page .btn-generate-strategy:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
 .lembrand-page .btn-icon {
@@ -609,19 +652,21 @@
 
 .lembrand-page .strategy-section {
   background: white;
-  border: 1px solid var(--border);
+  border: 3px solid var(--border);
   border-radius: 24px;
-  padding: 32px;
+  padding: 40px;
   margin-bottom: 32px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
 .lembrand-page .section-icon {
-  font-size: 32px;
-  margin-bottom: 16px;
+  font-size: 40px;
+  margin-bottom: 20px;
 }
 
 .lembrand-page .summary-text {
-  font-size: 16px;
+  font-size: 17px;
+  font-weight: 500;
   line-height: 1.8;
   color: var(--text-secondary);
 }
@@ -636,33 +681,43 @@
 
 .lembrand-page .pillar-card {
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 3px solid var(--border);
   border-radius: 16px;
-  padding: 24px;
+  padding: 28px;
+  transition: all var(--transition-normal);
+}
+
+.lembrand-page .pillar-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 6px 20px rgba(217, 119, 87, 0.15);
 }
 
 .lembrand-page .pillar-title {
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 8px;
+  font-size: 22px;
+  font-weight: 900;
+  margin-bottom: 10px;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
 
 .lembrand-page .pillar-frequency {
   display: inline-block;
-  background: var(--primary);
+  background: var(--accent);
   color: white;
-  padding: 4px 12px;
+  padding: 6px 14px;
   border-radius: 12px;
   font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 12px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  border: 2px solid var(--accent-dark);
 }
 
 .lembrand-page .pillar-description {
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: 500;
   color: var(--text-secondary);
-  margin-bottom: 16px;
-  line-height: 1.6;
+  margin-bottom: 18px;
+  line-height: 1.7;
 }
 
 .lembrand-page .pillar-examples {
@@ -674,10 +729,11 @@
 .lembrand-page .example-badge {
   display: inline-block;
   background: white;
-  border: 1px solid var(--border);
-  padding: 6px 12px;
+  border: 2px solid var(--border);
+  padding: 7px 13px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 500;
   color: var(--text-secondary);
 }
 
@@ -692,9 +748,10 @@
 .lembrand-page .message-item {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 16px;
+  gap: 14px;
+  padding: 18px;
   background: var(--surface);
+  border: 2px solid var(--border);
   border-radius: 12px;
 }
 
@@ -702,44 +759,48 @@
   flex-shrink: 0;
   color: var(--success);
   margin-top: 2px;
+  font-size: 20px;
 }
 
 .lembrand-page .message-text {
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.7;
   color: var(--text-primary);
 }
 
 /* Frequency Display */
 .lembrand-page .frequency-display {
   text-align: center;
-  padding: 32px;
+  padding: 40px;
   background: var(--surface);
+  border: 3px solid var(--border);
   border-radius: 16px;
   margin-top: 24px;
 }
 
 .lembrand-page .frequency-value {
-  font-size: 64px;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 8px;
+  font-size: 72px;
+  font-weight: 900;
+  color: var(--primary);
+  margin-bottom: 10px;
+  letter-spacing: -0.03em;
 }
 
 .lembrand-page .frequency-label {
-  font-size: 18px;
+  font-size: 20px;
+  font-weight: 700;
   color: var(--text-secondary);
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .lembrand-page .frequency-reasoning {
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: 500;
   color: var(--text-muted);
   max-width: 500px;
   margin: 0 auto;
+  line-height: 1.6;
 }
 
 /* Action Plan Tabs */
@@ -747,20 +808,20 @@
   display: flex;
   gap: 12px;
   margin: 24px 0;
-  border-bottom: 2px solid var(--border);
+  border-bottom: 3px solid var(--border);
 }
 
 .lembrand-page .tab-btn {
-  padding: 12px 24px;
+  padding: 14px 28px;
   background: none;
   border: none;
-  border-bottom: 2px solid transparent;
-  font-size: 16px;
-  font-weight: 500;
+  border-bottom: 3px solid transparent;
+  font-size: 17px;
+  font-weight: 700;
   color: var(--text-secondary);
   cursor: pointer;
   transition: all var(--transition-fast);
-  margin-bottom: -2px;
+  margin-bottom: -3px;
 }
 
 .lembrand-page .tab-btn.active {
@@ -778,10 +839,16 @@
 
 .lembrand-page .action-card {
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 3px solid var(--border);
   border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 16px;
+  padding: 24px;
+  margin-bottom: 18px;
+  transition: all var(--transition-normal);
+}
+
+.lembrand-page .action-card:hover {
+  border-color: var(--primary-light);
+  box-shadow: 0 4px 16px rgba(43, 95, 117, 0.1);
 }
 
 .lembrand-page .action-header {
@@ -789,42 +856,49 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .lembrand-page .action-title {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 900;
   flex: 1;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
 
 .lembrand-page .effort-badge {
-  padding: 6px 12px;
+  padding: 7px 14px;
   border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 700;
   white-space: nowrap;
+  border: 2px solid;
 }
 
 .lembrand-page .effort-low {
-  background: rgba(16, 185, 129, 0.1);
+  background: rgba(40, 167, 69, 0.1);
   color: var(--success);
+  border-color: var(--success);
 }
 
 .lembrand-page .effort-medium {
-  background: rgba(245, 158, 11, 0.1);
+  background: rgba(255, 193, 7, 0.1);
   color: var(--warning);
+  border-color: var(--warning);
 }
 
 .lembrand-page .effort-high {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(220, 53, 69, 0.1);
   color: var(--error);
+  border-color: var(--error);
 }
 
 .lembrand-page .action-reason {
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: 500;
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 /* ==============================================
@@ -856,25 +930,28 @@
 .lembrand-page .modal-content {
   position: relative;
   background: white;
+  border: 4px solid var(--border-dark);
   border-radius: 24px;
   max-width: 600px;
   width: 90%;
   max-height: 90vh;
   overflow: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
 }
 
 .lembrand-page .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px;
-  border-bottom: 1px solid var(--border);
+  padding: 28px;
+  border-bottom: 3px solid var(--border);
 }
 
 .lembrand-page .modal-header h3 {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
 }
 
 .lembrand-page .modal-close {
@@ -903,22 +980,24 @@
 }
 
 .lembrand-page .form-group {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .lembrand-page .form-group label {
   display: block;
-  font-weight: 500;
-  margin-bottom: 8px;
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 10px;
   color: var(--text-primary);
 }
 
 .lembrand-page .form-input {
   width: 100%;
-  padding: 12px 16px;
-  border: 1px solid var(--border);
+  padding: 14px 18px;
+  border: 3px solid var(--border);
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 17px;
+  font-weight: 500;
   font-family: inherit;
   transition: all var(--transition-fast);
 }
@@ -926,38 +1005,41 @@
 .lembrand-page .form-input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(232, 180, 160, 0.1);
+  box-shadow: 0 0 0 4px rgba(43, 95, 117, 0.15);
 }
 
 .lembrand-page .form-hint {
   display: block;
-  margin-top: 8px;
-  font-size: 14px;
+  margin-top: 10px;
+  font-size: 15px;
+  font-weight: 500;
   color: var(--text-muted);
+  line-height: 1.5;
 }
 
 .lembrand-page .modal-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  padding: 24px;
-  border-top: 1px solid var(--border);
+  gap: 14px;
+  padding: 28px;
+  border-top: 3px solid var(--border);
 }
 
 .lembrand-page .btn-secondary {
-  padding: 12px 24px;
+  padding: 14px 28px;
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
+  border: 3px solid var(--border);
+  border-radius: 10px;
+  font-size: 17px;
+  font-weight: 700;
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .lembrand-page .btn-secondary:hover {
   background: white;
-  border-color: var(--text-secondary);
+  border-color: var(--border-dark);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 /* Settings Button (Floating) */
@@ -965,33 +1047,34 @@
   position: fixed;
   bottom: 32px;
   right: 32px;
-  width: 56px;
-  height: 56px;
-  background: var(--primary);
+  width: 64px;
+  height: 64px;
+  background: var(--accent);
   color: white;
-  border: none;
+  border: 4px solid var(--accent-dark);
   border-radius: 50%;
-  font-size: 24px;
+  font-size: 26px;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(232, 180, 160, 0.4);
+  box-shadow: 0 6px 24px rgba(217, 119, 87, 0.4);
   transition: all var(--transition-normal);
   z-index: 999;
 }
 
 .lembrand-page .settings-btn:hover {
+  background: var(--accent-dark);
   transform: scale(1.1) rotate(90deg);
-  box-shadow: 0 6px 28px rgba(232, 180, 160, 0.6);
+  box-shadow: 0 8px 32px rgba(217, 119, 87, 0.6);
 }
 
 /* Loading spinner for buttons */
 .lembrand-page .spinner-small {
   display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
   border-top-color: white;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin 0.7s linear infinite;
 }
 
 /* ==============================================
@@ -1000,7 +1083,7 @@
 
 @media (max-width: 768px) {
   .lembrand-page .hero-title {
-    font-size: 32px;
+    font-size: 38px;
   }
 
   .lembrand-page .hero-description {
@@ -1029,11 +1112,11 @@
   }
 
   .lembrand-page .progress-card {
-    padding: 32px 24px;
+    padding: 36px 28px;
   }
 
   .lembrand-page .score-value {
-    font-size: 56px;
+    font-size: 64px;
   }
 
   .lembrand-page .dimensions-grid {
@@ -1051,10 +1134,10 @@
 
   .lembrand-page .tab-btn {
     border-bottom: none;
-    border-left: 2px solid transparent;
+    border-left: 3px solid transparent;
     text-align: left;
     margin-bottom: 0;
-    margin-left: -2px;
+    margin-left: -3px;
   }
 
   .lembrand-page .tab-btn.active {
@@ -1065,9 +1148,9 @@
   .lembrand-page .settings-btn {
     bottom: 16px;
     right: 16px;
-    width: 48px;
-    height: 48px;
-    font-size: 20px;
+    width: 56px;
+    height: 56px;
+    font-size: 22px;
   }
 }
 
@@ -1145,9 +1228,9 @@
 
 /* Updated progress card with new colors */
 .lembrand-page .progress-card {
-  background: var(--surface-light);
-  border: 2px solid var(--border);
-  box-shadow: 0 4px 20px rgba(58, 53, 48, 0.08);
+  background: white;
+  border: 3px solid var(--border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
 /* Icon animations */
