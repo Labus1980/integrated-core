@@ -228,8 +228,24 @@ class BaserowClient {
       }
 
       const data = rows[0]; // Get first matching analysis
-      console.log('📄 Analysis field names:', Object.keys(data));
-      console.log('📄 Full analysis JSON:', JSON.stringify(data, null, 2));
+      console.log('📄 Analysis - First row data:', data);
+      console.log('📄 Analysis - All field names:', Object.keys(data));
+      console.log('📄 Analysis - Full row JSON:', JSON.stringify(data, null, 2));
+
+      console.log('🔍 Looking for score fields in data:');
+      console.log('  score_overall:', data.score_overall);
+      console.log('  score_visual_consistency:', data.score_visual_consistency);
+      console.log('  score_tone_consistency:', data.score_tone_consistency);
+      console.log('  score_regularity:', data.score_regularity);
+      console.log('  score_diversity:', data.score_diversity);
+      console.log('  score_engagement:', data.score_engagement);
+      console.log('  score_positioning:', data.score_positioning);
+
+      // Check for field_* pattern
+      const scoreFields = Object.keys(data).filter(key =>
+        key.includes('score') || key.startsWith('field_')
+      );
+      console.log('🔍 Potential score fields found:', scoreFields);
 
       // TODO: Map field_* names if needed (will check field names from logs)
       return {
@@ -310,9 +326,20 @@ class BaserowClient {
       }
 
       const data = rows[0]; // Get first matching strategy
-      console.log('📄 First row data:', data);
-      console.log('📄 All field names:', Object.keys(data));
-      console.log('📄 Full row JSON:', JSON.stringify(data, null, 2));
+      console.log('📄 Strategy - First row data:', data);
+      console.log('📄 Strategy - All field names:', Object.keys(data));
+      console.log('📄 Strategy - Full row JSON:', JSON.stringify(data, null, 2));
+
+      // Check if scores are in the strategy table
+      console.log('🔍 Checking for score fields in strategy table:');
+      const scoreFields = Object.keys(data).filter(key =>
+        key.toLowerCase().includes('score') ||
+        (key.startsWith('field_') && parseInt(key.split('_')[1]) >= 7965)
+      );
+      console.log('🔍 Potential score fields in strategy:', scoreFields);
+      scoreFields.forEach(field => {
+        console.log(`  ${field}:`, data[field]);
+      });
 
       // Baserow field mapping
       // field_7960 = summary
