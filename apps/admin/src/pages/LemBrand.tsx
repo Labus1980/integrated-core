@@ -1208,60 +1208,64 @@ const LemBrand = () => {
       )}
 
       {/* Results Section */}
-      {showResults && analysisData && (
+      {showResults && (analysisData || (showStrategy && strategyData)) && (
         <section className="results-section">
           <div className="container">
             {/* Success Header */}
             <div className="results-header">
               <IconStar />
-              <h2 className="results-title">Your Strategy is Ready!</h2>
-              <p className="results-subtitle">Here's what we found about your brand</p>
+              <h2 className="results-title">{analysisData ? 'Your Strategy is Ready!' : 'Strategy Loaded!'}</h2>
+              <p className="results-subtitle">{analysisData ? "Here's what we found about your brand" : 'Content strategy from Baserow'}</p>
             </div>
 
-            {/* Overall Score Card */}
-            <div className={`score-card ${getScoreClass(analysisData.score_overall)}`}>
-              <div className="score-header">
-                <span className="score-label">LemBrand Score</span>
-              </div>
-
-              <div className="score-display">
-                <span className="score-value">{analysisData.score_overall}</span>
-                <span className="score-max">/100</span>
-              </div>
-
-              <div className="score-gauge">
-                <div className="gauge-background"></div>
-                <div className="gauge-fill" style={{ width: `${analysisData.score_overall}%` }}></div>
-              </div>
-
-              <p className="score-message">{getScoreMessage(analysisData.score_overall)}</p>
-            </div>
-
-            {/* Dimensions Breakdown */}
-            <div className="dimensions-section">
-              <h3 className="section-subtitle">📊 Detailed Breakdown</h3>
-
-              <div className="dimensions-grid">
-                {[
-                  { name: 'Visual Consistency', score: analysisData.score_visual_consistency },
-                  { name: 'Tone Consistency', score: analysisData.score_tone_consistency },
-                  { name: 'Publishing Regularity', score: analysisData.score_regularity },
-                  { name: 'Content Diversity', score: analysisData.score_diversity },
-                  { name: 'Engagement', score: analysisData.score_engagement },
-                  { name: 'Competitive Positioning', score: analysisData.score_positioning }
-                ].map((dimension, index) => (
-                  <div key={index} className="dimension-item">
-                    <div className="dimension-header">
-                      <span className="dimension-name">{dimension.name}</span>
-                      <span className="dimension-score">{dimension.score}</span>
-                    </div>
-                    <div className="dimension-bar">
-                      <div className="dimension-fill" style={{ width: `${dimension.score}%` }}></div>
-                    </div>
+            {/* Overall Score Card - only show if analysisData exists */}
+            {analysisData && (
+              <>
+                <div className={`score-card ${getScoreClass(analysisData.score_overall)}`}>
+                  <div className="score-header">
+                    <span className="score-label">LemBrand Score</span>
                   </div>
-                ))}
-              </div>
-            </div>
+
+                  <div className="score-display">
+                    <span className="score-value">{analysisData.score_overall}</span>
+                    <span className="score-max">/100</span>
+                  </div>
+
+                  <div className="score-gauge">
+                    <div className="gauge-background"></div>
+                    <div className="gauge-fill" style={{ width: `${analysisData.score_overall}%` }}></div>
+                  </div>
+
+                  <p className="score-message">{getScoreMessage(analysisData.score_overall)}</p>
+                </div>
+
+                {/* Dimensions Breakdown */}
+                <div className="dimensions-section">
+                  <h3 className="section-subtitle">📊 Detailed Breakdown</h3>
+
+                  <div className="dimensions-grid">
+                    {[
+                      { name: 'Visual Consistency', score: analysisData.score_visual_consistency },
+                      { name: 'Tone Consistency', score: analysisData.score_tone_consistency },
+                      { name: 'Publishing Regularity', score: analysisData.score_regularity },
+                      { name: 'Content Diversity', score: analysisData.score_diversity },
+                      { name: 'Engagement', score: analysisData.score_engagement },
+                      { name: 'Competitive Positioning', score: analysisData.score_positioning }
+                    ].map((dimension, index) => (
+                      <div key={index} className="dimension-item">
+                        <div className="dimension-header">
+                          <span className="dimension-name">{dimension.name}</span>
+                          <span className="dimension-score">{dimension.score}</span>
+                        </div>
+                        <div className="dimension-bar">
+                          <div className="dimension-fill" style={{ width: `${dimension.score}%` }}></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
 
             {/* Generate Strategy CTA */}
             {!showStrategy && (
