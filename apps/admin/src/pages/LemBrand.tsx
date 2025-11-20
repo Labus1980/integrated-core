@@ -5,8 +5,8 @@ import '../styles/lembrand.css';
 interface Config {
   analysisWebhook: string;
   strategyWebhook: string;
-  pollingInterval: number;
-  maxPollingAttempts: number;
+  analysisDuration: number; // seconds
+  strategyDuration: number; // seconds
 }
 
 // App state interface
@@ -14,7 +14,6 @@ interface AppState {
   brandId: string | null;
   analysisId: string | null;
   strategyId: string | null;
-  currentStep: number;
   isAnalyzing: boolean;
   isGeneratingStrategy: boolean;
 }
@@ -58,20 +57,22 @@ interface StrategyData {
   };
 }
 
+// Helper function for sleep/delay
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 const LemBrand = () => {
   // State management
   const [config, setConfig] = useState<Config>({
     analysisWebhook: 'https://n8n.okta-solutions.com/webhook-test/lembrand-start',
     strategyWebhook: 'https://n8n.okta-solutions.com/webhook-test/lembrand-strategy',
-    pollingInterval: 3000,
-    maxPollingAttempts: 100
+    analysisDuration: 120, // 2 minutes in seconds
+    strategyDuration: 120 // 2 minutes in seconds
   });
 
   const [appState, setAppState] = useState<AppState>({
     brandId: null,
     analysisId: null,
     strategyId: null,
-    currentStep: 0,
     isAnalyzing: false,
     isGeneratingStrategy: false
   });
@@ -79,6 +80,7 @@ const LemBrand = () => {
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [progress, setProgress] = useState(0);
   const [progressMessage, setProgressMessage] = useState('');
+  const [currentStage, setCurrentStage] = useState(0);
   const [showProgress, setShowProgress] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [showStrategy, setShowStrategy] = useState(false);
@@ -96,88 +98,141 @@ const LemBrand = () => {
   }, []);
 
   // Save config to localStorage
-  const saveConfig = (newConfig: Config) => {
+  const saveConfigToStorage = (newConfig: Config) => {
     localStorage.setItem('lembrand_config', JSON.stringify(newConfig));
     setConfig(newConfig);
   };
 
-  // Get step message based on progress
-  const getStepMessage = (progress: number): string => {
-    if (progress < 20) return 'Analyzing website...';
-    if (progress < 40) return 'Collecting Instagram data...';
-    if (progress < 60) return 'Finding competitors...';
-    if (progress < 80) return 'Calculating LemBrand Score...';
-    return 'Finalizing analysis...';
+  // Mock analysis data
+  const MOCK_ANALYSIS_DATA: AnalysisData = {
+    score_overall: 58,
+    score_visual_consistency: 72,
+    score_tone_consistency: 64,
+    score_regularity: 28,
+    score_diversity: 62,
+    score_engagement: 45,
+    score_positioning: 49
   };
 
-  // Mock status check (replace with actual API call)
-  const checkAnalysisStatus = async (): Promise<any> => {
-    // Simulate progress
-    const newProgress = Math.min(appState.currentStep * 20, 100);
-    setAppState(prev => ({ ...prev, currentStep: prev.currentStep + 1 }));
-
-    if (newProgress >= 100) {
-      // Simulate completed status with mock data
-      return {
-        status: 'completed',
-        progress: 100,
-        data: {
-          score_overall: 58,
-          score_visual_consistency: 72,
-          score_tone_consistency: 64,
-          score_regularity: 28,
-          score_diversity: 62,
-          score_engagement: 45,
-          score_positioning: 49
+  // Mock strategy data
+  const MOCK_STRATEGY_DATA: StrategyData = {
+    summary: `Your brand occupies a unique position in the healthy food sector, standing out with genuine care for local suppliers and production transparency. Visual consistency (72/100) and an authentic friendly tone (64/100) create a recognizable image that resonates with your target audience of young professionals.\n\nHowever, irregular posting (28/100) reduces visibility in the feed, and weak competitive positioning (49/100) misses opportunities to emphasize your uniqueness — unlike competitors, no one highlights personalized recipes for customers.\n\nStrategic direction: Increase frequency to 4 posts/week with focus on educational content (recipes, tips) and strengthen messaging about the local supplier ecosystem.`,
+    editorial_pillars: {
+      pillars: [
+        {
+          title: 'Recipes & Tips',
+          description: 'Simple, healthy recipes with your products and cooking tips for busy people',
+          examples: ['5-minute smoothie bowl', 'How to store greens for 2 weeks', '3 ways to cook quinoa'],
+          frequency: '2 posts/week'
+        },
+        {
+          title: 'Behind the Scenes',
+          description: 'Production process, team stories, supplier visits — show the real kitchen',
+          examples: ['Morning at production', 'Meet farmer Ivan', 'How we choose ingredients'],
+          frequency: '1 post/week'
+        },
+        {
+          title: 'Customer Stories',
+          description: 'Real stories, customer photos with your products, results',
+          examples: ['Repost: Anna lost 5kg', 'Review from regular customer', 'Customer lunch photo with tag'],
+          frequency: '2-3 posts/month'
+        },
+        {
+          title: 'Values & Mission',
+          description: 'Your healthy eating philosophy, environmental care, supporting local businesses',
+          examples: ["Why we don't use plastic", 'Our mission: health through food', 'Local = fresh = healthy'],
+          frequency: '1-2 posts/month'
+        },
+        {
+          title: 'Food Trends',
+          description: 'Expert content about new research, superfoods, nutrition myths',
+          examples: ['What are adaptogens?', 'Debunking gluten myths', 'Why probiotics matter in winter'],
+          frequency: '1 post/week'
         }
-      };
+      ]
+    },
+    key_messages: [
+      'Only local ingredients from trusted farmers',
+      'Ready healthy food without taste compromises',
+      'Transparency from farm to your plate',
+      'Personalized nutrition for your lifestyle'
+    ],
+    recommended_frequency: 4.5,
+    action_plan: {
+      immediate: [
+        {
+          action: 'Create content calendar for 4 weeks ahead with clear dates',
+          why: 'Eliminate irregularity, boost score from 28 to 50+',
+          effort: 'Low'
+        },
+        {
+          action: 'Create series of 3 Stories about local suppliers with geotags',
+          why: 'Quickly emphasize uniqueness and locality',
+          effort: 'Low'
+        }
+      ],
+      medium_term: [
+        {
+          action: 'Launch weekly "Recipe of the Week" series every Monday',
+          why: 'Create audience anticipation, boost engagement',
+          effort: 'Medium'
+        },
+        {
+          action: 'Film 5 short videos about production process',
+          why: 'Strengthen transparency and trust (visual storytelling)',
+          effort: 'High'
+        }
+      ],
+      long_term: [
+        {
+          action: 'Develop UGC campaign #MyHealthyKitchen with prizes',
+          why: 'Boost community engagement and get user-generated content',
+          effort: 'High'
+        },
+        {
+          action: 'Partner with 3 local farmers for cross-promotion',
+          why: 'Expand reach and strengthen "local = quality" positioning',
+          effort: 'Medium'
+        }
+      ]
     }
-
-    return {
-      status: 'in_progress',
-      progress: newProgress,
-      currentStep: getStepMessage(newProgress)
-    };
   };
 
-  // Poll analysis status
-  const pollAnalysisStatus = async () => {
-    let attempts = 0;
+  // Progress animation - Smooth 2-minute countdown
+  const animateProgress = async (durationSeconds: number, isStrategy = false) => {
+    const totalSteps = 100;
+    const stepDuration = (durationSeconds * 1000) / totalSteps;
 
-    const poll = setInterval(async () => {
-      attempts++;
+    const stages = isStrategy
+      ? [
+          { threshold: 0, message: 'Initializing strategy generation...', step: 1 },
+          { threshold: 20, message: 'Analyzing brand positioning...', step: 2 },
+          { threshold: 40, message: 'Creating editorial pillars...', step: 3 },
+          { threshold: 60, message: 'Developing key messages...', step: 4 },
+          { threshold: 80, message: 'Finalizing action plan...', step: 5 }
+        ]
+      : [
+          { threshold: 0, message: 'Analyzing website structure...', step: 1 },
+          { threshold: 20, message: 'Collecting Instagram data...', step: 2 },
+          { threshold: 40, message: 'Analyzing Facebook posts...', step: 3 },
+          { threshold: 60, message: 'Finding competitors...', step: 4 },
+          { threshold: 80, message: 'Calculating LemBrand Score...', step: 5 }
+        ];
 
-      if (attempts > config.maxPollingAttempts) {
-        clearInterval(poll);
-        alert('Analysis timeout. Please try again.');
-        setAppState(prev => ({ ...prev, isAnalyzing: false }));
-        return;
+    for (let i = 0; i <= totalSteps; i++) {
+      setProgress(i);
+
+      const currentStageData = stages.filter(s => s.threshold <= i).pop();
+      if (currentStageData) {
+        setProgressMessage(currentStageData.message);
+        setCurrentStage(currentStageData.step);
       }
 
-      try {
-        const status = await checkAnalysisStatus();
-
-        if (status.status === 'completed') {
-          clearInterval(poll);
-          setAppState(prev => ({ ...prev, isAnalyzing: false }));
-          setAnalysisData(status.data);
-          setShowProgress(false);
-          setShowResults(true);
-        } else if (status.status === 'failed') {
-          clearInterval(poll);
-          setAppState(prev => ({ ...prev, isAnalyzing: false }));
-          alert('Analysis failed. Please try again.');
-        } else {
-          setProgress(status.progress);
-          setProgressMessage(status.currentStep);
-        }
-      } catch (error) {
-        console.error('Polling error:', error);
-      }
-    }, config.pollingInterval);
+      await sleep(stepDuration);
+    }
   };
 
-  // Start analysis
+  // Start analysis with FIXED 2-minute timer
   const startAnalysis = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -187,155 +242,43 @@ const LemBrand = () => {
     }
 
     try {
-      setAppState(prev => ({ ...prev, isAnalyzing: true, currentStep: 0 }));
+      setAppState(prev => ({ ...prev, isAnalyzing: true }));
       setShowProgress(true);
       setShowResults(false);
+      setShowStrategy(false);
       setProgress(0);
-      setProgressMessage('Starting analysis...');
+      setCurrentStage(0);
 
-      // Call analysis webhook
-      const response = await fetch(config.analysisWebhook, {
+      // Call analysis webhook (fire and forget)
+      fetch(config.analysisWebhook, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          websiteUrl: websiteUrl
-        })
-      });
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ websiteUrl })
+      }).catch(err => console.error('Webhook error:', err));
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      // Start FIXED 2-minute progress animation
+      await animateProgress(config.analysisDuration, false);
 
-      const data = await response.json();
-
+      // After 2 minutes, show results
       setAppState(prev => ({
         ...prev,
-        brandId: data.brandId,
-        analysisId: data.analysisId
+        isAnalyzing: false,
+        brandId: 'brand-' + Date.now(),
+        analysisId: 'analysis-' + Date.now()
       }));
-
-      // Start polling
-      await pollAnalysisStatus();
+      setAnalysisData(MOCK_ANALYSIS_DATA);
+      setShowProgress(false);
+      setShowResults(true);
 
     } catch (error) {
       console.error('Analysis error:', error);
-      alert('Failed to start analysis. Please check webhook configuration.');
+      alert('Analysis failed. Please try again.');
       setAppState(prev => ({ ...prev, isAnalyzing: false }));
       setShowProgress(false);
     }
   };
 
-  // Mock strategy status check
-  const checkStrategyStatus = async (): Promise<any> => {
-    // Simulate delay
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
-    return {
-      status: 'completed',
-      data: {
-        summary: 'Your brand occupies a strong position in the healthy food sector with clear visual identity and engaging content. The main areas for improvement are publishing regularity and competitive differentiation.',
-        editorial_pillars: {
-          pillars: [
-            {
-              title: 'Recipes & Tips',
-              description: 'Simple, healthy recipes with your products',
-              examples: ['5-min smoothie bowl', 'How to store greens', '3 ways to cook quinoa'],
-              frequency: '2 posts/week'
-            },
-            {
-              title: 'Behind the Scenes',
-              description: 'Show your production process and team',
-              examples: ['Meet our farmers', 'From farm to table', 'Quality control process'],
-              frequency: '1 post/week'
-            },
-            {
-              title: 'Customer Stories',
-              description: 'Real stories from your customers',
-              examples: ['Transformation stories', 'Customer testimonials', 'Before & after'],
-              frequency: '1 post/week'
-            },
-            {
-              title: 'Educational Content',
-              description: 'Health tips and nutritional information',
-              examples: ['Benefits of organic food', 'How to read labels', 'Seasonal eating guide'],
-              frequency: '2 posts/week'
-            },
-            {
-              title: 'Community & Events',
-              description: 'Engage with your community',
-              examples: ['Local events', 'Challenges', 'Q&A sessions'],
-              frequency: '1 post/week'
-            }
-          ]
-        },
-        key_messages: [
-          'Only local ingredients from trusted farmers',
-          'Ready healthy food without taste compromises',
-          'Transparency from farm to your plate',
-          'Supporting local communities and sustainable farming',
-          'Quality you can trust, taste you will love'
-        ],
-        recommended_frequency: 7,
-        action_plan: {
-          immediate: [
-            {
-              action: 'Create content calendar for 4 weeks ahead',
-              why: 'Eliminate irregularity, boost score from 28 to 50+',
-              effort: 'Low'
-            },
-            {
-              action: 'Set up Instagram Stories highlights for each pillar',
-              why: 'Better content organization and discoverability',
-              effort: 'Low'
-            },
-            {
-              action: 'Create templates for each editorial pillar',
-              why: 'Improve visual consistency and save time',
-              effort: 'Medium'
-            }
-          ],
-          medium_term: [
-            {
-              action: 'Launch user-generated content campaign',
-              why: 'Increase engagement and build community',
-              effort: 'Medium'
-            },
-            {
-              action: 'Develop unique hashtag strategy',
-              why: 'Improve discoverability and brand recognition',
-              effort: 'Low'
-            },
-            {
-              action: 'Create video content series',
-              why: 'Video content gets 3x more engagement',
-              effort: 'High'
-            }
-          ],
-          long_term: [
-            {
-              action: 'Build partnerships with micro-influencers',
-              why: 'Expand reach and credibility',
-              effort: 'High'
-            },
-            {
-              action: 'Launch educational blog series',
-              why: 'Position as thought leader in healthy eating',
-              effort: 'High'
-            },
-            {
-              action: 'Implement comprehensive analytics dashboard',
-              why: 'Data-driven content optimization',
-              effort: 'Medium'
-            }
-          ]
-        }
-      }
-    };
-  };
-
-  // Generate strategy
+  // Generate strategy with FIXED 2-minute timer
   const generateStrategy = async () => {
     if (!appState.brandId || !appState.analysisId) {
       alert('Analysis data not found');
@@ -344,39 +287,41 @@ const LemBrand = () => {
 
     try {
       setAppState(prev => ({ ...prev, isGeneratingStrategy: true }));
+      setShowProgress(true);
+      setShowResults(false);
+      setProgress(0);
+      setCurrentStage(0);
 
-      // Call strategy webhook
-      const response = await fetch(config.strategyWebhook, {
+      // Call strategy webhook (fire and forget)
+      fetch(config.strategyWebhook, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           brandId: appState.brandId,
           analysisId: appState.analysisId
         })
-      });
+      }).catch(err => console.error('Webhook error:', err));
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      // Start FIXED 2-minute progress animation
+      await animateProgress(config.strategyDuration, true);
 
-      const data = await response.json();
-      setAppState(prev => ({ ...prev, strategyId: data.strategyId }));
-
-      // Poll for strategy completion
-      const status = await checkStrategyStatus();
-
-      if (status.status === 'completed') {
-        setStrategyData(status.data);
-        setShowStrategy(true);
-        setAppState(prev => ({ ...prev, isGeneratingStrategy: false }));
-      }
+      // After 2 minutes, show strategy results
+      setAppState(prev => ({
+        ...prev,
+        isGeneratingStrategy: false,
+        strategyId: 'strategy-' + Date.now()
+      }));
+      setStrategyData(MOCK_STRATEGY_DATA);
+      setShowProgress(false);
+      setShowResults(true);
+      setShowStrategy(true);
 
     } catch (error) {
-      console.error('Strategy generation error:', error);
-      alert('Failed to generate strategy. Please check webhook configuration.');
+      console.error('Strategy error:', error);
+      alert('Strategy generation failed. Please try again.');
       setAppState(prev => ({ ...prev, isGeneratingStrategy: false }));
+      setShowProgress(false);
+      setShowResults(true);
     }
   };
 
@@ -396,13 +341,80 @@ const LemBrand = () => {
     return 'score-needs-work';
   };
 
+  // SVG Icons Components
+  const IconTarget = () => (
+    <svg className="icon-target" width="48" height="48" viewBox="0 0 48 48">
+      <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" strokeWidth="2"/>
+      <circle cx="24" cy="24" r="12" fill="none" stroke="currentColor" strokeWidth="2"/>
+      <circle cx="24" cy="24" r="4" fill="currentColor"/>
+    </svg>
+  );
+
+  const IconSpeed = () => (
+    <svg className="icon-speed" width="48" height="48" viewBox="0 0 48 48">
+      <path d="M26 8L12 28h12l-4 12 14-20H22l4-12z" fill="currentColor"/>
+    </svg>
+  );
+
+  const IconChart = () => (
+    <svg className="icon-chart" width="48" height="48" viewBox="0 0 48 48">
+      <rect x="8" y="28" width="8" height="12" fill="currentColor" rx="2"/>
+      <rect x="20" y="18" width="8" height="22" fill="currentColor" rx="2"/>
+      <rect x="32" y="12" width="8" height="28" fill="currentColor" rx="2"/>
+    </svg>
+  );
+
+  const IconGlobe = () => (
+    <svg className="icon-globe" width="24" height="24" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2"/>
+      <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+            fill="none" stroke="currentColor" strokeWidth="2"/>
+    </svg>
+  );
+
+  const IconCheck = () => (
+    <svg className="icon-check" width="20" height="20" viewBox="0 0 20 20">
+      <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+            fill="currentColor"/>
+    </svg>
+  );
+
+  const IconStar = () => (
+    <svg className="icon-star" width="64" height="64" viewBox="0 0 64 64">
+      <path d="M32 4l4 24h24l-20 16 8 24-16-12-16 12 8-24-20-16h24z" fill="currentColor"/>
+    </svg>
+  );
+
+  const LogoShape = () => (
+    <svg className="logo-shape" width="32" height="32" viewBox="0 0 32 32">
+      <defs>
+        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style={{stopColor: '#E8B4A0'}}/>
+          <stop offset="100%" style={{stopColor: '#A4C3B2'}}/>
+        </linearGradient>
+      </defs>
+      <path d="M16 2L30 16L16 30L2 16Z"
+            fill="url(#logoGradient)"
+            stroke="currentColor"
+            strokeWidth="2"/>
+    </svg>
+  );
+
+  const SpinnerIcon = () => (
+    <svg className="spinner-small rotating" width="20" height="20" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="8" fill="none"
+              stroke="currentColor" strokeWidth="2"
+              strokeDasharray="50" strokeDashoffset="25"/>
+    </svg>
+  );
+
   return (
     <div className="lembrand-page">
       {/* Header */}
       <header className="header">
         <div className="container">
           <div className="logo">
-            <span className="logo-icon">🔷</span>
+            <LogoShape />
             <span className="logo-text">LemBrand</span>
           </div>
           <nav className="nav">
@@ -429,7 +441,7 @@ const LemBrand = () => {
             {/* URL Input Form */}
             <form className="url-form" onSubmit={startAnalysis}>
               <div className="input-wrapper">
-                <span className="input-icon">🌐</span>
+                <IconGlobe />
                 <input
                   type="url"
                   className="url-input"
@@ -437,6 +449,7 @@ const LemBrand = () => {
                   value={websiteUrl}
                   onChange={(e) => setWebsiteUrl(e.target.value)}
                   required
+                  disabled={appState.isAnalyzing}
                 />
                 <button type="submit" className="btn-primary" disabled={appState.isAnalyzing}>
                   {appState.isAnalyzing ? 'Analyzing...' : 'Analyze Now'}
@@ -445,9 +458,7 @@ const LemBrand = () => {
 
               <div className="trust-badges">
                 <span className="badge">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z" />
-                  </svg>
+                  <IconCheck />
                   No Sign-Up Required
                 </span>
                 <span className="badge">
@@ -458,10 +469,7 @@ const LemBrand = () => {
                   3-5 Minutes
                 </span>
                 <span className="badge">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z" />
-                    <path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l7-7z" />
-                  </svg>
+                  <IconCheck />
                   100% Free
                 </span>
               </div>
@@ -477,7 +485,7 @@ const LemBrand = () => {
 
           <div className="features-grid">
             <div className="feature-card">
-              <div className="feature-icon">🎯</div>
+              <IconTarget />
               <h3 className="feature-title">Deep Analysis</h3>
               <p className="feature-description">
                 We analyze your Instagram and Facebook for the last 3 months,
@@ -486,7 +494,7 @@ const LemBrand = () => {
             </div>
 
             <div className="feature-card">
-              <div className="feature-icon">⚡</div>
+              <IconSpeed />
               <h3 className="feature-title">Fast Results</h3>
               <p className="feature-description">
                 Get a professional strategy with editorial pillars and
@@ -495,7 +503,7 @@ const LemBrand = () => {
             </div>
 
             <div className="feature-card">
-              <div className="feature-icon">📊</div>
+              <IconChart />
               <h3 className="feature-title">Data + AI</h3>
               <p className="feature-description">
                 GPT-4 analyzes your content in the context of industry
@@ -512,9 +520,20 @@ const LemBrand = () => {
           <div className="container">
             <div className="progress-card">
               <div className="progress-header">
-                <div className="spinner"></div>
-                <h3 className="progress-title">Analyzing your brand...</h3>
-                <p className="progress-subtitle">This usually takes 3-5 minutes</p>
+                <svg className="progress-spinner" width="64" height="64" viewBox="0 0 64 64">
+                  <circle cx="32" cy="32" r="28" fill="none" stroke="var(--border)" strokeWidth="4"/>
+                  <circle cx="32" cy="32" r="28" fill="none" stroke="var(--primary)" strokeWidth="4"
+                          strokeDasharray="175" strokeDashoffset="175"
+                          className="spinner-circle"/>
+                </svg>
+                <h3 className="progress-title">
+                  {appState.isGeneratingStrategy ? 'Generating your strategy...' : 'Analyzing your brand...'}
+                </h3>
+                <p className="progress-subtitle">
+                  {appState.isGeneratingStrategy
+                    ? 'Creating personalized content pillars and action plan'
+                    : 'This will take approximately 2 minutes'}
+                </p>
               </div>
 
               <div className="progress-bar-container">
@@ -525,24 +544,35 @@ const LemBrand = () => {
               </div>
 
               <div className="progress-steps">
-                {[
-                  'Analyzing website...',
-                  'Collecting Instagram data...',
-                  'Finding competitors...',
-                  'Calculating LemBrand Score...',
-                  'Generating strategy...'
-                ].map((step, index) => {
-                  const stepProgress = (index + 1) * 20;
-                  const isCompleted = progress >= stepProgress;
-                  const isActive = progress >= (index * 20) && progress < stepProgress;
+                {(appState.isGeneratingStrategy
+                  ? [
+                      'Initializing strategy generation...',
+                      'Analyzing brand positioning...',
+                      'Creating editorial pillars...',
+                      'Developing key messages...',
+                      'Finalizing action plan...'
+                    ]
+                  : [
+                      'Analyzing website structure...',
+                      'Collecting Instagram data...',
+                      'Analyzing Facebook posts...',
+                      'Finding competitors...',
+                      'Calculating LemBrand Score...'
+                    ]
+                ).map((stepText, index) => {
+                  const stepNumber = index + 1;
+                  const isCompleted = currentStage > stepNumber;
+                  const isActive = currentStage === stepNumber;
 
                   return (
                     <div
                       key={index}
                       className={`step ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}
                     >
-                      <span className="step-icon">{isCompleted ? '✓' : '⏳'}</span>
-                      <span className="step-text">{step}</span>
+                      <span className="step-icon">
+                        {isCompleted ? '✓' : isActive ? '⏳' : '○'}
+                      </span>
+                      <span className="step-text">{stepText}</span>
                     </div>
                   );
                 })}
@@ -558,7 +588,7 @@ const LemBrand = () => {
           <div className="container">
             {/* Success Header */}
             <div className="results-header">
-              <div className="sparkle">✨</div>
+              <IconStar />
               <h2 className="results-title">Your Strategy is Ready!</h2>
               <p className="results-subtitle">Here's what we found about your brand</p>
             </div>
@@ -615,7 +645,7 @@ const LemBrand = () => {
                   <h3 className="cta-title">Ready for Your Full Strategy?</h3>
                   <p className="cta-description">
                     Get 5 editorial pillars, key messages, recommended posting
-                    frequency, and a detailed action plan
+                    frequency, and a detailed action plan in 2 minutes
                   </p>
                   <button
                     className="btn-generate-strategy"
@@ -624,14 +654,14 @@ const LemBrand = () => {
                   >
                     {appState.isGeneratingStrategy ? (
                       <>
-                        <span className="spinner-small"></span>
-                        Generating Strategy...
+                        <SpinnerIcon />
+                        <span>Generating...</span>
                       </>
                     ) : (
                       <>
-                        Generate Full Strategy
-                        <svg className="btn-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                        <span>Generate Full Strategy</span>
+                        <svg className="btn-arrow" width="20" height="20" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" fill="currentColor" />
                         </svg>
                       </>
                     )}
@@ -679,9 +709,7 @@ const LemBrand = () => {
                   <div className="messages-list">
                     {strategyData.key_messages.map((message, index) => (
                       <div key={index} className="message-item">
-                        <svg className="message-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                        </svg>
+                        <IconCheck />
                         <span className="message-text">{message}</span>
                       </div>
                     ))}
@@ -813,24 +841,38 @@ const LemBrand = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="pollingIntervalInput">Polling Interval (ms)</label>
+                <label htmlFor="analysisDurationInput">Analysis Duration (seconds)</label>
                 <input
                   type="number"
-                  id="pollingIntervalInput"
+                  id="analysisDurationInput"
                   className="form-input"
-                  value={config.pollingInterval}
-                  onChange={(e) => setConfig({ ...config, pollingInterval: parseInt(e.target.value) })}
-                  min="1000"
-                  max="10000"
+                  value={config.analysisDuration}
+                  onChange={(e) => setConfig({ ...config, analysisDuration: parseInt(e.target.value) })}
+                  min="30"
+                  max="300"
                 />
-                <small className="form-hint">How often to check status (default: 3000ms)</small>
+                <small className="form-hint">Duration for analysis (default: 120 seconds = 2 minutes)</small>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="strategyDurationInput">Strategy Duration (seconds)</label>
+                <input
+                  type="number"
+                  id="strategyDurationInput"
+                  className="form-input"
+                  value={config.strategyDuration}
+                  onChange={(e) => setConfig({ ...config, strategyDuration: parseInt(e.target.value) })}
+                  min="30"
+                  max="300"
+                />
+                <small className="form-hint">Duration for strategy generation (default: 120 seconds = 2 minutes)</small>
               </div>
             </div>
 
             <div className="modal-footer">
               <button className="btn-secondary" onClick={() => setShowSettings(false)}>Cancel</button>
               <button className="btn-primary" onClick={() => {
-                saveConfig(config);
+                saveConfigToStorage(config);
                 setShowSettings(false);
                 alert('Settings saved successfully!');
               }}>
