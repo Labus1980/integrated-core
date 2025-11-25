@@ -41,6 +41,7 @@ export const serviceUrls = {
   jambonz: getEnvVar('VITE_JAMBONZ_URL', 'https://jambonz-portal.okta-solutions.com/'),
   snipeIt: getEnvVar('VITE_SNIPEIT_URL', 'https://snipeit.okta-solutions.com/'),
   bolt: getEnvVar('VITE_BOLT_URL', 'https://bolt.okta-solutions.com'),
+  odoo: getEnvVar('VITE_ODOO_URL', 'https://odoo.okta-solutions.com'),
 } as const;
 
 // Service Versions
@@ -63,6 +64,7 @@ export const serviceVersions = {
   jambonz: getEnvVar('VITE_JAMBONZ_VERSION', '1.0.0'),
   snipeIt: getEnvVar('VITE_SNIPEIT_VERSION', '1.0.0'),
   bolt: getEnvVar('VITE_BOLT_VERSION', '1.0.0'),
+  odoo: getEnvVar('VITE_ODOO_VERSION', '17.0'),
 } as const;
 
 // General Settings

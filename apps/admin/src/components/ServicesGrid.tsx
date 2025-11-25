@@ -17,11 +17,13 @@ import {
   BookOpen,
   LifeBuoy,
   Package,
+  Briefcase,
 } from 'lucide-react';
 import { env } from '@/lib/env';
 import grafanaLogo from '@/assets/service-icons/grafana-original.svg';
 import supabaseLogo from '@/assets/service-icons/supabase-original.png';
 import prometheusLogo from '@/assets/service-icons/prometheus-original.png';
+import odooLogo from '@/assets/service-icons/odoo-original.svg';
 
 const SERVICES: Service[] = [
   {
@@ -212,6 +214,17 @@ const SERVICES: Service[] = [
     category: 'Омниканальность',
     status: 'online',
     version: env.versions.maubot,
+  },
+  {
+    id: 'odoo',
+    name: 'Odoo',
+    description: 'Комплексная ERP-система для управления бизнесом: CRM, продажи, склад, бухгалтерия и HR в одном решении',
+    url: env.services.odoo,
+    logo: odooLogo,
+    icon: <Briefcase className="h-5 w-5" />,
+    category: 'ERP',
+    status: 'online',
+    version: env.versions.odoo,
   },
 ];
 
