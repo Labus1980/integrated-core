@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { createClient } from '@codex/web-widget';
 import type { CodexSipClient, CallState, IncomingCallEvent } from '@codex/core-sip';
-import { getSipConfig } from '@/components/SipSettingsDialog';
 
 // ===== Types =====
 interface OdooUrlParams {
@@ -29,6 +28,50 @@ interface OdooCallEvent {
   recording_url?: string;
 }
 
+interface SipConfig {
+  displayName: string;
+  sipDomain: string;
+  serverAddress: string;
+  username: string;
+  password: string;
+}
+
+// ===== Default SIP Config =====
+const DEFAULT_SIP_CONFIG: SipConfig = {
+  displayName: 'Odoo Operator',
+  sipDomain: 'jambonzlab.ru',
+  serverAddress: 'ws://jambonz-sipws.okta-solutions.com',
+  username: '170',
+  password: 'QApassw3',
+};
+
+const STORAGE_KEY = 'odoo-sip-config';
+
+const getSipConfig = (): SipConfig => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      return { ...DEFAULT_SIP_CONFIG, ...JSON.parse(stored) };
+    }
+    // Fallback to main sip-config if available
+    const mainConfig = localStorage.getItem('sip-config');
+    if (mainConfig) {
+      return { ...DEFAULT_SIP_CONFIG, ...JSON.parse(mainConfig) };
+    }
+  } catch (error) {
+    console.error('[OdooPhoneWidget] Failed to load SIP config:', error);
+  }
+  return DEFAULT_SIP_CONFIG;
+};
+
+const saveSipConfig = (config: SipConfig): void => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+  } catch (error) {
+    console.error('[OdooPhoneWidget] Failed to save SIP config:', error);
+  }
+};
+
 // ===== Translations =====
 const translations = {
   ru: {
@@ -50,6 +93,19 @@ const translations = {
     reject: 'Отклонить',
     enterPhone: 'Введите номер',
     unknownContact: 'Неизвестный контакт',
+    settings: 'Настройки',
+    settingsTitle: 'Настройки Jambonz',
+    displayName: 'Имя оператора',
+    sipDomain: 'SIP Домен',
+    serverAddress: 'Адрес сервера (WebSocket)',
+    username: 'Логин',
+    password: 'Пароль',
+    save: 'Сохранить',
+    cancel: 'Отмена',
+    reset: 'Сбросить',
+    configSaved: 'Настройки сохранены',
+    reconnect: 'Переподключиться',
+    notConfigured: 'Настройте подключение к Jambonz',
   },
   en: {
     title: 'Telephony',
@@ -70,6 +126,19 @@ const translations = {
     reject: 'Reject',
     enterPhone: 'Enter phone number',
     unknownContact: 'Unknown Contact',
+    settings: 'Settings',
+    settingsTitle: 'Jambonz Settings',
+    displayName: 'Display Name',
+    sipDomain: 'SIP Domain',
+    serverAddress: 'Server Address (WebSocket)',
+    username: 'Username',
+    password: 'Password',
+    save: 'Save',
+    cancel: 'Cancel',
+    reset: 'Reset',
+    configSaved: 'Settings saved',
+    reconnect: 'Reconnect',
+    notConfigured: 'Configure Jambonz connection',
   },
 };
 
@@ -158,6 +227,13 @@ const styles = `
     display: flex;
     flex-direction: column;
     gap: 8px;
+    position: relative;
+  }
+
+  .odoo-phone-widget__header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .odoo-phone-widget__contact-name {
@@ -169,6 +245,28 @@ const styles = `
   }
 
   .odoo-phone-widget__contact-name svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .odoo-phone-widget__settings-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 8px;
+    padding: 8px;
+    cursor: pointer;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+
+  .odoo-phone-widget__settings-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .odoo-phone-widget__settings-btn svg {
     width: 20px;
     height: 20px;
   }
@@ -413,6 +511,11 @@ const styles = `
     background: #218838;
   }
 
+  .odoo-phone-widget__btn--call:disabled {
+    background: var(--odoo-text-muted);
+    cursor: not-allowed;
+  }
+
   .odoo-phone-widget__btn--hangup {
     width: 100%;
     padding: 16px;
@@ -472,8 +575,10 @@ const styles = `
   /* Loading state */
   .odoo-phone-widget__loading {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 16px;
     height: 100%;
     min-height: 400px;
   }
@@ -507,6 +612,159 @@ const styles = `
     width: 48px;
     height: 48px;
   }
+
+  /* Settings Panel */
+  .odoo-phone-widget__settings-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--odoo-surface);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  .odoo-phone-widget__settings-header {
+    background: var(--odoo-gradient);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .odoo-phone-widget__settings-title {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .odoo-phone-widget__settings-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 8px;
+    padding: 8px;
+    cursor: pointer;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+
+  .odoo-phone-widget__settings-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .odoo-phone-widget__settings-body {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+  }
+
+  .odoo-phone-widget__form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .odoo-phone-widget__label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--odoo-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .odoo-phone-widget__settings-footer {
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-top: 1px solid var(--odoo-border);
+  }
+
+  .odoo-phone-widget__btn--secondary {
+    background: var(--odoo-surface-elevated);
+    color: var(--odoo-text);
+    border: 1px solid var(--odoo-border);
+  }
+
+  .odoo-phone-widget__btn--secondary:hover {
+    background: var(--odoo-primary-light);
+  }
+
+  .odoo-phone-widget__btn--primary {
+    background: var(--odoo-primary);
+    color: white;
+  }
+
+  .odoo-phone-widget__btn--primary:hover {
+    background: var(--odoo-primary-light);
+  }
+
+  .odoo-phone-widget__toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--odoo-success);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 500;
+    animation: toastIn 0.3s ease-out;
+    z-index: 1000;
+  }
+
+  @keyframes toastIn {
+    from {
+      transform: translateX(-50%) translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  }
+
+  /* Not configured state */
+  .odoo-phone-widget__not-configured {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 40px 20px;
+    text-align: center;
+    flex: 1;
+  }
+
+  .odoo-phone-widget__not-configured-icon {
+    width: 64px;
+    height: 64px;
+    color: var(--odoo-text-muted);
+  }
+
+  .odoo-phone-widget__not-configured-text {
+    color: var(--odoo-text-muted);
+    font-size: 14px;
+  }
 `;
 
 // ===== Component =====
@@ -516,15 +774,22 @@ const OdooPhoneWidget: React.FC = () => {
   const [callState, setCallState] = useState<CallState>('idle');
   const [isMuted, setIsMuted] = useState(false);
   const [showKeypad, setShowKeypad] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [incomingCall, setIncomingCall] = useState<IncomingCallEvent | null>(null);
+  const [sipConfig, setSipConfig] = useState<SipConfig>(getSipConfig());
+  const [editingConfig, setEditingConfig] = useState<SipConfig>(getSipConfig());
+  const [toast, setToast] = useState<string | null>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [clientKey, setClientKey] = useState(0); // For forcing re-initialization
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const durationTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const callStartTimeRef = useRef<Date | null>(null);
   const autostartedRef = useRef(false);
+  const prevCallStateRef = useRef<CallState>('idle');
 
   // Parse URL parameters
   const params: OdooUrlParams = {
@@ -540,6 +805,12 @@ const OdooPhoneWidget: React.FC = () => {
   };
 
   const t = translations[params.lang];
+
+  // Show toast message
+  const showToast = (message: string) => {
+    setToast(message);
+    setTimeout(() => setToast(null), 3000);
+  };
 
   // Initialize phone number from URL
   useEffect(() => {
@@ -574,7 +845,6 @@ const OdooPhoneWidget: React.FC = () => {
     if (window.parent !== window) {
       window.parent.postMessage(event, '*');
     }
-    // Also dispatch as custom event for same-window listeners
     window.dispatchEvent(new CustomEvent('odoo-phone-event', { detail: event }));
     console.log('[OdooPhoneWidget] Event sent:', event);
   }, []);
@@ -586,9 +856,7 @@ const OdooPhoneWidget: React.FC = () => {
     try {
       await fetch(params.callback_url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           event: event.type,
           phone: event.phone,
@@ -609,34 +877,51 @@ const OdooPhoneWidget: React.FC = () => {
 
   // Initialize SIP client
   useEffect(() => {
+    const config = sipConfig;
+
+    if (!config.sipDomain || !config.serverAddress || !config.username || !config.password) {
+      setError(null);
+      setIsInitializing(false);
+      return;
+    }
+
+    setIsInitializing(true);
+    setError(null);
+
     try {
-      const config = getSipConfig();
-
-      if (!config.sipDomain || !config.serverAddress || !config.username || !config.password) {
-        setError('SIP configuration is incomplete. Please configure in settings.');
-        return;
-      }
-
       const client = createClient({
         JAMBONZ_SIP_DOMAIN: config.sipDomain,
         JAMBONZ_WSS_ADDRESS: config.serverAddress,
         JAMBONZ_SIP_USERNAME: config.username,
         JAMBONZ_SIP_PASSWORD: config.password,
-        TARGET_SIP_URI: `sip:${phoneNumber || '0397dc5f-2f8f-4778-8499-0af934dd1196'}@${config.sipDomain}`,
+        TARGET_SIP_URI: `sip:0397dc5f-2f8f-4778-8499-0af934dd1196@${config.sipDomain}`,
         TARGET_APPLICATION_NAME: 'voicebot',
         DEFAULT_LANG: params.lang,
         FALLBACK_LANG: params.lang === 'ru' ? 'en' : 'ru',
         STUN_URLS: 'stun:fs-tun.okta-solutions.com:3478',
-        MAX_REGISTER_RETRIES: '5',
+        MAX_REGISTER_RETRIES: '3',
+        INFINITE_RECONNECT: 'false',
       });
 
       setSipClient(client);
-      setError(null);
+      setIsInitializing(false);
     } catch (err) {
-      setError('Failed to initialize phone widget');
       console.error('[OdooPhoneWidget] Init error:', err);
+      setError('Failed to initialize phone widget');
+      setIsInitializing(false);
     }
-  }, [params.lang]);
+
+    // Cleanup on unmount or config change
+    return () => {
+      if (sipClient) {
+        try {
+          sipClient.destroy();
+        } catch (e) {
+          console.warn('[OdooPhoneWidget] Error destroying client:', e);
+        }
+      }
+    };
+  }, [sipConfig, clientKey, params.lang]);
 
   // Set up audio element and event listeners
   useEffect(() => {
@@ -649,13 +934,14 @@ const OdooPhoneWidget: React.FC = () => {
     // Register SIP
     sipClient.register().catch((err) => {
       console.error('[OdooPhoneWidget] Registration failed:', err);
-      setError('Failed to register. Please check your connection.');
+      // Don't set error for registration failures - allow retry
     });
 
     // Event handlers
     const onCallStateChange = (event: { state: CallState }) => {
-      const prevState = callState;
+      const prevState = prevCallStateRef.current;
       setCallState(event.state);
+      prevCallStateRef.current = event.state;
 
       if (event.state === 'connected') {
         callStartTimeRef.current = new Date();
@@ -663,12 +949,10 @@ const OdooPhoneWidget: React.FC = () => {
         setCallDuration(0);
         setIncomingCall(null);
 
-        // Start duration timer
         durationTimerRef.current = setInterval(() => {
           setCallDuration((prev) => prev + 1);
         }, 1000);
 
-        // Send call_started event
         const startEvent: OdooCallEvent = {
           type: 'call_started',
           phone: phoneNumber,
@@ -682,18 +966,15 @@ const OdooPhoneWidget: React.FC = () => {
       }
 
       if (event.state === 'ended' || event.state === 'error') {
-        // Clear timer
         if (durationTimerRef.current) {
           clearInterval(durationTimerRef.current);
           durationTimerRef.current = null;
         }
 
-        // Calculate duration
         const duration = callStartTimeRef.current
           ? Math.round((new Date().getTime() - callStartTimeRef.current.getTime()) / 1000)
           : callDuration;
 
-        // Determine status
         let status: 'completed' | 'missed' | 'failed' | 'busy' = 'completed';
         if (event.state === 'error') {
           status = 'failed';
@@ -701,7 +982,6 @@ const OdooPhoneWidget: React.FC = () => {
           status = 'missed';
         }
 
-        // Send call_ended event
         const endEvent: OdooCallEvent = {
           type: 'call_ended',
           phone: phoneNumber,
@@ -724,7 +1004,6 @@ const OdooPhoneWidget: React.FC = () => {
       setIncomingCall(event);
       setCallState('incoming');
 
-      // Send incoming_call event
       const incomingEvent: OdooCallEvent = {
         type: 'incoming_call',
         phone: event.from || '',
@@ -742,9 +1021,8 @@ const OdooPhoneWidget: React.FC = () => {
       if (durationTimerRef.current) {
         clearInterval(durationTimerRef.current);
       }
-      sipClient.destroy();
     };
-  }, [sipClient, phoneNumber, params.partner_id, params.lead_id, params.user_id, postMessageToOdoo, sendWebhook]);
+  }, [sipClient, phoneNumber, params.partner_id, params.lead_id, params.user_id, postMessageToOdoo, sendWebhook, callDuration]);
 
   // Autostart call
   useEffect(() => {
@@ -756,10 +1034,9 @@ const OdooPhoneWidget: React.FC = () => {
       (callState === 'idle' || callState === 'ended')
     ) {
       autostartedRef.current = true;
-      // Small delay to ensure registration is complete
       const timer = setTimeout(() => {
         handleCall();
-      }, 1500);
+      }, 2000);
       return () => clearTimeout(timer);
     }
   }, [sipClient, params.autostart, params.phone, callState]);
@@ -828,10 +1105,8 @@ const OdooPhoneWidget: React.FC = () => {
   const handleKeyPress = async (digit: string) => {
     if (!sipClient) return;
     if (callState === 'connected') {
-      // Send DTMF during call
       await sipClient.sendDtmf(digit);
     } else {
-      // Add to phone number when not in call
       setPhoneNumber((prev) => prev + digit);
     }
   };
@@ -854,29 +1129,37 @@ const OdooPhoneWidget: React.FC = () => {
     }
   };
 
+  const handleSaveSettings = () => {
+    saveSipConfig(editingConfig);
+    setSipConfig(editingConfig);
+    setShowSettings(false);
+    showToast(t.configSaved);
+    // Force re-initialization of client
+    setClientKey((k) => k + 1);
+  };
+
+  const handleResetSettings = () => {
+    setEditingConfig(DEFAULT_SIP_CONFIG);
+  };
+
+  const handleReconnect = () => {
+    setClientKey((k) => k + 1);
+  };
+
+  const handleOpenSettings = () => {
+    setEditingConfig(sipConfig);
+    setShowSettings(true);
+  };
+
   // Check states
   const isLive = callState === 'connected';
   const isBusy = callState === 'connecting' || callState === 'ringing';
   const isIncoming = callState === 'incoming';
   const canCall = callState === 'idle' || callState === 'ended' || callState === 'error';
-
-  // Error state
-  if (error) {
-    return (
-      <div className={`odoo-phone-widget ${params.embedded ? 'odoo-phone-widget--embedded' : 'odoo-phone-widget--standalone'}`}>
-        <div className="odoo-phone-widget__error">
-          <svg className="odoo-phone-widget__error-icon" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-          </svg>
-          <p>{error}</p>
-        </div>
-        <audio ref={audioRef} hidden autoPlay playsInline />
-      </div>
-    );
-  }
+  const isConfigured = sipConfig.sipDomain && sipConfig.serverAddress && sipConfig.username && sipConfig.password;
 
   // Loading state
-  if (!sipClient) {
+  if (isInitializing) {
     return (
       <div className={`odoo-phone-widget ${params.embedded ? 'odoo-phone-widget--embedded' : 'odoo-phone-widget--standalone'}`}>
         <div className="odoo-phone-widget__loading">
@@ -890,159 +1173,300 @@ const OdooPhoneWidget: React.FC = () => {
   return (
     <div
       className={`odoo-phone-widget ${params.embedded ? 'odoo-phone-widget--embedded' : 'odoo-phone-widget--standalone'} ${isIncoming ? 'odoo-phone-widget--incoming' : ''}`}
+      style={{ position: 'relative' }}
     >
+      {/* Settings Panel */}
+      {showSettings && (
+        <div className="odoo-phone-widget__settings-panel">
+          <div className="odoo-phone-widget__settings-header">
+            <span className="odoo-phone-widget__settings-title">{t.settingsTitle}</span>
+            <button
+              className="odoo-phone-widget__settings-close"
+              onClick={() => setShowSettings(false)}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div className="odoo-phone-widget__settings-body">
+            <div className="odoo-phone-widget__form-group">
+              <label className="odoo-phone-widget__label">{t.displayName}</label>
+              <input
+                type="text"
+                className="odoo-phone-widget__input"
+                value={editingConfig.displayName}
+                onChange={(e) => setEditingConfig({ ...editingConfig, displayName: e.target.value })}
+                placeholder="Odoo Operator"
+              />
+            </div>
+            <div className="odoo-phone-widget__form-group">
+              <label className="odoo-phone-widget__label">{t.sipDomain} *</label>
+              <input
+                type="text"
+                className="odoo-phone-widget__input"
+                value={editingConfig.sipDomain}
+                onChange={(e) => setEditingConfig({ ...editingConfig, sipDomain: e.target.value })}
+                placeholder="jambonzlab.ru"
+              />
+            </div>
+            <div className="odoo-phone-widget__form-group">
+              <label className="odoo-phone-widget__label">{t.serverAddress} *</label>
+              <input
+                type="text"
+                className="odoo-phone-widget__input"
+                value={editingConfig.serverAddress}
+                onChange={(e) => setEditingConfig({ ...editingConfig, serverAddress: e.target.value })}
+                placeholder="ws://jambonz-sipws.okta-solutions.com"
+              />
+            </div>
+            <div className="odoo-phone-widget__form-group">
+              <label className="odoo-phone-widget__label">{t.username} *</label>
+              <input
+                type="text"
+                className="odoo-phone-widget__input"
+                value={editingConfig.username}
+                onChange={(e) => setEditingConfig({ ...editingConfig, username: e.target.value })}
+                placeholder="170"
+              />
+            </div>
+            <div className="odoo-phone-widget__form-group">
+              <label className="odoo-phone-widget__label">{t.password} *</label>
+              <input
+                type="password"
+                className="odoo-phone-widget__input"
+                value={editingConfig.password}
+                onChange={(e) => setEditingConfig({ ...editingConfig, password: e.target.value })}
+                placeholder="********"
+              />
+            </div>
+          </div>
+          <div className="odoo-phone-widget__settings-footer">
+            <button
+              className="odoo-phone-widget__btn odoo-phone-widget__btn--secondary"
+              onClick={handleResetSettings}
+            >
+              {t.reset}
+            </button>
+            <button
+              className="odoo-phone-widget__btn odoo-phone-widget__btn--primary"
+              onClick={handleSaveSettings}
+            >
+              {t.save}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="odoo-phone-widget__header">
-        <div className="odoo-phone-widget__contact-name">
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z" />
-          </svg>
-          {params.name || (incomingCall?.from ? incomingCall.displayFrom : t.unknownContact)}
+        <div className="odoo-phone-widget__header-top">
+          <div className="odoo-phone-widget__contact-name">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z" />
+            </svg>
+            {params.name || (incomingCall?.from ? incomingCall.displayFrom : t.unknownContact)}
+          </div>
+          <button
+            className="odoo-phone-widget__settings-btn"
+            onClick={handleOpenSettings}
+            title={t.settings}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+          </button>
         </div>
         <div className="odoo-phone-widget__phone-number">
           {phoneNumber || incomingCall?.from || t.enterPhone}
         </div>
       </div>
 
-      {/* Status Bar */}
-      <div className="odoo-phone-widget__status-bar">
-        {isLive && (
-          <div className="odoo-phone-widget__timer">
-            {formatDuration(callDuration)}
-          </div>
-        )}
-
-        {/* Audio Visualizer */}
-        <div className={`odoo-phone-widget__visualizer ${isLive ? 'odoo-phone-widget__visualizer--active' : ''}`}>
-          {[...Array(8)].map((_, i) => (
-            <div
-              key={i}
-              className="odoo-phone-widget__visualizer-bar"
-              style={{ height: isLive ? undefined : '8px' }}
-            />
-          ))}
+      {/* Not configured state */}
+      {!isConfigured && !showSettings && (
+        <div className="odoo-phone-widget__not-configured">
+          <svg className="odoo-phone-widget__not-configured-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+          <p className="odoo-phone-widget__not-configured-text">{t.notConfigured}</p>
+          <button
+            className="odoo-phone-widget__btn odoo-phone-widget__btn--primary"
+            onClick={handleOpenSettings}
+          >
+            {t.settings}
+          </button>
         </div>
+      )}
 
-        <div className={`odoo-phone-widget__status ${getStatusClass()}`}>
-          {getStatusLabel()}
-        </div>
-      </div>
+      {/* Main content when configured */}
+      {isConfigured && (
+        <>
+          {/* Status Bar */}
+          <div className="odoo-phone-widget__status-bar">
+            {isLive && (
+              <div className="odoo-phone-widget__timer">
+                {formatDuration(callDuration)}
+              </div>
+            )}
 
-      {/* Body */}
-      <div className="odoo-phone-widget__body">
-        {/* Phone Input (only when not in call) */}
-        {canCall && !isIncoming && (
-          <div className="odoo-phone-widget__input-container">
-            <input
-              type="tel"
-              className="odoo-phone-widget__input"
-              placeholder={t.enterPhone}
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-            />
+            {/* Audio Visualizer */}
+            <div className={`odoo-phone-widget__visualizer ${isLive ? 'odoo-phone-widget__visualizer--active' : ''}`}>
+              {[...Array(8)].map((_, i) => (
+                <div
+                  key={i}
+                  className="odoo-phone-widget__visualizer-bar"
+                  style={{ height: isLive ? undefined : '8px' }}
+                />
+              ))}
+            </div>
+
+            <div className={`odoo-phone-widget__status ${getStatusClass()}`}>
+              {getStatusLabel()}
+            </div>
           </div>
-        )}
 
-        {/* DTMF Keypad */}
-        {(showKeypad || (canCall && !isIncoming)) && (
-          <div className="odoo-phone-widget__keypad">
-            {dtmfKeys.map(({ digit, letters }) => (
+          {/* Body */}
+          <div className="odoo-phone-widget__body">
+            {/* Phone Input (only when not in call) */}
+            {canCall && !isIncoming && (
+              <div className="odoo-phone-widget__input-container">
+                <input
+                  type="tel"
+                  className="odoo-phone-widget__input"
+                  placeholder={t.enterPhone}
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                />
+              </div>
+            )}
+
+            {/* DTMF Keypad */}
+            {(showKeypad || (canCall && !isIncoming)) && (
+              <div className="odoo-phone-widget__keypad">
+                {dtmfKeys.map(({ digit, letters }) => (
+                  <button
+                    key={digit}
+                    className="odoo-phone-widget__key"
+                    onClick={() => handleKeyPress(digit)}
+                  >
+                    <span className="odoo-phone-widget__key-digit">{digit}</span>
+                    {letters && <span className="odoo-phone-widget__key-letters">{letters}</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Control Buttons (during call) */}
+            {(isLive || isBusy) && (
+              <div className="odoo-phone-widget__controls">
+                <button
+                  className={`odoo-phone-widget__btn odoo-phone-widget__btn--mute ${isMuted ? 'active' : ''}`}
+                  onClick={handleMuteToggle}
+                  disabled={!isLive}
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    {isMuted ? (
+                      <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z" />
+                    ) : (
+                      <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+                    )}
+                  </svg>
+                  {isMuted ? t.unmute : t.mute}
+                </button>
+
+                <button
+                  className={`odoo-phone-widget__btn odoo-phone-widget__btn--keypad ${showKeypad ? 'active' : ''}`}
+                  onClick={() => setShowKeypad(!showKeypad)}
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 19c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM6 1c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12-8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-6 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+                  </svg>
+                  {t.keypad}
+                </button>
+              </div>
+            )}
+
+            {/* Error with reconnect button */}
+            {error && (
+              <div className="odoo-phone-widget__error">
+                <svg className="odoo-phone-widget__error-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                </svg>
+                <p>{error}</p>
+                <button
+                  className="odoo-phone-widget__btn odoo-phone-widget__btn--secondary"
+                  onClick={handleReconnect}
+                >
+                  {t.reconnect}
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Main Action */}
+          <div className="odoo-phone-widget__main-action">
+            {/* Incoming call controls */}
+            {isIncoming && (
+              <div className="odoo-phone-widget__incoming-controls">
+                <button
+                  className="odoo-phone-widget__btn odoo-phone-widget__btn--accept"
+                  onClick={handleAcceptCall}
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z" />
+                  </svg>
+                  {t.accept}
+                </button>
+                <button
+                  className="odoo-phone-widget__btn odoo-phone-widget__btn--reject"
+                  onClick={handleRejectCall}
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z" />
+                  </svg>
+                  {t.reject}
+                </button>
+              </div>
+            )}
+
+            {/* Call button */}
+            {canCall && !isIncoming && !error && (
               <button
-                key={digit}
-                className="odoo-phone-widget__key"
-                onClick={() => handleKeyPress(digit)}
+                className="odoo-phone-widget__btn odoo-phone-widget__btn--call"
+                onClick={handleCall}
+                disabled={!phoneNumber || !sipClient}
               >
-                <span className="odoo-phone-widget__key-digit">{digit}</span>
-                {letters && <span className="odoo-phone-widget__key-letters">{letters}</span>}
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z" />
+                </svg>
+                {t.call}
               </button>
-            ))}
+            )}
+
+            {/* Hangup button */}
+            {(isLive || isBusy) && (
+              <button
+                className="odoo-phone-widget__btn odoo-phone-widget__btn--hangup"
+                onClick={handleHangup}
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z" />
+                </svg>
+                {t.hangup}
+              </button>
+            )}
           </div>
-        )}
+        </>
+      )}
 
-        {/* Control Buttons (during call) */}
-        {(isLive || isBusy) && (
-          <div className="odoo-phone-widget__controls">
-            <button
-              className={`odoo-phone-widget__btn odoo-phone-widget__btn--mute ${isMuted ? 'active' : ''}`}
-              onClick={handleMuteToggle}
-              disabled={!isLive}
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                {isMuted ? (
-                  <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z" />
-                ) : (
-                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
-                )}
-              </svg>
-              {isMuted ? t.unmute : t.mute}
-            </button>
-
-            <button
-              className={`odoo-phone-widget__btn odoo-phone-widget__btn--keypad ${showKeypad ? 'active' : ''}`}
-              onClick={() => setShowKeypad(!showKeypad)}
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 19c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM6 1c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12-8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-6 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
-              </svg>
-              {t.keypad}
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Main Action */}
-      <div className="odoo-phone-widget__main-action">
-        {/* Incoming call controls */}
-        {isIncoming && (
-          <div className="odoo-phone-widget__incoming-controls">
-            <button
-              className="odoo-phone-widget__btn odoo-phone-widget__btn--accept"
-              onClick={handleAcceptCall}
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z" />
-              </svg>
-              {t.accept}
-            </button>
-            <button
-              className="odoo-phone-widget__btn odoo-phone-widget__btn--reject"
-              onClick={handleRejectCall}
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z" />
-              </svg>
-              {t.reject}
-            </button>
-          </div>
-        )}
-
-        {/* Call button */}
-        {canCall && !isIncoming && (
-          <button
-            className="odoo-phone-widget__btn odoo-phone-widget__btn--call"
-            onClick={handleCall}
-            disabled={!phoneNumber}
-          >
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z" />
-            </svg>
-            {t.call}
-          </button>
-        )}
-
-        {/* Hangup button */}
-        {(isLive || isBusy) && (
-          <button
-            className="odoo-phone-widget__btn odoo-phone-widget__btn--hangup"
-            onClick={handleHangup}
-          >
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z" />
-            </svg>
-            {t.hangup}
-          </button>
-        )}
-      </div>
+      {/* Toast */}
+      {toast && (
+        <div className="odoo-phone-widget__toast">
+          {toast}
+        </div>
+      )}
 
       <audio ref={audioRef} hidden autoPlay playsInline />
     </div>
