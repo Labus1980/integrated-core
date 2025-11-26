@@ -158,6 +158,97 @@ const dtmfKeys = [
   { digit: '#', letters: '' },
 ];
 
+// ===== DTMF Tone Frequencies =====
+const dtmfFrequencies: Record<string, [number, number]> = {
+  '1': [697, 1209], '2': [697, 1336], '3': [697, 1477],
+  '4': [770, 1209], '5': [770, 1336], '6': [770, 1477],
+  '7': [852, 1209], '8': [852, 1336], '9': [852, 1477],
+  '*': [941, 1209], '0': [941, 1336], '#': [941, 1477],
+};
+
+// Audio context for DTMF tones
+let audioContext: AudioContext | null = null;
+
+const playDtmfTone = (digit: string, duration = 150) => {
+  const freqs = dtmfFrequencies[digit];
+  if (!freqs) return;
+
+  try {
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    }
+
+    const [freq1, freq2] = freqs;
+    const now = audioContext.currentTime;
+    const endTime = now + duration / 1000;
+
+    // Create oscillators for the two frequencies
+    const osc1 = audioContext.createOscillator();
+    const osc2 = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    osc1.frequency.value = freq1;
+    osc2.frequency.value = freq2;
+    osc1.type = 'sine';
+    osc2.type = 'sine';
+
+    // Set volume
+    gainNode.gain.value = 0.2;
+
+    // Connect
+    osc1.connect(gainNode);
+    osc2.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    // Start and stop
+    osc1.start(now);
+    osc2.start(now);
+    osc1.stop(endTime);
+    osc2.stop(endTime);
+
+    // Cleanup
+    setTimeout(() => {
+      osc1.disconnect();
+      osc2.disconnect();
+      gainNode.disconnect();
+    }, duration + 50);
+  } catch (e) {
+    console.warn('[OdooPhoneWidget] Failed to play DTMF tone:', e);
+  }
+};
+
+// ===== Phone Number Formatting =====
+const formatPhoneNumber = (phone: string): string => {
+  // Remove all non-digit characters except +
+  const cleaned = phone.replace(/[^\d+]/g, '');
+
+  // Russian number format: +7 XXX XXX-XX-XX
+  if (cleaned.startsWith('+7') && cleaned.length === 12) {
+    const digits = cleaned.slice(2);
+    return `+7 ${digits.slice(0, 3)} ${digits.slice(3, 6)}-${digits.slice(6, 8)}-${digits.slice(8, 10)}`;
+  }
+
+  // 8 format: 8 XXX XXX-XX-XX
+  if (cleaned.startsWith('8') && cleaned.length === 11) {
+    const digits = cleaned.slice(1);
+    return `8 ${digits.slice(0, 3)} ${digits.slice(3, 6)}-${digits.slice(6, 8)}-${digits.slice(8, 10)}`;
+  }
+
+  // International format: +X XXX XXX XXXX
+  if (cleaned.startsWith('+') && cleaned.length >= 11) {
+    const countryCode = cleaned.slice(0, cleaned.length - 10);
+    const digits = cleaned.slice(-10);
+    return `${countryCode} ${digits.slice(0, 3)} ${digits.slice(3, 6)}-${digits.slice(6, 8)}-${digits.slice(8, 10)}`;
+  }
+
+  // Default: just add spaces every 3 digits
+  if (cleaned.length > 6) {
+    return cleaned.replace(/(\d{3})(?=\d)/g, '$1 ');
+  }
+
+  return phone;
+};
+
 // ===== Styles =====
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -1128,10 +1219,16 @@ const OdooPhoneWidget: React.FC = () => {
   };
 
   const handleKeyPress = async (digit: string) => {
-    if (!sipClient) return;
+    // Play DTMF tone sound
+    playDtmfTone(digit);
+
     if (callState === 'connected') {
-      await sipClient.sendDtmf(digit);
+      // During call - send DTMF to remote
+      if (sipClient) {
+        await sipClient.sendDtmf(digit);
+      }
     } else {
+      // Not in call - add digit to phone number
       setPhoneNumber((prev) => prev + digit);
     }
   };
@@ -1304,7 +1401,7 @@ const OdooPhoneWidget: React.FC = () => {
           </button>
         </div>
         <div className="odoo-phone-widget__phone-number">
-          {phoneNumber || incomingCall?.from || t.enterPhone}
+          {phoneNumber ? formatPhoneNumber(phoneNumber) : (incomingCall?.from ? formatPhoneNumber(incomingCall.from) : t.enterPhone)}
         </div>
       </div>
 
