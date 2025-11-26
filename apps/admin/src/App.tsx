@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import LemBrand from "./pages/LemBrand";
+import OdooPhoneWidget from "./pages/OdooPhoneWidget";
 import NotFound from "./pages/NotFound";
 import ZammadFormInit from "@/components/ZammadFormInit";
 import { useZammadChat } from "@/hooks/useZammadChat";
@@ -25,6 +26,7 @@ const App = () => {
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/lembrand" element={<LemBrand />} />
+              <Route path="/phone-widget" element={<OdooPhoneWidget />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
