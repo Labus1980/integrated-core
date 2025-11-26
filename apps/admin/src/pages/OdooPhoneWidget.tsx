@@ -108,6 +108,9 @@ const translations = {
     configSaved: 'Настройки сохранены',
     reconnect: 'Переподключиться',
     notConfigured: 'Настройте подключение к Jambonz',
+    hideKeypad: 'Скрыть клавиатуру',
+    showKeypad: 'Показать клавиатуру',
+    waitingForCalls: 'Ожидание звонков',
   },
   en: {
     title: 'Telephony',
@@ -141,6 +144,9 @@ const translations = {
     configSaved: 'Settings saved',
     reconnect: 'Reconnect',
     notConfigured: 'Configure Jambonz connection',
+    hideKeypad: 'Hide keypad',
+    showKeypad: 'Show keypad',
+    waitingForCalls: 'Waiting for calls',
   },
 };
 
@@ -858,6 +864,41 @@ const styles = `
     color: var(--odoo-text-muted);
     font-size: 14px;
   }
+
+  /* Waiting for calls mode */
+  .odoo-phone-widget__waiting-mode {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 40px 20px;
+    flex: 1;
+  }
+
+  .odoo-phone-widget__waiting-icon {
+    width: 64px;
+    height: 64px;
+    color: var(--odoo-primary);
+    animation: pulse-phone 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-phone {
+    0%, 100% {
+      opacity: 0.6;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+  }
+
+  .odoo-phone-widget__waiting-text {
+    color: var(--odoo-text-muted);
+    font-size: 14px;
+    font-weight: 500;
+  }
 `;
 
 // ===== Component =====
@@ -867,6 +908,7 @@ const OdooPhoneWidget: React.FC = () => {
   const [callState, setCallState] = useState<CallState>('idle');
   const [isMuted, setIsMuted] = useState(false);
   const [showKeypad, setShowKeypad] = useState(false);
+  const [keypadCollapsed, setKeypadCollapsed] = useState(false); // For hiding keypad in idle mode
   const [showSettings, setShowSettings] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -1479,8 +1521,8 @@ const OdooPhoneWidget: React.FC = () => {
 
           {/* Body */}
           <div className="odoo-phone-widget__body">
-            {/* Phone Input (only when not in call) */}
-            {canCall && !isIncoming && (
+            {/* Phone Input (only when not in call and keypad not collapsed) */}
+            {canCall && !isIncoming && !keypadCollapsed && (
               <div className="odoo-phone-widget__input-container">
                 <input
                   type="tel"
@@ -1493,7 +1535,7 @@ const OdooPhoneWidget: React.FC = () => {
             )}
 
             {/* DTMF Keypad */}
-            {(showKeypad || (canCall && !isIncoming)) && (
+            {(showKeypad || (canCall && !isIncoming && !keypadCollapsed)) && (
               <div className="odoo-phone-widget__keypad">
                 {dtmfKeys.map(({ digit, letters }) => (
                   <button
@@ -1505,6 +1547,35 @@ const OdooPhoneWidget: React.FC = () => {
                     {letters && <span className="odoo-phone-widget__key-letters">{letters}</span>}
                   </button>
                 ))}
+              </div>
+            )}
+
+            {/* Waiting for calls mode (when keypad is collapsed) */}
+            {canCall && !isIncoming && keypadCollapsed && (
+              <div className="odoo-phone-widget__waiting-mode">
+                <svg className="odoo-phone-widget__waiting-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z" />
+                </svg>
+                <p className="odoo-phone-widget__waiting-text">{t.waitingForCalls}</p>
+              </div>
+            )}
+
+            {/* Toggle keypad button (in idle mode) */}
+            {canCall && !isIncoming && (
+              <div className="odoo-phone-widget__controls">
+                <button
+                  className={`odoo-phone-widget__btn odoo-phone-widget__btn--keypad ${!keypadCollapsed ? 'active' : ''}`}
+                  onClick={() => setKeypadCollapsed(!keypadCollapsed)}
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    {keypadCollapsed ? (
+                      <path d="M12 19c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM6 1c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12-8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-6 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+                    ) : (
+                      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                    )}
+                  </svg>
+                  {keypadCollapsed ? t.showKeypad : t.hideKeypad}
+                </button>
               </div>
             )}
 
