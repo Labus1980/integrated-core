@@ -949,6 +949,13 @@ const OdooPhoneWidget: React.FC = () => {
         setCallDuration(0);
         setIncomingCall(null);
 
+        // Ensure audio playback starts (handle autoplay policy)
+        if (audioRef.current) {
+          audioRef.current.play().catch((err) => {
+            console.warn('[OdooPhoneWidget] Audio autoplay blocked:', err);
+          });
+        }
+
         durationTimerRef.current = setInterval(() => {
           setCallDuration((prev) => prev + 1);
         }, 1000);
@@ -1080,6 +1087,22 @@ const OdooPhoneWidget: React.FC = () => {
   // Handlers
   const handleCall = async () => {
     if (!sipClient || !phoneNumber) return;
+
+    // Pre-warm audio element with user gesture to enable autoplay
+    if (audioRef.current) {
+      try {
+        // Create silent audio context to unlock audio
+        audioRef.current.muted = true;
+        await audioRef.current.play();
+        audioRef.current.pause();
+        audioRef.current.muted = false;
+        audioRef.current.currentTime = 0;
+        console.log('[OdooPhoneWidget] Audio pre-warmed for autoplay');
+      } catch (e) {
+        console.warn('[OdooPhoneWidget] Audio pre-warm failed:', e);
+      }
+    }
+
     try {
       await sipClient.startCall({ language: params.lang });
     } catch (err) {
