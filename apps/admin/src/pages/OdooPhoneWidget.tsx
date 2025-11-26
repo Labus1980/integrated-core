@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { createClient } from '@codex/web-widget';
-import type { CodexSipClient, CallState, IncomingCallEvent } from '@codex/core-sip';
+import type { CodexSipClient, CallState, IncomingCallEvent, CustomerData } from '@codex/core-sip';
 
 // ===== Types =====
 interface OdooUrlParams {
@@ -11,6 +11,8 @@ interface OdooUrlParams {
   lead_id: string | null;
   user_id: string | null;
   callback_url: string | null;
+  model: string | null;
+  source: string | null;
   embedded: boolean;
   autostart: boolean;
   lang: 'ru' | 'en';
@@ -106,6 +108,9 @@ const translations = {
     configSaved: 'Настройки сохранены',
     reconnect: 'Переподключиться',
     notConfigured: 'Настройте подключение к Jambonz',
+    hideKeypad: 'Скрыть клавиатуру',
+    showKeypad: 'Показать клавиатуру',
+    waitingForCalls: 'Ожидание звонков',
   },
   en: {
     title: 'Telephony',
@@ -139,6 +144,9 @@ const translations = {
     configSaved: 'Settings saved',
     reconnect: 'Reconnect',
     notConfigured: 'Configure Jambonz connection',
+    hideKeypad: 'Hide keypad',
+    showKeypad: 'Show keypad',
+    waitingForCalls: 'Waiting for calls',
   },
 };
 
@@ -157,6 +165,97 @@ const dtmfKeys = [
   { digit: '0', letters: '+' },
   { digit: '#', letters: '' },
 ];
+
+// ===== DTMF Tone Frequencies =====
+const dtmfFrequencies: Record<string, [number, number]> = {
+  '1': [697, 1209], '2': [697, 1336], '3': [697, 1477],
+  '4': [770, 1209], '5': [770, 1336], '6': [770, 1477],
+  '7': [852, 1209], '8': [852, 1336], '9': [852, 1477],
+  '*': [941, 1209], '0': [941, 1336], '#': [941, 1477],
+};
+
+// Audio context for DTMF tones
+let audioContext: AudioContext | null = null;
+
+const playDtmfTone = (digit: string, duration = 150) => {
+  const freqs = dtmfFrequencies[digit];
+  if (!freqs) return;
+
+  try {
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    }
+
+    const [freq1, freq2] = freqs;
+    const now = audioContext.currentTime;
+    const endTime = now + duration / 1000;
+
+    // Create oscillators for the two frequencies
+    const osc1 = audioContext.createOscillator();
+    const osc2 = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    osc1.frequency.value = freq1;
+    osc2.frequency.value = freq2;
+    osc1.type = 'sine';
+    osc2.type = 'sine';
+
+    // Set volume
+    gainNode.gain.value = 0.2;
+
+    // Connect
+    osc1.connect(gainNode);
+    osc2.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    // Start and stop
+    osc1.start(now);
+    osc2.start(now);
+    osc1.stop(endTime);
+    osc2.stop(endTime);
+
+    // Cleanup
+    setTimeout(() => {
+      osc1.disconnect();
+      osc2.disconnect();
+      gainNode.disconnect();
+    }, duration + 50);
+  } catch (e) {
+    console.warn('[OdooPhoneWidget] Failed to play DTMF tone:', e);
+  }
+};
+
+// ===== Phone Number Formatting =====
+const formatPhoneNumber = (phone: string): string => {
+  // Remove all non-digit characters except +
+  const cleaned = phone.replace(/[^\d+]/g, '');
+
+  // Russian number format: +7 XXX XXX-XX-XX
+  if (cleaned.startsWith('+7') && cleaned.length === 12) {
+    const digits = cleaned.slice(2);
+    return `+7 ${digits.slice(0, 3)} ${digits.slice(3, 6)}-${digits.slice(6, 8)}-${digits.slice(8, 10)}`;
+  }
+
+  // 8 format: 8 XXX XXX-XX-XX
+  if (cleaned.startsWith('8') && cleaned.length === 11) {
+    const digits = cleaned.slice(1);
+    return `8 ${digits.slice(0, 3)} ${digits.slice(3, 6)}-${digits.slice(6, 8)}-${digits.slice(8, 10)}`;
+  }
+
+  // International format: +X XXX XXX XXXX
+  if (cleaned.startsWith('+') && cleaned.length >= 11) {
+    const countryCode = cleaned.slice(0, cleaned.length - 10);
+    const digits = cleaned.slice(-10);
+    return `${countryCode} ${digits.slice(0, 3)} ${digits.slice(3, 6)}-${digits.slice(6, 8)}-${digits.slice(8, 10)}`;
+  }
+
+  // Default: just add spaces every 3 digits
+  if (cleaned.length > 6) {
+    return cleaned.replace(/(\d{3})(?=\d)/g, '$1 ');
+  }
+
+  return phone;
+};
 
 // ===== Styles =====
 const styles = `
@@ -765,6 +864,41 @@ const styles = `
     color: var(--odoo-text-muted);
     font-size: 14px;
   }
+
+  /* Waiting for calls mode */
+  .odoo-phone-widget__waiting-mode {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 40px 20px;
+    flex: 1;
+  }
+
+  .odoo-phone-widget__waiting-icon {
+    width: 64px;
+    height: 64px;
+    color: var(--odoo-primary);
+    animation: pulse-phone 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-phone {
+    0%, 100% {
+      opacity: 0.6;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+  }
+
+  .odoo-phone-widget__waiting-text {
+    color: var(--odoo-text-muted);
+    font-size: 14px;
+    font-weight: 500;
+  }
 `;
 
 // ===== Component =====
@@ -774,6 +908,7 @@ const OdooPhoneWidget: React.FC = () => {
   const [callState, setCallState] = useState<CallState>('idle');
   const [isMuted, setIsMuted] = useState(false);
   const [showKeypad, setShowKeypad] = useState(false);
+  const [keypadCollapsed, setKeypadCollapsed] = useState(false); // For hiding keypad in idle mode
   const [showSettings, setShowSettings] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -799,6 +934,8 @@ const OdooPhoneWidget: React.FC = () => {
     lead_id: searchParams.get('lead_id'),
     user_id: searchParams.get('user_id'),
     callback_url: searchParams.get('callback_url'),
+    model: searchParams.get('model'),
+    source: searchParams.get('source'),
     embedded: searchParams.get('embedded') === 'true',
     autostart: searchParams.get('autostart') === 'true',
     lang: (searchParams.get('lang') as 'ru' | 'en') || 'ru',
@@ -1084,6 +1221,28 @@ const OdooPhoneWidget: React.FC = () => {
     return '';
   };
 
+  // Build customerData with Odoo parameters for Jambonz
+  const buildCustomerData = useCallback((): CustomerData => {
+    const odooFields: Record<string, unknown> = {};
+
+    // Add all Odoo parameters as custom fields
+    if (params.partner_id) odooFields.partner_id = parseInt(params.partner_id, 10);
+    if (params.lead_id) odooFields.lead_id = parseInt(params.lead_id, 10);
+    if (params.user_id) odooFields.user_id = parseInt(params.user_id, 10);
+    if (params.model) odooFields.model = params.model;
+    if (params.source) odooFields.source = params.source;
+    if (params.name) odooFields.contact_name = params.name;
+    if (phoneNumber) odooFields.phone = phoneNumber;
+
+    return {
+      callType: 'odoo-widget',
+      clientName: params.name || undefined,
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      customFields: odooFields,
+    };
+  }, [params.partner_id, params.lead_id, params.user_id, params.model, params.source, params.name, phoneNumber]);
+
   // Handlers
   const handleCall = async () => {
     if (!sipClient || !phoneNumber) return;
@@ -1106,7 +1265,9 @@ const OdooPhoneWidget: React.FC = () => {
     }
 
     try {
-      await sipClient.startCall({ language: params.lang });
+      const customerData = buildCustomerData();
+      console.log('[OdooPhoneWidget] Starting call with customerData:', customerData);
+      await sipClient.startCall({ language: params.lang, customerData });
     } catch (err) {
       console.error('[OdooPhoneWidget] Call failed:', err);
     }
@@ -1128,10 +1289,16 @@ const OdooPhoneWidget: React.FC = () => {
   };
 
   const handleKeyPress = async (digit: string) => {
-    if (!sipClient) return;
+    // Play DTMF tone sound
+    playDtmfTone(digit);
+
     if (callState === 'connected') {
-      await sipClient.sendDtmf(digit);
+      // During call - send DTMF to remote
+      if (sipClient) {
+        await sipClient.sendDtmf(digit);
+      }
     } else {
+      // Not in call - add digit to phone number
       setPhoneNumber((prev) => prev + digit);
     }
   };
@@ -1304,7 +1471,7 @@ const OdooPhoneWidget: React.FC = () => {
           </button>
         </div>
         <div className="odoo-phone-widget__phone-number">
-          {phoneNumber || incomingCall?.from || t.enterPhone}
+          {phoneNumber ? formatPhoneNumber(phoneNumber) : (incomingCall?.from ? formatPhoneNumber(incomingCall.from) : t.enterPhone)}
         </div>
       </div>
 
@@ -1354,8 +1521,8 @@ const OdooPhoneWidget: React.FC = () => {
 
           {/* Body */}
           <div className="odoo-phone-widget__body">
-            {/* Phone Input (only when not in call) */}
-            {canCall && !isIncoming && (
+            {/* Phone Input (only when not in call and keypad not collapsed) */}
+            {canCall && !isIncoming && !keypadCollapsed && (
               <div className="odoo-phone-widget__input-container">
                 <input
                   type="tel"
@@ -1368,7 +1535,7 @@ const OdooPhoneWidget: React.FC = () => {
             )}
 
             {/* DTMF Keypad */}
-            {(showKeypad || (canCall && !isIncoming)) && (
+            {(showKeypad || (canCall && !isIncoming && !keypadCollapsed)) && (
               <div className="odoo-phone-widget__keypad">
                 {dtmfKeys.map(({ digit, letters }) => (
                   <button
@@ -1380,6 +1547,35 @@ const OdooPhoneWidget: React.FC = () => {
                     {letters && <span className="odoo-phone-widget__key-letters">{letters}</span>}
                   </button>
                 ))}
+              </div>
+            )}
+
+            {/* Waiting for calls mode (when keypad is collapsed) */}
+            {canCall && !isIncoming && keypadCollapsed && (
+              <div className="odoo-phone-widget__waiting-mode">
+                <svg className="odoo-phone-widget__waiting-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z" />
+                </svg>
+                <p className="odoo-phone-widget__waiting-text">{t.waitingForCalls}</p>
+              </div>
+            )}
+
+            {/* Toggle keypad button (in idle mode) */}
+            {canCall && !isIncoming && (
+              <div className="odoo-phone-widget__controls">
+                <button
+                  className={`odoo-phone-widget__btn odoo-phone-widget__btn--keypad ${!keypadCollapsed ? 'active' : ''}`}
+                  onClick={() => setKeypadCollapsed(!keypadCollapsed)}
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    {keypadCollapsed ? (
+                      <path d="M12 19c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM6 1c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12-8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-6 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+                    ) : (
+                      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                    )}
+                  </svg>
+                  {keypadCollapsed ? t.showKeypad : t.hideKeypad}
+                </button>
               </div>
             )}
 
