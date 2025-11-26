@@ -1088,19 +1088,21 @@ const OdooPhoneWidget: React.FC = () => {
   const handleCall = async () => {
     if (!sipClient || !phoneNumber) return;
 
-    // Pre-warm audio element with user gesture to enable autoplay
+    // Pre-warm audio element with user gesture to enable autoplay (non-blocking)
     if (audioRef.current) {
-      try {
-        // Create silent audio context to unlock audio
-        audioRef.current.muted = true;
-        await audioRef.current.play();
-        audioRef.current.pause();
-        audioRef.current.muted = false;
-        audioRef.current.currentTime = 0;
-        console.log('[OdooPhoneWidget] Audio pre-warmed for autoplay');
-      } catch (e) {
-        console.warn('[OdooPhoneWidget] Audio pre-warm failed:', e);
-      }
+      const audio = audioRef.current;
+      audio.muted = true;
+      audio.play()
+        .then(() => {
+          audio.pause();
+          audio.muted = false;
+          audio.currentTime = 0;
+          console.log('[OdooPhoneWidget] Audio pre-warmed for autoplay');
+        })
+        .catch((e) => {
+          console.warn('[OdooPhoneWidget] Audio pre-warm failed:', e);
+          audio.muted = false;
+        });
     }
 
     try {
