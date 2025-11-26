@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { createClient } from '@codex/web-widget';
-import type { CodexSipClient, CallState, IncomingCallEvent } from '@codex/core-sip';
+import type { CodexSipClient, CallState, IncomingCallEvent, CustomerData } from '@codex/core-sip';
 
 // ===== Types =====
 interface OdooUrlParams {
@@ -11,6 +11,8 @@ interface OdooUrlParams {
   lead_id: string | null;
   user_id: string | null;
   callback_url: string | null;
+  model: string | null;
+  source: string | null;
   embedded: boolean;
   autostart: boolean;
   lang: 'ru' | 'en';
@@ -890,6 +892,8 @@ const OdooPhoneWidget: React.FC = () => {
     lead_id: searchParams.get('lead_id'),
     user_id: searchParams.get('user_id'),
     callback_url: searchParams.get('callback_url'),
+    model: searchParams.get('model'),
+    source: searchParams.get('source'),
     embedded: searchParams.get('embedded') === 'true',
     autostart: searchParams.get('autostart') === 'true',
     lang: (searchParams.get('lang') as 'ru' | 'en') || 'ru',
@@ -1175,6 +1179,28 @@ const OdooPhoneWidget: React.FC = () => {
     return '';
   };
 
+  // Build customerData with Odoo parameters for Jambonz
+  const buildCustomerData = useCallback((): CustomerData => {
+    const odooFields: Record<string, unknown> = {};
+
+    // Add all Odoo parameters as custom fields
+    if (params.partner_id) odooFields.partner_id = parseInt(params.partner_id, 10);
+    if (params.lead_id) odooFields.lead_id = parseInt(params.lead_id, 10);
+    if (params.user_id) odooFields.user_id = parseInt(params.user_id, 10);
+    if (params.model) odooFields.model = params.model;
+    if (params.source) odooFields.source = params.source;
+    if (params.name) odooFields.contact_name = params.name;
+    if (phoneNumber) odooFields.phone = phoneNumber;
+
+    return {
+      callType: 'odoo-widget',
+      clientName: params.name || undefined,
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      customFields: odooFields,
+    };
+  }, [params.partner_id, params.lead_id, params.user_id, params.model, params.source, params.name, phoneNumber]);
+
   // Handlers
   const handleCall = async () => {
     if (!sipClient || !phoneNumber) return;
@@ -1197,7 +1223,9 @@ const OdooPhoneWidget: React.FC = () => {
     }
 
     try {
-      await sipClient.startCall({ language: params.lang });
+      const customerData = buildCustomerData();
+      console.log('[OdooPhoneWidget] Starting call with customerData:', customerData);
+      await sipClient.startCall({ language: params.lang, customerData });
     } catch (err) {
       console.error('[OdooPhoneWidget] Call failed:', err);
     }
