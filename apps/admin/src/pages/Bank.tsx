@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { Settings, Check, ArrowLeft, Phone, Mail, ShieldCheck } from 'lucide-react';
+import FloatingZammadChat from '@/components/FloatingZammadChat';
 import {
   Dialog,
   DialogContent,
@@ -763,6 +764,9 @@ const Bank = () => {
           </div>
         </div>
       </footer>
+
+      {/* Zammad Chat Widget */}
+      <FloatingZammadChat />
     </div>
   );
 };
