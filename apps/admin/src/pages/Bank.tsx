@@ -587,77 +587,81 @@ const Bank = () => {
 
             {/* Right - Card & Benefits */}
             <div className="space-y-8">
-              {/* Card */}
-              <div className="relative max-w-[380px] aspect-[1.586/1] rounded-2xl overflow-hidden shadow-2xl">
-                {/* Dark gradient background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-[#1a1f3c] via-[#0d1025] to-[#000000]" />
-
-                {/* Subtle pattern overlay */}
-                <div className="absolute inset-0 opacity-10" style={{
-                  backgroundImage: `radial-gradient(circle at 70% 30%, rgba(255,255,255,0.1) 0%, transparent 50%)`
-                }} />
-
-                {/* VTB Logo - top left */}
-                <div className="absolute top-5 left-5">
-                  <img
-                    src="/uploads/Main_ic_LogoVTBlight.svg"
-                    alt="ВТБ"
-                    className="h-7 w-auto brightness-0 invert"
-                  />
-                </div>
-
-                {/* Chip */}
-                <div className="absolute top-16 left-5">
-                  <div className="w-12 h-9 rounded-md bg-gradient-to-br from-[#d4af37] via-[#f4d875] to-[#c4a030] shadow-inner">
-                    <div className="w-full h-full grid grid-cols-3 gap-[1px] p-[3px]">
-                      <div className="bg-[#b8960c]/40 rounded-sm"></div>
-                      <div className="bg-[#b8960c]/40 rounded-sm"></div>
-                      <div className="bg-[#b8960c]/40 rounded-sm"></div>
-                      <div className="bg-[#b8960c]/40 rounded-sm col-span-3"></div>
-                      <div className="bg-[#b8960c]/40 rounded-sm"></div>
-                      <div className="bg-[#b8960c]/40 rounded-sm"></div>
-                      <div className="bg-[#b8960c]/40 rounded-sm"></div>
+              {/* Card with shopping basket */}
+              <div className="relative max-w-[380px]">
+                {/* Shopping basket floating above card */}
+                <div className="absolute -top-16 left-4 z-10">
+                  {/* Basket container */}
+                  <div className="relative">
+                    {/* Badge "100% кешбэк" */}
+                    <div className="absolute -left-2 top-8 z-20 bg-gradient-to-r from-[#FF6B9D] via-[#C44FE2] to-[#7B61FF] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg transform -rotate-12">
+                      100%
+                      <span className="block text-[10px] font-normal -mt-0.5">кешбэк</span>
                     </div>
+                    {/* Basket SVG */}
+                    <svg width="100" height="90" viewBox="0 0 100 90" fill="none" className="drop-shadow-xl">
+                      {/* Basket body */}
+                      <ellipse cx="50" cy="70" rx="35" ry="15" fill="url(#basketGradient)"/>
+                      <path d="M15 55 Q15 75 50 80 Q85 75 85 55 L85 45 Q85 40 80 40 L20 40 Q15 40 15 45 Z" fill="url(#basketGradient)"/>
+                      {/* Basket rim */}
+                      <ellipse cx="50" cy="40" rx="35" ry="8" fill="#9B6DD6"/>
+                      {/* Basket handle */}
+                      <path d="M30 40 Q30 15 50 15 Q70 15 70 40" stroke="#9B6DD6" strokeWidth="5" fill="none"/>
+                      {/* Groceries - bread */}
+                      <ellipse cx="45" cy="28" rx="12" ry="8" fill="#E8B86D"/>
+                      <ellipse cx="45" cy="26" rx="10" ry="5" fill="#F4D5A6"/>
+                      {/* Groceries - carrot */}
+                      <path d="M65 20 L72 35 L68 35 Z" fill="#FF7F50"/>
+                      <path d="M65 20 L63 12" stroke="#4CAF50" strokeWidth="2"/>
+                      <path d="M65 20 L67 13" stroke="#4CAF50" strokeWidth="2"/>
+                      {/* Groceries - bottle */}
+                      <rect x="55" y="22" width="8" height="18" rx="2" fill="#4FC3F7"/>
+                      <rect x="57" y="18" width="4" height="5" fill="#4FC3F7"/>
+                      {/* Groceries - green leaf */}
+                      <ellipse cx="38" cy="22" rx="5" ry="8" fill="#66BB6A" transform="rotate(-20 38 22)"/>
+                      <defs>
+                        <linearGradient id="basketGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#B388FF"/>
+                          <stop offset="100%" stopColor="#7C4DFF"/>
+                        </linearGradient>
+                      </defs>
+                    </svg>
                   </div>
                 </div>
 
-                {/* Card Number */}
-                <div className="absolute bottom-16 left-5 right-5">
-                  <p className="text-white/90 font-mono text-lg tracking-[0.2em]">
-                    •••• •••• •••• 0000
-                  </p>
-                </div>
+                {/* Card */}
+                <div className="relative aspect-[1.586/1] rounded-2xl overflow-hidden shadow-2xl mt-12">
+                  {/* Blue gradient background */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#42A5F5] via-[#1E88E5] to-[#1565C0]" />
 
-                {/* Card Holder & Expiry */}
-                <div className="absolute bottom-5 left-5 right-5 flex justify-between items-end">
-                  <div>
-                    <p className="text-white/50 text-[10px] uppercase tracking-wider mb-0.5">Держатель карты</p>
-                    <p className="text-white/90 text-sm font-medium tracking-wide">CARDHOLDER NAME</p>
+                  {/* VTB Logo - top right */}
+                  <div className="absolute top-5 right-5">
+                    <svg width="60" height="24" viewBox="0 0 60 24" fill="none">
+                      {/* Three horizontal lines */}
+                      <rect x="0" y="4" width="16" height="3" fill="white"/>
+                      <rect x="0" y="10" width="16" height="3" fill="white"/>
+                      <rect x="0" y="16" width="16" height="3" fill="white"/>
+                      {/* ВТБ text */}
+                      <text x="22" y="18" fill="white" fontSize="16" fontWeight="bold" fontFamily="Arial, sans-serif">ВТБ</text>
+                    </svg>
                   </div>
-                  <div className="text-right">
-                    <p className="text-white/50 text-[10px] uppercase tracking-wider mb-0.5">Действует до</p>
-                    <p className="text-white/90 text-sm font-medium">12/28</p>
+
+                  {/* MIR Logo - bottom left */}
+                  <div className="absolute bottom-5 left-5">
+                    <svg width="70" height="28" viewBox="0 0 70 28" fill="none">
+                      {/* MIR logo background shape */}
+                      <rect x="0" y="4" width="70" height="20" rx="4" fill="url(#mirGradient)"/>
+                      {/* МИР text */}
+                      <text x="10" y="19" fill="white" fontSize="14" fontWeight="bold" fontFamily="Arial, sans-serif">МИР</text>
+                      <defs>
+                        <linearGradient id="mirGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#4FC3F7"/>
+                          <stop offset="50%" stopColor="#7C4DFF"/>
+                          <stop offset="100%" stopColor="#E040FB"/>
+                        </linearGradient>
+                      </defs>
+                    </svg>
                   </div>
-                </div>
-
-                {/* MIR Logo - bottom right */}
-                <div className="absolute bottom-5 right-5">
-                  <svg width="50" height="16" viewBox="0 0 50 16" fill="none">
-                    <path d="M7.5 0L10 8L12.5 0H17.5V16H14V5L11 16H9L6 5V16H2.5V0H7.5Z" fill="white"/>
-                    <path d="M21 0H24.5V16H21V0Z" fill="white"/>
-                    <path d="M28 0H33C36.5 0 39 2.5 39 5.5C39 8.5 36.5 11 33 11H31.5V16H28V0ZM31.5 8H32.5C34 8 35.5 7 35.5 5.5C35.5 4 34 3 32.5 3H31.5V8Z" fill="white"/>
-                  </svg>
-                </div>
-
-                {/* Contactless icon */}
-                <div className="absolute top-5 right-5">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-white/60">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" fill="currentColor" fillOpacity="0"/>
-                    <path d="M8.5 8.5C10.5 6.5 13.5 6.5 15.5 8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                    <path d="M6.5 6.5C9.5 3.5 14.5 3.5 17.5 6.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                    <path d="M10.5 10.5C11.5 9.5 12.5 9.5 13.5 10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                    <circle cx="12" cy="13" r="1.5" fill="currentColor"/>
-                  </svg>
                 </div>
               </div>
 
