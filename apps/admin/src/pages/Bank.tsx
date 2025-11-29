@@ -109,9 +109,7 @@ const Bank = () => {
   const phoneInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
-    lastName: '',
-    firstName: '',
-    middleName: '',
+    fullName: '',
     phone: '',
     birthDate: '',
     agreeTerms: false,
@@ -228,9 +226,7 @@ const Bank = () => {
 
     try {
       const payload = {
-        lastName: formData.lastName,
-        firstName: formData.firstName,
-        middleName: formData.middleName,
+        fullName: formData.fullName,
         phone: '7' + phoneDigits,
         birthDate: formData.birthDate,
         timestamp: new Date().toISOString(),
@@ -289,9 +285,7 @@ const Bank = () => {
             onClick={() => {
               setIsSuccess(false);
               setFormData({
-                lastName: '',
-                firstName: '',
-                middleName: '',
+                fullName: '',
                 phone: '',
                 birthDate: '',
                 agreeTerms: false,
@@ -415,42 +409,16 @@ const Bank = () => {
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="lastName" className="text-sm text-gray-700 font-medium">Фамилия</Label>
+                    <Label htmlFor="fullName" className="text-sm text-gray-700 font-medium">ФИО</Label>
                     <Input
-                      id="lastName"
-                      name="lastName"
-                      value={formData.lastName}
+                      id="fullName"
+                      name="fullName"
+                      value={formData.fullName}
                       onChange={handleInputChange}
-                      placeholder="Иванов"
+                      placeholder="Иванов Иван Иванович"
                       required
-                      className="h-12 rounded-xl border-gray-200 focus:border-[#00AAFF] focus:ring-[#00AAFF]/20"
+                      className="h-12 rounded-xl border-gray-200 bg-white text-gray-900 focus:border-[#00AAFF] focus:ring-[#00AAFF]/20"
                     />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="firstName" className="text-sm text-gray-700 font-medium">Имя</Label>
-                      <Input
-                        id="firstName"
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleInputChange}
-                        placeholder="Иван"
-                        required
-                        className="h-12 rounded-xl border-gray-200 focus:border-[#00AAFF] focus:ring-[#00AAFF]/20"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="middleName" className="text-sm text-gray-700 font-medium">Отчество</Label>
-                      <Input
-                        id="middleName"
-                        name="middleName"
-                        value={formData.middleName}
-                        onChange={handleInputChange}
-                        placeholder="Иванович"
-                        className="h-12 rounded-xl border-gray-200 focus:border-[#00AAFF] focus:ring-[#00AAFF]/20"
-                      />
-                    </div>
                   </div>
 
                   <div className="space-y-1.5">
@@ -467,7 +435,7 @@ const Bank = () => {
                         onKeyDown={handlePhoneKeyDown}
                         placeholder="(999) 123-45-67"
                         required
-                        className="h-12 rounded-xl border-gray-200 focus:border-[#00AAFF] focus:ring-[#00AAFF]/20 pl-11"
+                        className="h-12 rounded-xl border-gray-200 bg-white text-gray-900 focus:border-[#00AAFF] focus:ring-[#00AAFF]/20 pl-11"
                       />
                     </div>
                   </div>
@@ -481,7 +449,7 @@ const Bank = () => {
                       onChange={handleBirthDateChange}
                       placeholder="ДД.ММ.ГГГГ"
                       required
-                      className="h-12 rounded-xl border-gray-200 focus:border-[#00AAFF] focus:ring-[#00AAFF]/20"
+                      className="h-12 rounded-xl border-gray-200 bg-white text-gray-900 focus:border-[#00AAFF] focus:ring-[#00AAFF]/20"
                     />
                   </div>
 
