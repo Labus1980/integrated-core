@@ -299,14 +299,16 @@ const Bank = () => {
 
           <form onSubmit={handleSmsSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="smsCode" className="text-gray-500 text-sm font-normal">
+              <Label htmlFor="smsCode" className="text-gray-700 text-sm font-medium">
                 Код из SMS
               </Label>
               <Input
                 id="smsCode"
                 value={smsCode}
                 onChange={handleSmsCodeChange}
-                placeholder="____"
+                placeholder="0000"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 maxLength={4}
                 className="h-14 rounded-lg border-gray-200 bg-white text-gray-900 text-center text-2xl tracking-[0.5em] font-mono focus:border-[#0066FF] focus:ring-0"
                 autoFocus
@@ -497,7 +499,7 @@ const Bank = () => {
             <div>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="fullName" className="text-gray-500 text-sm font-normal">
+                  <Label htmlFor="fullName" className="text-gray-700 text-sm font-medium">
                     Фамилия, имя и отчество
                   </Label>
                   <Input
@@ -505,6 +507,7 @@ const Bank = () => {
                     name="fullName"
                     value={formData.fullName}
                     onChange={handleInputChange}
+                    placeholder="Иванов Иван Иванович"
                     required
                     className="h-12 rounded-lg border-gray-200 bg-white text-gray-900 focus:border-[#0066FF] focus:ring-0"
                   />
@@ -512,7 +515,7 @@ const Bank = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="birthDate" className="text-gray-500 text-sm font-normal">
+                  <Label htmlFor="birthDate" className="text-gray-700 text-sm font-medium">
                     Дата рождения
                   </Label>
                   <Input
@@ -520,14 +523,15 @@ const Bank = () => {
                     name="birthDate"
                     value={formData.birthDate}
                     onChange={handleBirthDateChange}
-                    placeholder="__.__.____"
+                    placeholder="ДД.ММ.ГГГГ"
+                    inputMode="numeric"
                     required
                     className="h-12 rounded-lg border-gray-200 bg-white text-gray-900 focus:border-[#0066FF] focus:ring-0"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-gray-500 text-sm font-normal">
+                  <Label htmlFor="phone" className="text-gray-700 text-sm font-medium">
                     Мобильный телефон
                   </Label>
                   <div className="relative">
@@ -536,9 +540,10 @@ const Bank = () => {
                       id="phone"
                       name="phone"
                       type="tel"
+                      inputMode="tel"
                       value={formData.phone}
                       onChange={handlePhoneChange}
-                      placeholder="(___) ___-__-__"
+                      placeholder="(999) 123-45-67"
                       required
                       className="h-12 rounded-lg border-gray-200 bg-white text-gray-900 focus:border-[#0066FF] focus:ring-0 pl-10"
                     />
