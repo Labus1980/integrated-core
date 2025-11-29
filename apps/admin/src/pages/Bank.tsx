@@ -259,17 +259,6 @@ const Bank = () => {
     // Имитация проверки кода
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Проверяем код
-    if (smsCode !== generatedCode) {
-      setIsLoading(false);
-      toast({
-        title: "Неверный код",
-        description: "Введённый код не совпадает с отправленным",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(false);
     setStep('success');
     toast({
