@@ -437,25 +437,25 @@ const Bank = () => {
                   <Settings className="w-5 h-5" />
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
+              <DialogContent className="sm:max-w-md bg-white border-gray-200">
                 <DialogHeader>
-                  <DialogTitle>Настройки Webhook</DialogTitle>
-                  <DialogDescription>
+                  <DialogTitle className="text-gray-900">Настройки Webhook</DialogTitle>
+                  <DialogDescription className="text-gray-500">
                     Укажите URL для отправки данных заявки
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
-                    <Label htmlFor="webhook-url">Webhook URL</Label>
+                    <Label htmlFor="webhook-url" className="text-gray-700">Webhook URL</Label>
                     <Input
                       id="webhook-url"
                       value={tempWebhookUrl}
                       onChange={(e) => setTempWebhookUrl(e.target.value)}
                       placeholder="https://your-webhook-url.com/api"
-                      className="bg-white"
+                      className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
                     />
                   </div>
-                  <Button onClick={saveWebhookSettings} className="w-full bg-[#0066FF] hover:bg-[#0052CC]">
+                  <Button onClick={saveWebhookSettings} className="w-full bg-[#0066FF] hover:bg-[#0052CC] text-white">
                     Сохранить
                   </Button>
                 </div>
