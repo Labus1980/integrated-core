@@ -499,7 +499,7 @@ const Bank = () => {
             <div>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="fullName" className="text-gray-700 text-sm font-medium">
+                  <Label htmlFor="fullName" className="text-gray-900 text-sm font-medium">
                     Фамилия, имя и отчество
                   </Label>
                   <Input
@@ -515,7 +515,7 @@ const Bank = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="birthDate" className="text-gray-700 text-sm font-medium">
+                  <Label htmlFor="birthDate" className="text-gray-900 text-sm font-medium">
                     Дата рождения
                   </Label>
                   <Input
@@ -525,13 +525,14 @@ const Bank = () => {
                     onChange={handleBirthDateChange}
                     placeholder="ДД.ММ.ГГГГ"
                     inputMode="numeric"
+                    pattern="[0-9]*"
                     required
                     className="h-12 rounded-lg border-gray-200 bg-white text-gray-900 focus:border-[#0066FF] focus:ring-0"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-gray-700 text-sm font-medium">
+                  <Label htmlFor="phone" className="text-gray-900 text-sm font-medium">
                     Мобильный телефон
                   </Label>
                   <div className="relative">
