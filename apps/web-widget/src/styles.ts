@@ -76,6 +76,7 @@ export const floatingWidgetStyles = `
     z-index: 999999;
     font-family: var(--codex-font-family);
     pointer-events: none;
+    background: transparent;
   }
 
   .codex-floating-voice-widget--bottom-right {
