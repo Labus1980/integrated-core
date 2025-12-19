@@ -10,8 +10,6 @@ import {
 import { FloatingButton } from "./FloatingButton";
 import { AudioVisualizer } from "./AudioVisualizer";
 import { LanguageSelector, LanguageOption } from "./LanguageSelector";
-import { DTMFKeypad } from "./DTMFKeypad";
-import { sendDtmfInBand } from "../utils/dtmfAudio";
 
 const defaultLanguages: LanguageOption[] = [
   { code: "en", label: "English", flag: "🇬🇧" },
@@ -39,8 +37,6 @@ const translations = {
     accept: "Accept",
     reject: "Reject",
     incomingFrom: "Incoming call from",
-    showKeypad: "Show Keypad",
-    hideKeypad: "Hide Keypad",
   },
   ru: {
     title: "Голосовой чат",
@@ -60,8 +56,6 @@ const translations = {
     accept: "Принять",
     reject: "Отклонить",
     incomingFrom: "Входящий звонок от",
-    showKeypad: "Показать клавиатуру",
-    hideKeypad: "Скрыть клавиатуру",
   },
 };
 
@@ -93,7 +87,6 @@ export const FloatingVoiceWidget = ({
   const [callDuration, setCallDuration] = useState(0);
   const durationTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [incomingCall, setIncomingCall] = useState<IncomingCallEvent | null>(null);
-  const [showKeypad, setShowKeypad] = useState(false);
 
   const initialLang = languages[0]?.code ?? client.language;
   const [selectedLanguage, setSelectedLanguage] = useState<string>(initialLang);
@@ -254,26 +247,6 @@ export const FloatingVoiceWidget = ({
     }
   };
 
-  const handleDtmfKeyPress = async (tone: string) => {
-    try {
-      // Get local media stream from SIP client
-      const stream = client.getLocalMediaStream();
-
-      if (stream) {
-        // Send in-band DTMF (for Jambonz which expects DTMF as audio tones)
-        await sendDtmfInBand(tone, stream, 250);
-        console.log(`Sent in-band DTMF tone: ${tone}`);
-      } else {
-        // Fallback to SIP INFO (may not work with Jambonz)
-        console.warn("No local media stream available, falling back to SIP INFO");
-        await client.sendDtmf(tone);
-        console.log(`Sent DTMF via SIP INFO: ${tone}`);
-      }
-    } catch (error) {
-      console.error("Failed to send DTMF:", error);
-    }
-  };
-
   const handleAcceptCall = async () => {
     try {
       await client.acceptIncomingCall({ language: selectedLanguage });
@@ -369,14 +342,6 @@ export const FloatingVoiceWidget = ({
 
             <AudioVisualizer isActive={isLive} />
 
-            {isLive && showKeypad && (
-              <DTMFKeypad
-                onKeyPress={handleDtmfKeyPress}
-                theme={theme}
-                disabled={false}
-              />
-            )}
-
             <LanguageSelector
               languages={languages}
               selected={selectedLanguage}
@@ -465,29 +430,6 @@ export const FloatingVoiceWidget = ({
                       )}
                     </svg>
                     <span>{isMuted ? t.unmute : t.mute}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className={clsx(
-                      "codex-floating-voice-widget__control-btn",
-                      showKeypad && "codex-floating-voice-widget__control-btn--active"
-                    )}
-                    onClick={() => setShowKeypad(!showKeypad)}
-                    aria-pressed={showKeypad}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="4" y="4" width="4" height="4" rx="1" fill="currentColor" />
-                      <rect x="10" y="4" width="4" height="4" rx="1" fill="currentColor" />
-                      <rect x="16" y="4" width="4" height="4" rx="1" fill="currentColor" />
-                      <rect x="4" y="10" width="4" height="4" rx="1" fill="currentColor" />
-                      <rect x="10" y="10" width="4" height="4" rx="1" fill="currentColor" />
-                      <rect x="16" y="10" width="4" height="4" rx="1" fill="currentColor" />
-                      <rect x="4" y="16" width="4" height="4" rx="1" fill="currentColor" />
-                      <rect x="10" y="16" width="4" height="4" rx="1" fill="currentColor" />
-                      <rect x="16" y="16" width="4" height="4" rx="1" fill="currentColor" />
-                    </svg>
-                    <span>{showKeypad ? t.hideKeypad : t.showKeypad}</span>
                   </button>
                 </>
               )}
