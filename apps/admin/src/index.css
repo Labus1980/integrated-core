@@ -117,6 +117,17 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Прозрачный фон для страницы /floating-widget (iframe виджет) */
+  html:has(body.floating-widget-transparent),
+  body.floating-widget-transparent,
+  body.floating-widget-transparent #root,
+  body.floating-widget-transparent #root > * {
+    background: transparent !important;
+    background-color: transparent !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
 }
 
 /* Zammad Chat Widget Styling */
