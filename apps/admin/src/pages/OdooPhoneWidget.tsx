@@ -42,7 +42,7 @@ interface SipConfig {
 const DEFAULT_SIP_CONFIG: SipConfig = {
   displayName: 'Odoo Operator',
   sipDomain: 'jambonzlab.ru',
-  serverAddress: 'ws://jambonz-sipws.okta-solutions.com',
+  serverAddress: 'wss://jambonz-sipws.okta-solutions.com',
   username: '170',
   password: 'QApassw3',
 };
@@ -1409,7 +1409,7 @@ const OdooPhoneWidget: React.FC = () => {
                 className="odoo-phone-widget__input"
                 value={editingConfig.serverAddress}
                 onChange={(e) => setEditingConfig({ ...editingConfig, serverAddress: e.target.value })}
-                placeholder="ws://jambonz-sipws.okta-solutions.com"
+                placeholder="wss://jambonz-sipws.okta-solutions.com"
               />
             </div>
             <div className="odoo-phone-widget__form-group">
