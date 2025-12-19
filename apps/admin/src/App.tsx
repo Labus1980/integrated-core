@@ -15,7 +15,21 @@ import { useZammadChat } from "@/hooks/useZammadChat";
 
 const queryClient = new QueryClient();
 
-const App = () => {
+// Отдельный компонент для страницы floating-widget без темы
+const FloatingWidgetApp = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/floating-widget" element={<FloatingWidgetPage />} />
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+};
+
+// Основное приложение с темой
+const MainApp = () => {
   useZammadChat(); // Инициализация чата
 
   return (
@@ -29,7 +43,6 @@ const App = () => {
               <Route path="/" element={<Index />} />
               <Route path="/lembrand" element={<LemBrand />} />
               <Route path="/phone-widget" element={<OdooPhoneWidget />} />
-              <Route path="/floating-widget" element={<FloatingWidgetPage />} />
               <Route path="/bank" element={<Bank />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
@@ -41,6 +54,15 @@ const App = () => {
       </ThemeProvider>
     </QueryClientProvider>
   );
+};
+
+// Выбор приложения в зависимости от пути
+const App = () => {
+  // Для /floating-widget рендерим без ThemeProvider
+  if (window.location.pathname === '/floating-widget') {
+    return <FloatingWidgetApp />;
+  }
+  return <MainApp />;
 };
 
 export default App;
