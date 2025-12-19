@@ -16,29 +16,35 @@ import { JambonzWidget } from '@/components/JambonzWidget';
  * Сам виджет имеет pointer-events: auto и будет реагировать на клики
  */
 const FloatingWidgetPage: React.FC = () => {
-  // Делаем html и body прозрачными
+  // Делаем html и body полностью прозрачными с !important для переопределения Tailwind
   useEffect(() => {
-    // Сохраняем оригинальные стили
-    const originalHtmlBg = document.documentElement.style.background;
-    const originalBodyBg = document.body.style.background;
-    const originalBodyMargin = document.body.style.margin;
-    const originalBodyPadding = document.body.style.padding;
-    const originalBodyOverflow = document.body.style.overflow;
+    const styleId = 'floating-widget-transparent-bg';
+    let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
 
-    // Применяем прозрачность
-    document.documentElement.style.background = 'transparent';
-    document.body.style.background = 'transparent';
-    document.body.style.margin = '0';
-    document.body.style.padding = '0';
-    document.body.style.overflow = 'hidden';
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = styleId;
+      document.head.appendChild(styleEl);
+    }
 
-    // Восстанавливаем при размонтировании
+    // CSS с !important для переопределения глобальных стилей Tailwind
+    styleEl.textContent = `
+      html, body, #root {
+        background: transparent !important;
+        background-color: transparent !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        min-height: 100vh !important;
+      }
+    `;
+
+    // Cleanup при размонтировании
     return () => {
-      document.documentElement.style.background = originalHtmlBg;
-      document.body.style.background = originalBodyBg;
-      document.body.style.margin = originalBodyMargin;
-      document.body.style.padding = originalBodyPadding;
-      document.body.style.overflow = originalBodyOverflow;
+      const el = document.getElementById(styleId);
+      if (el) {
+        el.remove();
+      }
     };
   }, []);
 
@@ -55,9 +61,9 @@ const FloatingWidgetPage: React.FC = () => {
       justifyContent: 'flex-end',
       padding: '20px',
       margin: 0,
-      pointerEvents: 'none', // Позволяет кликать сквозь контейнер
+      pointerEvents: 'none',
     }}>
-      <div style={{ pointerEvents: 'auto' }}> {/* Виджет реагирует на клики */}
+      <div style={{ pointerEvents: 'auto' }}>
         <JambonzWidget embedded={false} />
       </div>
     </div>
