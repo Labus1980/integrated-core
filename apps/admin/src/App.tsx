@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import LemBrand from "./pages/LemBrand";
 import OdooPhoneWidget from "./pages/OdooPhoneWidget";
+import FloatingWidgetPage from "./pages/FloatingWidgetPage";
 import Bank from "./pages/Bank";
 import NotFound from "./pages/NotFound";
 import ZammadFormInit from "@/components/ZammadFormInit";
@@ -28,6 +29,7 @@ const App = () => {
               <Route path="/" element={<Index />} />
               <Route path="/lembrand" element={<LemBrand />} />
               <Route path="/phone-widget" element={<OdooPhoneWidget />} />
+              <Route path="/floating-widget" element={<FloatingWidgetPage />} />
               <Route path="/bank" element={<Bank />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
